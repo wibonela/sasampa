@@ -43,12 +43,17 @@ class SettingsController extends Controller
             'store_address' => 'nullable|string|max:500',
             'store_phone' => 'nullable|string|max:50',
             'store_email' => 'nullable|email|max:255',
-            'currency_symbol' => 'required|string|max:10',
-            'default_tax_rate' => 'required|numeric|min:0|max:100',
-            'low_stock_threshold' => 'required|integer|min:0',
+            'currency_symbol' => 'nullable|string|max:10',
+            'default_tax_rate' => 'nullable|numeric|min:0|max:100',
+            'low_stock_threshold' => 'nullable|integer|min:0',
             'receipt_header' => 'nullable|string|max:500',
             'receipt_footer' => 'nullable|string|max:500',
         ]);
+
+        // Apply defaults for nullable fields
+        $validated['currency_symbol'] = $validated['currency_symbol'] ?? 'TZS';
+        $validated['default_tax_rate'] = $validated['default_tax_rate'] ?? 0;
+        $validated['low_stock_threshold'] = $validated['low_stock_threshold'] ?? 10;
 
         // Handle logo upload
         if ($request->hasFile('store_logo')) {
