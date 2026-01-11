@@ -214,6 +214,7 @@
             </a>
             <div class="nav-links">
                 <a href="#features">Features</a>
+                <a href="{{ route('docs.index') }}">Documentation</a>
                 @auth
                     <a href="{{ route('dashboard') }}" class="nav-btn">Dashboard</a>
                 @else
