@@ -42,12 +42,22 @@ td {
 .header {
     padding: 32px 0;
     text-align: center;
+    background-color: #1a1a2e;
+    border-radius: 16px 16px 0 0;
+}
+
+.header a {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff !important;
+    text-decoration: none;
+    letter-spacing: -0.5px;
 }
 
 .header-logo {
     font-size: 26px;
     font-weight: 700;
-    color: #1a1a2e;
+    color: #ffffff !important;
     text-decoration: none;
     letter-spacing: -0.5px;
 }

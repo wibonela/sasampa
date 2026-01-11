@@ -23,7 +23,9 @@ class DashboardController extends Controller
         }
 
         $companyId = $user->company_id;
-        $branchId = $user->currentBranch()?->id;
+
+        // Company owners see all branches, staff see only their current branch
+        $branchId = $user->isCompanyOwner() ? null : $user->currentBranch()?->id;
 
         // Get cached dashboard stats
         $stats = $this->cacheService->dashboardStats($companyId, $branchId);
