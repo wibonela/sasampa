@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Seed permissions first
+        $this->call(PermissionSeeder::class);
+
         // Create Platform Admin (no company)
         User::create([
             'name' => 'Platform Admin',
@@ -22,6 +25,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => User::ROLE_PLATFORM_ADMIN,
             'company_id' => null,
+            'is_active' => true,
         ]);
 
         // Create a sample approved company
@@ -41,6 +45,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => User::ROLE_COMPANY_OWNER,
             'company_id' => $company->id,
+            'is_active' => true,
         ]);
 
         // Create cashier for the company
@@ -50,6 +55,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => User::ROLE_CASHIER,
             'company_id' => $company->id,
+            'is_active' => true,
         ]);
 
         // Create company settings
@@ -141,6 +147,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => User::ROLE_COMPANY_OWNER,
             'company_id' => $pendingCompany->id,
+            'is_active' => true,
         ]);
 
         // Seed documentation

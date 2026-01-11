@@ -21,7 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'company.approved' => \App\Http\Middleware\EnsureCompanyApproved::class,
             'platform.admin' => \App\Http\Middleware\PlatformAdmin::class,
+            'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);
+
+        // Rate limiting for API routes
+        $middleware->throttleApi('60,1'); // 60 requests per minute
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
