@@ -100,11 +100,11 @@
                                 @forelse($recentTransactions as $transaction)
                                     <tr>
                                         <td>
-                                            <a href="{{ route('transactions.show', $transaction) }}" style="text-decoration: none; color: var(--apple-blue);">
+                                            <a href="{{ route('transactions.show', $transaction->id) }}" style="text-decoration: none; color: var(--apple-blue);">
                                                 {{ $transaction->transaction_number }}
                                             </a>
                                         </td>
-                                        <td>{{ $transaction->user->name }}</td>
+                                        <td>{{ $transaction->user->name ?? 'Unknown' }}</td>
                                         <td style="font-weight: 500;">{{ number_format($transaction->total, 0) }} TZS</td>
                                         <td>
                                             @if($transaction->status === 'completed')
