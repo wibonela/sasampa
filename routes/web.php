@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CompanyManagementController;
 use App\Http\Controllers\Admin\DocumentationArticleController;
 use App\Http\Controllers\Admin\DocumentationCategoryController;
+use App\Http\Controllers\Auth\InvitationController;
+use App\Http\Controllers\Auth\PinLoginController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BranchSwitchController;
 use App\Http\Controllers\CategoryController;
@@ -21,10 +23,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SandukuController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
-// Sanduku feedback (public API)
-Route::post('/api/sanduku', [SandukuController::class, 'store'])->name('sanduku.store');
+// Sanduku feedback (public API with rate limiting)
+Route::post('/api/sanduku', [SandukuController::class, 'store'])
+    ->middleware('throttle:10,1') // 10 requests per minute
+    ->name('sanduku.store');
 
 // Landing page
 Route::get('/', function () {
@@ -50,6 +55,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [OnboardingController::class, 'processStep1']);
     // Keep alias for old route
     Route::get('/onboarding', fn() => redirect()->route('onboarding.step1'))->name('company.register');
+
+    // Staff invitation acceptance
+    Route::get('/invitation/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+    Route::post('/invitation/{token}', [InvitationController::class, 'accept'])->name('invitation.accept');
+
+    // PIN Login
+    Route::get('/pin-login', [PinLoginController::class, 'showForm'])->name('pos.pin-login');
+    Route::post('/pin-login', [PinLoginController::class, 'login'])->name('pos.pin-login.submit');
 });
 
 // Authenticated routes
@@ -141,6 +154,31 @@ Route::middleware('auth')->group(function () {
             ->name('branches.remove-user');
         Route::post('/branches/{branch}/users/{user}/default', [BranchController::class, 'setDefaultBranch'])
             ->name('branches.set-default');
+
+        // User/Staff Management (company owner only)
+        Route::middleware('permission:manage_users')->group(function () {
+            Route::resource('users', UserManagementController::class)->except(['show']);
+            Route::get('/users/{user}/permissions', [UserManagementController::class, 'permissions'])
+                ->name('users.permissions');
+            Route::put('/users/{user}/permissions', [UserManagementController::class, 'updatePermissions'])
+                ->name('users.permissions.update');
+            Route::post('/users/{user}/send-invitation', [UserManagementController::class, 'sendInvitation'])
+                ->name('users.send-invitation');
+            Route::post('/users/{user}/resend-invitation', [UserManagementController::class, 'resendInvitation'])
+                ->name('users.resend-invitation');
+            Route::post('/users/{user}/reset-pin', [UserManagementController::class, 'resetPin'])
+                ->name('users.reset-pin');
+            Route::patch('/users/{user}/toggle-active', [UserManagementController::class, 'toggleActive'])
+                ->name('users.toggle-active');
+        });
+
+        // PIN Session Management (authenticated users)
+        Route::post('/pos/quick-switch', [PinLoginController::class, 'quickSwitch'])
+            ->name('pos.quick-switch');
+        Route::post('/pos/end-session', [PinLoginController::class, 'endSession'])
+            ->name('pos.end-session');
+        Route::get('/pos/current-user', [PinLoginController::class, 'getCurrentUser'])
+            ->name('pos.current-user');
 
         // Categories
         Route::resource('categories', CategoryController::class)->except(['show']);

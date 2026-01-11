@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\BelongsToCompany;
+use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,8 +13,30 @@ class Transaction extends Model
 {
     use HasFactory, BelongsToCompany;
 
+    protected static function booted(): void
+    {
+        static::created(function (Transaction $transaction) {
+            if ($transaction->company_id) {
+                app(CacheService::class)->invalidateDashboard(
+                    $transaction->company_id,
+                    $transaction->branch_id
+                );
+            }
+        });
+
+        static::updated(function (Transaction $transaction) {
+            if ($transaction->company_id) {
+                app(CacheService::class)->invalidateDashboard(
+                    $transaction->company_id,
+                    $transaction->branch_id
+                );
+            }
+        });
+    }
+
     protected $fillable = [
         'company_id',
+        'branch_id',
         'transaction_number',
         'user_id',
         'customer_name',
