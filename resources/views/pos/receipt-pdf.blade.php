@@ -6,189 +6,167 @@
     <title>Receipt - {{ $transaction->transaction_number }}</title>
     <style>
         @page {
-            margin: 15mm 15mm 8mm 15mm; /* top right bottom left - safe print margins */
-        }
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
+            margin: 10mm;
+            size: 80mm auto;
         }
         body {
-            font-family: 'DejaVu Sans Mono', monospace;
-            font-size: 11px;
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10px;
             line-height: 1.4;
             color: #1a2942;
+            margin: 0;
+            padding: 0;
         }
 
         .receipt {
             width: 100%;
+            max-width: 60mm;
+            margin: 0 auto;
         }
 
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .logo {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 8px;
-            display: block;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
+            margin-bottom: 8px;
         }
         .store-name {
             font-size: 14px;
             font-weight: bold;
-            color: #1a2942;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
         .store-tagline {
-            font-size: 9px;
-            color: #6b7280;
+            font-size: 8px;
+            color: #666;
             letter-spacing: 1px;
             margin-bottom: 3px;
         }
         .store-address {
-            font-size: 10px;
-            color: #1a2942;
+            font-size: 9px;
             line-height: 1.4;
         }
 
         /* Divider */
         .divider {
-            border: none;
-            border-top: 1px dashed #1a2942;
-            margin: 6px 0;
+            border: 0;
+            border-top: 1px dashed #333;
+            margin: 8px 0;
         }
 
-        /* Info rows */
-        .info-row {
-            display: table;
+        /* Info table */
+        .info-table {
             width: 100%;
-            margin-bottom: 2px;
+            border-collapse: collapse;
+            margin-bottom: 5px;
         }
-        .info-label {
-            display: table-cell;
-            width: 35%;
-            font-size: 10px;
+        .info-table td {
+            padding: 2px 0;
+            font-size: 9px;
+        }
+        .info-table .label {
+            width: 30%;
             color: #1a2942;
         }
-        .info-value {
-            display: table-cell;
-            width: 65%;
-            font-size: 10px;
-            color: #1a2942;
+        .info-table .value {
+            width: 70%;
             text-align: right;
-        }
-
-        /* Items header */
-        .items-header {
-            display: table;
-            width: 100%;
-            border-bottom: 1px dashed #1a2942;
-            padding-bottom: 3px;
-            margin-bottom: 5px;
-        }
-        .items-header span {
-            display: table-cell;
-            font-size: 10px;
-            font-weight: bold;
             color: #1a2942;
         }
-        .items-header .col-item { width: 50%; }
-        .items-header .col-qty { width: 20%; text-align: center; }
-        .items-header .col-amount { width: 30%; text-align: right; }
 
-        /* Item */
-        .item {
-            margin-bottom: 5px;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 4px;
+        /* Items table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .item:last-child {
-            border-bottom: none;
+        .items-table th {
+            font-size: 9px;
+            font-weight: bold;
+            text-align: left;
+            padding: 3px 0;
+            border-bottom: 1px dashed #333;
+        }
+        .items-table th.qty {
+            text-align: center;
+            width: 15%;
+        }
+        .items-table th.amount {
+            text-align: right;
+            width: 30%;
+        }
+        .items-table td {
+            padding: 4px 0;
+            font-size: 9px;
+            vertical-align: top;
+            border-bottom: 1px solid #eee;
+        }
+        .items-table td.qty {
+            text-align: center;
+        }
+        .items-table td.amount {
+            text-align: right;
         }
         .item-name {
-            font-size: 10px;
             font-weight: bold;
-            color: #1a2942;
-            margin-bottom: 1px;
+            font-size: 9px;
         }
-        .item-details {
-            display: table;
-            width: 100%;
+        .item-price {
+            color: #666;
+            font-size: 8px;
         }
-        .item-details span {
-            display: table-cell;
-            font-size: 10px;
-            color: #1a2942;
-        }
-        .item-price { width: 50%; color: #6b7280; }
-        .item-qty { width: 20%; text-align: center; }
-        .item-amount { width: 30%; text-align: right; }
 
-        /* Totals */
-        .totals-row {
-            display: table;
+        /* Totals table */
+        .totals-table {
             width: 100%;
-            margin-bottom: 2px;
+            border-collapse: collapse;
+            margin-top: 5px;
         }
-        .totals-label {
-            display: table-cell;
-            font-size: 10px;
-            color: #1a2942;
+        .totals-table td {
+            padding: 2px 0;
+            font-size: 9px;
         }
-        .totals-value {
-            display: table-cell;
-            font-size: 10px;
-            color: #1a2942;
+        .totals-table .value {
             text-align: right;
         }
-        .total-final {
-            margin: 5px 0;
-        }
-        .total-final .totals-label,
-        .total-final .totals-value {
-            font-size: 12px;
+        .totals-table .total-row td {
+            font-size: 11px;
             font-weight: bold;
+            padding: 5px 0;
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 8px;
+            margin-top: 10px;
         }
         .thank-you {
-            font-size: 10px;
-            color: #1a2942;
-            margin-bottom: 2px;
+            font-size: 9px;
+            margin-bottom: 3px;
         }
         .welcome {
-            font-size: 10px;
-            color: #1a2942;
+            font-size: 9px;
             margin-bottom: 5px;
         }
         .enquiries {
-            font-size: 9px;
-            color: #6b7280;
-            margin-bottom: 5px;
+            font-size: 8px;
+            color: #666;
+            margin-bottom: 8px;
         }
         .receipt-box {
             display: inline-block;
-            border: 1px solid #1a2942;
-            padding: 4px 10px;
-            font-size: 10px;
-            color: #1a2942;
+            border: 1px solid #333;
+            padding: 4px 12px;
+            font-size: 9px;
             margin: 5px 0;
         }
         .powered {
-            font-size: 9px;
-            color: #6b7280;
-            margin-top: 5px;
-        }
-        .powered .brand-link {
-            color: #667eea;
-            font-weight: bold;
+            font-size: 8px;
+            color: #666;
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -233,88 +211,97 @@
         <hr class="divider">
 
         <!-- Transaction Info -->
-        <div class="info-row">
-            <span class="info-label">Receipt #:</span>
-            <span class="info-value">{{ $transaction->transaction_number }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Date:</span>
-            <span class="info-value">{{ $transaction->created_at->format('d/m/Y') }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Time:</span>
-            <span class="info-value">{{ $transaction->created_at->format('H:i') }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Cashier:</span>
-            <span class="info-value">{{ $transaction->user->name }}</span>
-        </div>
-        @if($transaction->customer_name)
-        <div class="info-row">
-            <span class="info-label">Customer:</span>
-            <span class="info-value">{{ $transaction->customer_name }}</span>
-        </div>
-        @endif
+        <table class="info-table">
+            <tr>
+                <td class="label">Receipt #:</td>
+                <td class="value">{{ $transaction->transaction_number }}</td>
+            </tr>
+            <tr>
+                <td class="label">Date:</td>
+                <td class="value">{{ $transaction->created_at->format('d/m/Y') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Time:</td>
+                <td class="value">{{ $transaction->created_at->format('H:i') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Cashier:</td>
+                <td class="value">{{ $transaction->user->name }}</td>
+            </tr>
+            @if($transaction->customer_name)
+            <tr>
+                <td class="label">Customer:</td>
+                <td class="value">{{ $transaction->customer_name }}</td>
+            </tr>
+            @endif
+        </table>
 
         <hr class="divider">
 
-        <!-- Items Header -->
-        <div class="items-header">
-            <span class="col-item">Item</span>
-            <span class="col-qty">Qty</span>
-            <span class="col-amount">Amount</span>
-        </div>
-
         <!-- Items -->
-        @foreach($transaction->items as $item)
-        <div class="item">
-            <div class="item-name">{{ $item->product_name }}</div>
-            <div class="item-details">
-                <span class="item-price">@ {{ $currency }} {{ number_format($item->unit_price, 2) }}</span>
-                <span class="item-qty">{{ $item->quantity }}</span>
-                <span class="item-amount">{{ $currency }} {{ number_format($item->subtotal, 0) }}</span>
-            </div>
-        </div>
-        @endforeach
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="qty">Qty</th>
+                    <th class="amount">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($transaction->items as $item)
+                <tr>
+                    <td>
+                        <div class="item-name">{{ $item->product_name }}</div>
+                        <div class="item-price">@ {{ $currency }} {{ number_format($item->unit_price, 0) }}</div>
+                    </td>
+                    <td class="qty">{{ $item->quantity }}</td>
+                    <td class="amount">{{ $currency }} {{ number_format($item->subtotal, 0) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
 
         <hr class="divider">
 
         <!-- Totals -->
-        <div class="totals-row">
-            <span class="totals-label">Subtotal:</span>
-            <span class="totals-value">{{ $currency }} {{ number_format($transaction->subtotal, 0) }}</span>
-        </div>
-        @if($transaction->tax_amount > 0)
-        <div class="totals-row">
-            <span class="totals-label">VAT:</span>
-            <span class="totals-value">{{ $currency }} {{ number_format($transaction->tax_amount, 0) }}</span>
-        </div>
-        @endif
-        @if($transaction->discount_amount > 0)
-        <div class="totals-row">
-            <span class="totals-label">Discount:</span>
-            <span class="totals-value">-{{ $currency }} {{ number_format($transaction->discount_amount, 0) }}</span>
-        </div>
-        @endif
-
-        <div class="totals-row total-final">
-            <span class="totals-label">TOTAL:</span>
-            <span class="totals-value">{{ $currency }} {{ number_format($transaction->total, 0) }}</span>
-        </div>
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal:</td>
+                <td class="value">{{ $currency }} {{ number_format($transaction->subtotal, 0) }}</td>
+            </tr>
+            @if($transaction->tax_amount > 0)
+            <tr>
+                <td>VAT:</td>
+                <td class="value">{{ $currency }} {{ number_format($transaction->tax_amount, 0) }}</td>
+            </tr>
+            @endif
+            @if($transaction->discount_amount > 0)
+            <tr>
+                <td>Discount:</td>
+                <td class="value">-{{ $currency }} {{ number_format($transaction->discount_amount, 0) }}</td>
+            </tr>
+            @endif
+            <tr class="total-row">
+                <td>TOTAL:</td>
+                <td class="value">{{ $currency }} {{ number_format($transaction->total, 0) }}</td>
+            </tr>
+        </table>
 
         <hr class="divider">
 
         <!-- Payment -->
-        <div class="info-row">
-            <span class="info-label">Payment:</span>
-            <span class="info-value">{{ ucfirst($transaction->payment_method) }}</span>
-        </div>
-        @if($transaction->change_given > 0)
-        <div class="info-row">
-            <span class="info-label">Change:</span>
-            <span class="info-value">{{ $currency }} {{ number_format($transaction->change_given, 0) }}</span>
-        </div>
-        @endif
+        <table class="info-table">
+            <tr>
+                <td class="label">Payment:</td>
+                <td class="value">{{ ucfirst($transaction->payment_method) }}</td>
+            </tr>
+            @if($transaction->change_given > 0)
+            <tr>
+                <td class="label">Change:</td>
+                <td class="value">{{ $currency }} {{ number_format($transaction->change_given, 0) }}</td>
+            </tr>
+            @endif
+        </table>
 
         <hr class="divider">
 
@@ -326,7 +313,7 @@
                 <div class="enquiries">For enquiries: {{ $storePhone }}</div>
             @endif
             <div class="receipt-box">{{ $transaction->transaction_number }}</div>
-            <div class="powered">Powered by Sasampa POS | <span class="brand-link">sasampa.com</span></div>
+            <div class="powered">Powered by Sasampa POS | sasampa.com</div>
         </div>
     </div>
 </body>
