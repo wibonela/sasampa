@@ -25,6 +25,7 @@ class Company extends Model
         'address',
         'logo',
         'status',
+        'is_suspended',
         'user_limit',
         'approved_at',
         'onboarding_step',
@@ -37,6 +38,7 @@ class Company extends Model
         'approved_at' => 'datetime',
         'onboarding_completed' => 'boolean',
         'branches_enabled' => 'boolean',
+        'is_suspended' => 'boolean',
     ];
 
     /*
