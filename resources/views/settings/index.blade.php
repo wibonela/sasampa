@@ -53,6 +53,14 @@
         }
     </style>
 
+    <!-- Hidden form for removing logo (outside main form to avoid nesting) -->
+    @if($settings['store_logo'] ?? false)
+        <form action="{{ route('settings.remove-logo') }}" method="POST" id="removeLogoForm" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+
     <div class="fade-in">
         <!-- Page Header -->
         <div class="mb-4">
@@ -93,13 +101,9 @@
                                         <small class="text-muted">Max size: 2MB. Recommended: Square image (e.g., 200x200)</small>
                                     </div>
                                     @if($settings['store_logo'])
-                                        <form action="{{ route('settings.remove-logo') }}" method="POST" class="d-inline" id="removeLogoForm">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Remove logo?')) document.getElementById('removeLogoForm').submit();">
-                                                <i class="bi bi-trash me-1"></i>Remove Logo
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Remove logo?')) document.getElementById('removeLogoForm').submit();">
+                                            <i class="bi bi-trash me-1"></i>Remove Logo
+                                        </button>
                                     @endif
                                 </div>
                             </div>
