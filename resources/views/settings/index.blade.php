@@ -1,4 +1,58 @@
 <x-app-layout>
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="toast-notification" style="display: none;">
+        <div class="toast-content">
+            <i class="bi bi-check-circle-fill toast-icon"></i>
+            <span class="toast-message">Settings saved successfully!</span>
+        </div>
+    </div>
+
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            animation: slideDown 0.3s ease-out;
+        }
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #34C759 0%, #30B350 100%);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(52, 199, 89, 0.35);
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .toast-icon {
+            font-size: 20px;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
+    </style>
+
     <div class="fade-in">
         <!-- Page Header -->
         <div class="mb-4">
@@ -173,15 +227,6 @@
                         </span>
                     </div>
 
-                    @if(session('success'))
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const status = document.getElementById('saveStatus');
-                                status.style.display = 'inline';
-                                setTimeout(() => { status.style.display = 'none'; }, 3000);
-                            });
-                        </script>
-                    @endif
                 </form>
             </div>
 
@@ -230,4 +275,23 @@
             </div>
         </div>
     </div>
+
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toast = document.getElementById('toast-notification');
+
+                // Show toast
+                toast.style.display = 'block';
+
+                // Hide after 3 seconds with animation
+                setTimeout(function() {
+                    toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(function() {
+                        toast.style.display = 'none';
+                    }, 300);
+                }, 3000);
+            });
+        </script>
+    @endif
 </x-app-layout>

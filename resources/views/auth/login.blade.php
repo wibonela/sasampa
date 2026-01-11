@@ -5,7 +5,14 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    @if ($errors->has('csrf'))
+        <div class="alert alert-warning mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Session expired. Please try again.
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
 
         <div class="mb-3">
