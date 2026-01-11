@@ -82,6 +82,16 @@
                                 @endif
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.user-limit-requests.*') ? 'active' : '' }}" href="{{ route('admin.user-limit-requests.index') }}">
+                                <i class="bi bi-people"></i>
+                                User Limits
+                                @php $pendingRequests = \App\Models\UserLimitRequest::where('status', 'pending')->count(); @endphp
+                                @if($pendingRequests > 0)
+                                    <span class="badge bg-warning">{{ $pendingRequests }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
 

@@ -6,9 +6,44 @@
                 <h1 class="page-title">Staff Members</h1>
                 <p class="page-subtitle">Manage your team and their permissions</p>
             </div>
-            <a href="{{ route('users.create') }}" class="btn btn-primary">
-                <i class="bi bi-person-plus me-1"></i>Add Staff
-            </a>
+            @if($canCreateMore)
+                <a href="{{ route('users.create') }}" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>Add Staff
+                </a>
+            @else
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#requestMoreModal">
+                    <i class="bi bi-person-plus me-1"></i>Add Staff
+                </button>
+            @endif
+        </div>
+
+        <!-- User Limit Info -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-people" style="color: var(--apple-blue); font-size: 24px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--apple-gray-1);">User Slots</div>
+                            <div style="font-size: 24px; font-weight: 600;">{{ $userCount }} / {{ $userLimit }}</div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        @if($canCreateMore)
+                            <span class="badge bg-success">{{ $userLimit - $userCount }} slots available</span>
+                        @elseif($hasPendingRequest)
+                            <span class="badge bg-warning">Request pending</span>
+                        @else
+                            <span class="badge bg-danger">Limit reached</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#requestMoreModal">
+                                Request More
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Staff Table -->
@@ -100,12 +135,67 @@
                                 <td colspan="6" class="text-center py-5 text-secondary">
                                     <i class="bi bi-people" style="font-size: 48px; color: var(--apple-gray-3);"></i>
                                     <p class="mt-3 mb-0">No staff members yet</p>
-                                    <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm mt-2">Add Your First Staff Member</a>
+                                    @if($canCreateMore)
+                                        <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm mt-2">Add Your First Staff Member</a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request More Users Modal -->
+    <div class="modal fade" id="requestMoreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-envelope me-2"></i>Request More User Slots
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('users.request-more') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        @if($hasPendingRequest)
+                            <div class="alert alert-warning">
+                                <i class="bi bi-clock me-2"></i>
+                                You already have a pending request. Please wait for admin to review it.
+                            </div>
+                        @else
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Your current limit is <strong>{{ $userLimit }} users</strong>. Request more slots by filling out this form.
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">How many user slots do you need?</label>
+                                <select name="requested_limit" class="form-select" required>
+                                    @for($i = $userLimit + 1; $i <= min($userLimit + 20, 50); $i++)
+                                        <option value="{{ $i }}">{{ $i }} users (+{{ $i - $userLimit }} more)</option>
+                                    @endfor
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Reason for request</label>
+                                <textarea name="reason" class="form-control" rows="3" required
+                                          placeholder="Please explain why you need additional user slots..."></textarea>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        @if(!$hasPendingRequest)
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i>Submit Request
+                            </button>
+                        @endif
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -6,6 +6,7 @@ use App\Mail\UserInvitation;
 use App\Models\Branch;
 use App\Models\Permission;
 use App\Models\User;
+use App\Models\UserLimitRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,18 +20,32 @@ class UserManagementController extends Controller
 {
     public function index(): View
     {
-        $users = User::where('company_id', auth()->user()->company_id)
+        $company = auth()->user()->company;
+        $users = User::where('company_id', $company->id)
             ->where('id', '!=', auth()->id())
             ->with(['branches'])
             ->orderBy('name')
             ->get();
 
-        return view('users.index', compact('users'));
+        $userLimit = $company->getUserLimit();
+        $userCount = $company->getUserCount();
+        $canCreateMore = $company->canCreateMoreUsers();
+        $hasPendingRequest = $company->hasPendingLimitRequest();
+
+        return view('users.index', compact('users', 'userLimit', 'userCount', 'canCreateMore', 'hasPendingRequest'));
     }
 
     public function create(): View
     {
-        $branches = auth()->user()->company->branches()->active()->get();
+        $company = auth()->user()->company;
+
+        // Check if company can create more users
+        if (!$company->canCreateMoreUsers()) {
+            return redirect()->route('users.index')
+                ->with('error', 'You have reached your user limit. Please request more user slots from admin.');
+        }
+
+        $branches = $company->branches()->active()->get();
         $permissions = Permission::all()->groupBy('group');
 
         return view('users.create', compact('branches', 'permissions'));
@@ -38,6 +53,14 @@ class UserManagementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $company = auth()->user()->company;
+
+        // Check if company can create more users
+        if (!$company->canCreateMoreUsers()) {
+            return redirect()->route('users.index')
+                ->with('error', 'You have reached your user limit. Please request more user slots from admin.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => [
@@ -261,6 +284,32 @@ class UserManagementController extends Controller
 
         $status = $user->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "Staff member has been {$status}.");
+    }
+
+    public function requestMoreUsers(Request $request): RedirectResponse
+    {
+        $company = auth()->user()->company;
+
+        // Check if there's already a pending request
+        if ($company->hasPendingLimitRequest()) {
+            return back()->with('error', 'You already have a pending request. Please wait for admin to review it.');
+        }
+
+        $validated = $request->validate([
+            'requested_limit' => 'required|integer|min:' . ($company->getUserLimit() + 1) . '|max:100',
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        UserLimitRequest::create([
+            'company_id' => $company->id,
+            'requested_by' => auth()->id(),
+            'current_limit' => $company->getUserLimit(),
+            'requested_limit' => $validated['requested_limit'],
+            'reason' => $validated['reason'],
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Your request has been submitted. Admin will review it soon.');
     }
 
     protected function authorizeUser(User $user): void

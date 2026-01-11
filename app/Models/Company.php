@@ -25,6 +25,7 @@ class Company extends Model
         'address',
         'logo',
         'status',
+        'user_limit',
         'approved_at',
         'onboarding_step',
         'onboarding_completed',
@@ -82,6 +83,42 @@ class Company extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function userLimitRequests(): HasMany
+    {
+        return $this->hasMany(UserLimitRequest::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Limit Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function getUserLimit(): int
+    {
+        return $this->user_limit ?? 3;
+    }
+
+    public function getUserCount(): int
+    {
+        return $this->users()->count();
+    }
+
+    public function canCreateMoreUsers(): bool
+    {
+        return $this->getUserCount() < $this->getUserLimit();
+    }
+
+    public function getRemainingUserSlots(): int
+    {
+        return max(0, $this->getUserLimit() - $this->getUserCount());
+    }
+
+    public function hasPendingLimitRequest(): bool
+    {
+        return $this->userLimitRequests()->pending()->exists();
     }
 
     /*
