@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SandukuFeedback;
+use App\Models\UserLimitRequest;
 use App\Services\AdminDashboardService;
 use App\Services\AdminNotificationService;
 use Illuminate\Http\Request;
@@ -26,6 +28,10 @@ class AdminDashboardController extends Controller
         $pendingCompanies = $this->dashboardService->getPendingCompanies();
         $unreadNotifications = $this->notificationService->getUnreadCount();
 
+        // Additional stats
+        $userLimitRequests = UserLimitRequest::where('status', 'pending')->count();
+        $feedbackCount = SandukuFeedback::where('status', 'new')->count();
+
         // Chart data
         $registrationTrends = $this->dashboardService->getRegistrationTrends(14);
         $revenueTrends = $this->dashboardService->getRevenueTrends('daily', 14);
@@ -41,7 +47,9 @@ class AdminDashboardController extends Controller
             'pendingCompanies',
             'unreadNotifications',
             'registrationTrends',
-            'revenueTrends'
+            'revenueTrends',
+            'userLimitRequests',
+            'feedbackCount'
         ));
     }
 

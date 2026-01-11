@@ -77,4 +77,29 @@ class CompanyManagementController extends Controller
 
         return back()->with('success', "Company '{$company->name}' has been rejected.");
     }
+
+    public function suspend(Company $company)
+    {
+        $company->update(['is_suspended' => true]);
+
+        return back()->with('success', "Company '{$company->name}' has been suspended.");
+    }
+
+    public function unsuspend(Company $company)
+    {
+        $company->update(['is_suspended' => false]);
+
+        return back()->with('success', "Company '{$company->name}' has been unsuspended.");
+    }
+
+    public function updateLimit(Request $request, Company $company)
+    {
+        $validated = $request->validate([
+            'user_limit' => 'required|integer|min:1|max:100',
+        ]);
+
+        $company->update(['user_limit' => $validated['user_limit']]);
+
+        return back()->with('success', "User limit for '{$company->name}' has been updated to {$validated['user_limit']}.");
+    }
 }

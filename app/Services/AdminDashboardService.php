@@ -28,9 +28,9 @@ class AdminDashboardService
     public function getUsersByRole(): array
     {
         return [
-            'platform_admins' => User::where('role', User::ROLE_PLATFORM_ADMIN)->count(),
-            'company_owners' => User::where('role', User::ROLE_COMPANY_OWNER)->count(),
-            'cashiers' => User::where('role', User::ROLE_CASHIER)->count(),
+            'platform_admin' => User::where('role', User::ROLE_PLATFORM_ADMIN)->count(),
+            'company_owner' => User::where('role', User::ROLE_COMPANY_OWNER)->count(),
+            'cashier' => User::where('role', User::ROLE_CASHIER)->count(),
         ];
     }
 

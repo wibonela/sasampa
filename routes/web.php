@@ -125,6 +125,12 @@ Route::middleware('auth')->group(function () {
                 ->name('companies.approve');
             Route::post('/companies/{company}/reject', [CompanyManagementController::class, 'reject'])
                 ->name('companies.reject');
+            Route::post('/companies/{company}/suspend', [CompanyManagementController::class, 'suspend'])
+                ->name('companies.suspend');
+            Route::post('/companies/{company}/unsuspend', [CompanyManagementController::class, 'unsuspend'])
+                ->name('companies.unsuspend');
+            Route::patch('/companies/{company}/update-limit', [CompanyManagementController::class, 'updateLimit'])
+                ->name('companies.update-limit');
 
             // Sanduku Feedback
             Route::get('/sanduku', [AdminSandukuController::class, 'index'])
