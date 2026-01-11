@@ -155,18 +155,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/branch/switch/{branch}', [BranchSwitchController::class, 'switch'])
             ->name('branch.switch');
 
-        // Branch Management (company owner only)
-        Route::resource('branches', BranchController::class)->except(['show']);
-        Route::get('/branches/{branch}/users', [BranchController::class, 'users'])
-            ->name('branches.users');
-        Route::post('/branches/{branch}/users', [BranchController::class, 'assignUser'])
-            ->name('branches.assign-user');
-        Route::delete('/branches/{branch}/users/{user}', [BranchController::class, 'removeUser'])
-            ->name('branches.remove-user');
-        Route::post('/branches/{branch}/users/{user}/default', [BranchController::class, 'setDefaultBranch'])
-            ->name('branches.set-default');
+        // Branch Management
+        Route::middleware('permission:manage_branches')->group(function () {
+            Route::resource('branches', BranchController::class)->except(['show']);
+            Route::get('/branches/{branch}/users', [BranchController::class, 'users'])
+                ->name('branches.users');
+            Route::post('/branches/{branch}/users', [BranchController::class, 'assignUser'])
+                ->name('branches.assign-user');
+            Route::delete('/branches/{branch}/users/{user}', [BranchController::class, 'removeUser'])
+                ->name('branches.remove-user');
+            Route::post('/branches/{branch}/users/{user}/default', [BranchController::class, 'setDefaultBranch'])
+                ->name('branches.set-default');
+        });
 
-        // User/Staff Management (company owner only)
+        // User/Staff Management
         Route::middleware('permission:manage_users')->group(function () {
             Route::resource('users', UserManagementController::class)->except(['show']);
             Route::get('/users/{user}/permissions', [UserManagementController::class, 'permissions'])
@@ -221,10 +223,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/products', [ReportController::class, 'products'])->name('reports.products');
         Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
 
-        // Settings
-        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-        Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-        Route::delete('/settings/logo', [SettingsController::class, 'removeLogo'])->name('settings.remove-logo');
+        // Settings (company owner only)
+        Route::middleware('permission:manage_settings')->group(function () {
+            Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+            Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+            Route::delete('/settings/logo', [SettingsController::class, 'removeLogo'])->name('settings.remove-logo');
+        });
     });
 });
 

@@ -177,7 +177,7 @@
                                 </a>
                             </li>
                         @endif
-                        @if(auth()->user()->isCompanyOwner())
+                        @if(auth()->user()->hasPermission('manage_branches'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}" href="{{ route('branches.index') }}">
                                     <i class="bi bi-building"></i>
@@ -185,12 +185,14 @@
                                 </a>
                             </li>
                         @endif
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
-                                <i class="bi bi-gear"></i>
-                                Settings
-                            </a>
-                        </li>
+                        @if(auth()->user()->hasPermission('manage_settings'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
+                                    <i class="bi bi-gear"></i>
+                                    Settings
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
 
