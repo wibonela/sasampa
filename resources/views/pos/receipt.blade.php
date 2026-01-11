@@ -6,7 +6,7 @@
     <title>Receipt - {{ $transaction->transaction_number }}</title>
     <style>
         @page {
-            margin: 10mm 8mm;
+            margin: 15mm 12mm 8mm 12mm; /* top right bottom left - safe print margins */
             size: 76mm auto;
         }
         * {
@@ -26,7 +26,7 @@
             width: 76mm;
             max-width: 100%;
             margin: 0 auto;
-            padding: 10mm 8mm;
+            padding: 15mm 12mm 8mm 12mm; /* top right bottom left - safe print margins */
             background: #fff;
         }
 
