@@ -72,6 +72,16 @@
                                 @endif
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.sanduku.*') ? 'active' : '' }}" href="{{ route('admin.sanduku.index') }}">
+                                <i class="bi bi-inbox"></i>
+                                Sanduku Feedback
+                                @php $newFeedback = \App\Models\Sanduku::where('status', 'new')->count(); @endphp
+                                @if($newFeedback > 0)
+                                    <span class="badge bg-info">{{ $newFeedback }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -159,6 +169,14 @@
                 <div class="nav-section">
                     <p class="nav-section-title">Settings</p>
                     <ul class="nav flex-column">
+                        @if(auth()->user()->hasPermission('manage_users'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                                    <i class="bi bi-people"></i>
+                                    Users
+                                </a>
+                            </li>
+                        @endif
                         @if(auth()->user()->isCompanyOwner())
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}" href="{{ route('branches.index') }}">

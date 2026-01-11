@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\AdminSandukuController;
 use App\Http\Controllers\Admin\CompanyManagementController;
 use App\Http\Controllers\Admin\DocumentationArticleController;
 use App\Http\Controllers\Admin\DocumentationCategoryController;
@@ -123,6 +124,16 @@ Route::middleware('auth')->group(function () {
                 ->name('companies.approve');
             Route::post('/companies/{company}/reject', [CompanyManagementController::class, 'reject'])
                 ->name('companies.reject');
+
+            // Sanduku Feedback
+            Route::get('/sanduku', [AdminSandukuController::class, 'index'])
+                ->name('sanduku.index');
+            Route::get('/sanduku/{sanduku}', [AdminSandukuController::class, 'show'])
+                ->name('sanduku.show');
+            Route::patch('/sanduku/{sanduku}/status', [AdminSandukuController::class, 'updateStatus'])
+                ->name('sanduku.update-status');
+            Route::delete('/sanduku/{sanduku}', [AdminSandukuController::class, 'destroy'])
+                ->name('sanduku.destroy');
 
             // Documentation Management
             Route::prefix('documentation')->name('documentation.')->group(function () {
