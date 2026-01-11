@@ -1,0 +1,57 @@
+# ===========================================
+# CRITICAL - NEVER COMMIT THESE FILES
+# ===========================================
+/database/*.sqlite
+/database/database.sqlite
+database.sqlite
+.env
+.env.backup
+.env.production
+.env.local
+
+# ===========================================
+# Laravel Framework
+# ===========================================
+/bootstrap/cache/*.php
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/app/*
+!/storage/app/.gitignore
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+/vendor
+
+# ===========================================
+# Build & Dependencies
+# ===========================================
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# ===========================================
+# IDE & System Files
+# ===========================================
+.DS_Store
+Thumbs.db
+*.log
+.phpactor.json
+.phpunit.result.cache
+.phpunit.cache/
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+/auth.json
+Homestead.json
+Homestead.yaml
