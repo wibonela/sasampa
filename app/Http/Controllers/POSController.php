@@ -110,9 +110,12 @@ class POSController extends Controller
                 $changeGiven = max(0, $amountPaid - $total);
 
                 // Create transaction
+                $user = Auth::user();
                 $transaction = Transaction::create([
+                    'company_id' => $user->company_id,
+                    'branch_id' => $user->currentBranch()?->id,
                     'transaction_number' => Transaction::generateTransactionNumber(),
-                    'user_id' => Auth::id(),
+                    'user_id' => $user->id,
                     'customer_name' => $validated['customer_name'],
                     'customer_phone' => $validated['customer_phone'] ?? null,
                     'customer_tin' => $validated['customer_tin'] ?? null,
@@ -147,8 +150,9 @@ class POSController extends Controller
                         $quantityAfter = $quantityBefore - $item['quantity'];
 
                         StockAdjustment::create([
+                            'company_id' => $user->company_id,
                             'product_id' => $item['product']->id,
-                            'user_id' => Auth::id(),
+                            'user_id' => $user->id,
                             'type' => 'sold',
                             'quantity_change' => -$item['quantity'],
                             'quantity_before' => $quantityBefore,

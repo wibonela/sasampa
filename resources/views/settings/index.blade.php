@@ -118,7 +118,8 @@
                                     <label for="default_tax_rate" class="form-label">Default Tax Rate (%)</label>
                                     <input type="number" step="0.01" class="form-control @error('default_tax_rate') is-invalid @enderror"
                                            id="default_tax_rate" name="default_tax_rate"
-                                           value="{{ old('default_tax_rate', $settings['default_tax_rate']) }}">
+                                           value="{{ old('default_tax_rate', $settings['default_tax_rate'] ?? 0) }}"
+                                           placeholder="0">
                                     @error('default_tax_rate')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -127,7 +128,8 @@
                                     <label for="low_stock_threshold" class="form-label">Low Stock Threshold</label>
                                     <input type="number" class="form-control @error('low_stock_threshold') is-invalid @enderror"
                                            id="low_stock_threshold" name="low_stock_threshold"
-                                           value="{{ old('low_stock_threshold', $settings['low_stock_threshold']) }}">
+                                           value="{{ old('low_stock_threshold', $settings['low_stock_threshold'] ?? 10) }}"
+                                           placeholder="10">
                                     @error('low_stock_threshold')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -162,9 +164,24 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle me-1"></i>Save Settings
-                    </button>
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="bi bi-check-circle me-1"></i>Save Settings
+                        </button>
+                        <span id="saveStatus" class="text-success fw-medium" style="display: none;">
+                            <i class="bi bi-check-circle-fill me-1"></i>Saved!
+                        </span>
+                    </div>
+
+                    @if(session('success'))
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const status = document.getElementById('saveStatus');
+                                status.style.display = 'inline';
+                                setTimeout(() => { status.style.display = 'none'; }, 3000);
+                            });
+                        </script>
+                    @endif
                 </form>
             </div>
 
