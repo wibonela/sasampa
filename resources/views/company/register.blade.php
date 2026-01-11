@@ -50,7 +50,7 @@
     <div class="register-wrapper">
         <div class="register-card">
             <div class="register-logo">
-                <i class="bi bi-shop"></i>
+                <svg width="56" height="56" viewBox="0 0 32 32"><defs><linearGradient id="regLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#regLogoGrad)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
                 <h3 class="mt-2 mb-0">Register Your Business</h3>
                 <small class="text-muted">Start using Sasampa POS today</small>
             </div>
