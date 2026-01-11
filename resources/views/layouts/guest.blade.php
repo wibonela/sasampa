@@ -7,6 +7,11 @@
 
     <title>{{ config('app.name', 'Sasampa POS') }}</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body style="background: var(--apple-gray-6); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
