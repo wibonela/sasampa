@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-app-layout>
     <div class="fade-in">
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-start mb-4">
@@ -206,4 +206,4 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
+</x-app-layout>
