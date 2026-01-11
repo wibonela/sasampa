@@ -76,8 +76,23 @@ class Transaction extends Model
     {
         $prefix = 'TXN';
         $date = now()->format('Ymd');
-        $count = static::whereDate('created_at', today())->count() + 1;
-        return sprintf('%s-%s-%04d', $prefix, $date, $count);
+        $random = strtoupper(substr(uniqid(), -4));
+
+        // Generate unique transaction number with retry
+        $maxAttempts = 10;
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $number = sprintf('%s-%s-%s%s', $prefix, $date, $random, $i > 0 ? $i : '');
+
+            if (!static::where('transaction_number', $number)->exists()) {
+                return $number;
+            }
+
+            // Generate new random for next attempt
+            $random = strtoupper(substr(uniqid(), -4));
+        }
+
+        // Fallback with timestamp for guaranteed uniqueness
+        return sprintf('%s-%s-%s', $prefix, $date, substr(md5(uniqid(mt_rand(), true)), 0, 8));
     }
 
     public function getStatusColorAttribute(): string
