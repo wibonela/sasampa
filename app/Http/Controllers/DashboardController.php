@@ -13,9 +13,15 @@ class DashboardController extends Controller
         protected CacheService $cacheService
     ) {}
 
-    public function index(): View
+    public function index(): View|\Illuminate\Http\RedirectResponse
     {
         $user = auth()->user();
+
+        // Platform admins should use the admin dashboard
+        if ($user->isPlatformAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $companyId = $user->company_id;
         $branchId = $user->currentBranch()?->id;
 
