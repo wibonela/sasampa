@@ -18,7 +18,7 @@
     <!-- Mobile Header -->
     <header class="mobile-header">
         <div class="mobile-header-title">
-            <i class="bi bi-shop"></i>
+            <svg width="24" height="24" viewBox="0 0 32 32" style="vertical-align: middle; margin-right: 6px;"><defs><linearGradient id="logoGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#logoGrad1)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
             Sasampa
         </div>
         <button class="mobile-menu-btn" onclick="toggleSidebar()">
@@ -36,7 +36,7 @@
         </button>
         <div class="sidebar-header">
             <h4>
-                <i class="bi bi-shop"></i>
+                <svg width="28" height="28" viewBox="0 0 32 32" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="logoGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#logoGrad2)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
                 Sasampa POS
             </h4>
             @if(auth()->user()->company)

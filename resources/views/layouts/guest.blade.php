@@ -20,9 +20,7 @@
             <div class="card-body p-4">
                 <!-- Logo -->
                 <div class="text-center mb-4">
-                    <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--apple-blue) 0%, #5856D6 100%); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                        <i class="bi bi-shop" style="font-size: 24px; color: #fff;"></i>
-                    </div>
+                    <svg width="56" height="56" viewBox="0 0 32 32" style="margin-bottom: 12px;"><defs><linearGradient id="guestLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#guestLogoGrad)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
                     <h4 style="font-weight: 600; margin: 0; color: var(--apple-text);">Sasampa POS</h4>
                     <p class="text-secondary mb-0" style="font-size: 13px;">Point of Sale System</p>
                 </div>

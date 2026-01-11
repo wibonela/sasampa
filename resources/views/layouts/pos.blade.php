@@ -439,7 +439,7 @@
     <!-- POS Header -->
     <header class="pos-header">
         <div class="logo">
-            <i class="bi bi-shop"></i>
+            <svg width="24" height="24" viewBox="0 0 32 32"><defs><linearGradient id="posLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#posLogoGrad)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
             <span>Sasampa POS</span>
         </div>
         <div class="d-flex align-items-center gap-2">
