@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\SandukuFeedback;
+use App\Models\Sanduku;
 use App\Models\UserLimitRequest;
 use App\Services\AdminDashboardService;
 use App\Services\AdminNotificationService;
@@ -30,7 +30,7 @@ class AdminDashboardController extends Controller
 
         // Additional stats
         $userLimitRequests = UserLimitRequest::where('status', 'pending')->count();
-        $feedbackCount = SandukuFeedback::where('status', 'new')->count();
+        $feedbackCount = Sanduku::where('status', 'new')->count();
 
         // Chart data
         $registrationTrends = $this->dashboardService->getRegistrationTrends(14);
