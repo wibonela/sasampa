@@ -10,6 +10,10 @@ class DocumentationSeeder extends Seeder
 {
     public function run(): void
     {
+        // Clear existing documentation to avoid duplicates
+        DocumentationArticle::query()->delete();
+        DocumentationCategory::query()->delete();
+
         $categories = [
             [
                 'slug' => 'getting-started',
@@ -196,9 +200,159 @@ class DocumentationSeeder extends Seeder
                 ],
             ],
             [
+                'slug' => 'user-management',
+                'icon' => 'bi-people',
+                'sort_order' => 5,
+                'translations' => [
+                    'en' => [
+                        'name' => 'User Management',
+                        'description' => 'Add staff members and manage their access and permissions.',
+                    ],
+                    'sw' => [
+                        'name' => 'Usimamizi wa Watumiaji',
+                        'description' => 'Ongeza wafanyakazi na simamia ufikiaji na ruhusa zao.',
+                    ],
+                ],
+                'articles' => [
+                    [
+                        'slug' => 'adding-staff',
+                        'sort_order' => 1,
+                        'is_featured' => true,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'Adding Staff Members',
+                                'excerpt' => 'Learn how to add and invite staff to your team.',
+                                'content' => "# Adding Staff Members\n\nAdd cashiers and other staff members to help run your business.\n\n## User Limits\n\nYour account has a user limit (default: 3 users). If you need more:\n1. Go to **Staff** in the menu\n2. Click **Request More** when at your limit\n3. Fill in how many users you need and why\n4. Wait for admin approval\n\n## Steps to Add Staff\n\n1. Go to **Staff** in the menu\n2. Click **Add Staff**\n3. Fill in their details:\n   - **Name**: Staff member's name\n   - **Email**: Their email address\n   - **Role**: Usually Cashier\n   - **Branches**: Which branches they can access\n4. Choose invitation method:\n   - **Email**: They receive a link to set password\n   - **PIN**: You set a 4-digit PIN for quick login\n   - **Both**: Email link + PIN access\n5. Set their permissions\n6. Click **Save**\n\n## Invitation Methods\n\n| Method | Best For | How It Works |\n|--------|----------|-------------|\n| Email | Full access users | Receives email to set password |\n| PIN | Quick POS access | Uses PIN to login at POS |\n| Both | Flexibility | Can use either method |\n\n## Tips\n\n- Use PIN for cashiers who share devices\n- Use email for managers who need full access\n- Always set appropriate permissions",
+                            ],
+                            'sw' => [
+                                'title' => 'Kuongeza Wafanyakazi',
+                                'excerpt' => 'Jifunze jinsi ya kuongeza na kuwaalika wafanyakazi kwenye timu yako.',
+                                'content' => "# Kuongeza Wafanyakazi\n\nOngeza wakusanyaji fedha na wafanyakazi wengine kusaidia kuendesha biashara yako.\n\n## Vikomo vya Watumiaji\n\nAkaunti yako ina kikomo cha watumiaji (kawaida: watumiaji 3). Ukihitaji zaidi:\n1. Nenda **Wafanyakazi** kwenye menyu\n2. Bonyeza **Omba Zaidi** unapofikia kikomo chako\n3. Jaza ni watumiaji wangapi unahitaji na kwa nini\n4. Subiri idhini ya msimamizi\n\n## Hatua za Kuongeza Mfanyakazi\n\n1. Nenda **Wafanyakazi** kwenye menyu\n2. Bonyeza **Ongeza Mfanyakazi**\n3. Jaza maelezo yao:\n   - **Jina**: Jina la mfanyakazi\n   - **Barua pepe**: Anwani yao ya barua pepe\n   - **Jukumu**: Kawaida Mkusanyaji Fedha\n   - **Matawi**: Matawi gani wanaweza kufikia\n4. Chagua njia ya mwaliko:\n   - **Barua pepe**: Wanapokea kiungo cha kuweka nenosiri\n   - **PIN**: Unaweka PIN ya tarakimu 4 kwa kuingia haraka\n   - **Zote mbili**: Kiungo cha barua pepe + ufikiaji wa PIN\n5. Weka ruhusa zao\n6. Bonyeza **Hifadhi**\n\n## Njia za Mwaliko\n\n| Njia | Bora Kwa | Inavyofanya Kazi |\n|------|----------|------------------|\n| Barua pepe | Watumiaji wenye ufikiaji kamili | Wanapokea barua pepe kuweka nenosiri |\n| PIN | Ufikiaji wa haraka wa POS | Hutumia PIN kuingia POS |\n| Zote mbili | Unyumbufu | Wanaweza kutumia njia yoyote |\n\n## Vidokezo\n\n- Tumia PIN kwa wakusanyaji fedha wanaoshiriki vifaa\n- Tumia barua pepe kwa wasimamizi wanaohitaji ufikiaji kamili\n- Daima weka ruhusa zinazofaa",
+                            ],
+                        ],
+                    ],
+                    [
+                        'slug' => 'permissions',
+                        'sort_order' => 2,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'Managing Permissions',
+                                'excerpt' => 'Control what each staff member can do.',
+                                'content' => "# Managing Permissions\n\nControl exactly what each staff member can access and do.\n\n## Available Permissions\n\n| Permission | What It Allows |\n|------------|---------------|\n| View Reports | Access sales and inventory reports |\n| Manage Inventory | Adjust stock levels |\n| Void Transactions | Cancel completed sales |\n| Apply Discounts | Give discounts on sales |\n| View Cost Prices | See product cost prices |\n| Manage Users | Add and edit staff members |\n| Manage Branches | Configure branch settings |\n| Manage Settings | Change company settings |\n\n## Setting Permissions\n\n1. Go to **Staff** in the menu\n2. Click the shield icon next to a staff member\n3. Check/uncheck permissions\n4. Click **Save**\n\n## Permission Groups\n\n### Cashier (Basic)\n- Process sales\n- View own transactions\n\n### Senior Cashier\n- All basic permissions\n- Void transactions\n- Apply discounts\n\n### Manager\n- All permissions except settings\n\n### Company Owner\n- Full access to everything\n\n## Tips\n\n- Start with minimal permissions\n- Add permissions as needed\n- Review permissions regularly",
+                            ],
+                            'sw' => [
+                                'title' => 'Kusimamia Ruhusa',
+                                'excerpt' => 'Dhibiti kila mfanyakazi anaweza kufanya nini.',
+                                'content' => "# Kusimamia Ruhusa\n\nDhibiti kwa usahihi kila mfanyakazi anaweza kufikia na kufanya nini.\n\n## Ruhusa Zinazopatikana\n\n| Ruhusa | Inaruhusu Nini |\n|--------|----------------|\n| Tazama Ripoti | Ufikiaji wa ripoti za mauzo na stoku |\n| Simamia Stoku | Rekebisha viwango vya stoku |\n| Batilisha Miamala | Ghairi mauzo yaliyokamilika |\n| Toa Punguzo | Toa punguzo kwenye mauzo |\n| Tazama Bei za Gharama | Ona bei za gharama za bidhaa |\n| Simamia Watumiaji | Ongeza na hariri wafanyakazi |\n| Simamia Matawi | Sanidi mipangilio ya tawi |\n| Simamia Mipangilio | Badilisha mipangilio ya kampuni |\n\n## Kuweka Ruhusa\n\n1. Nenda **Wafanyakazi** kwenye menyu\n2. Bonyeza ikoni ya ngao karibu na mfanyakazi\n3. Weka/ondoa alama kwenye ruhusa\n4. Bonyeza **Hifadhi**\n\n## Makundi ya Ruhusa\n\n### Mkusanyaji Fedha (Msingi)\n- Fanya mauzo\n- Tazama miamala yako\n\n### Mkusanyaji Fedha Mkuu\n- Ruhusa zote za msingi\n- Batilisha miamala\n- Toa punguzo\n\n### Meneja\n- Ruhusa zote isipokuwa mipangilio\n\n### Mmiliki wa Kampuni\n- Ufikiaji kamili wa kila kitu\n\n## Vidokezo\n\n- Anza na ruhusa ndogo\n- Ongeza ruhusa kadri inavyohitajika\n- Pitia ruhusa mara kwa mara",
+                            ],
+                        ],
+                    ],
+                    [
+                        'slug' => 'pin-login',
+                        'sort_order' => 3,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'PIN Login System',
+                                'excerpt' => 'Quick login for POS using PIN codes.',
+                                'content' => "# PIN Login System\n\nThe PIN system allows quick cashier switching at the POS.\n\n## How PIN Login Works\n\n1. Staff member enters their 4-digit PIN\n2. System verifies the PIN\n3. Staff is logged in and ready to sell\n\n## Setting Up PIN\n\nWhen creating a staff member:\n1. Choose **PIN** or **Both** as invitation method\n2. Enter a 4-digit PIN\n3. Share the PIN securely with the staff member\n\n## Resetting PIN\n\n1. Go to **Staff**\n2. Click **Edit** on the staff member\n3. Click **Reset PIN**\n4. Share the new PIN with them\n\n## Quick Switch Mode\n\nOn shared POS terminals:\n1. Current cashier logs out\n2. New cashier enters their PIN\n3. Instantly switches to their session\n\n## Security Tips\n\n- Don't share PINs between staff\n- Change PINs if compromised\n- Use unique PINs (avoid 1234, 0000)\n- Deactivate staff who leave",
+                            ],
+                            'sw' => [
+                                'title' => 'Mfumo wa Kuingia kwa PIN',
+                                'excerpt' => 'Kuingia haraka kwa POS kwa kutumia misimbo ya PIN.',
+                                'content' => "# Mfumo wa Kuingia kwa PIN\n\nMfumo wa PIN unaruhusu kubadilisha mkusanyaji fedha haraka kwenye POS.\n\n## Jinsi Kuingia kwa PIN Inavyofanya Kazi\n\n1. Mfanyakazi anaingiza PIN yake ya tarakimu 4\n2. Mfumo unathibitisha PIN\n3. Mfanyakazi ameingia na yuko tayari kuuza\n\n## Kuweka PIN\n\nWakati wa kuunda mfanyakazi:\n1. Chagua **PIN** au **Zote mbili** kama njia ya mwaliko\n2. Ingiza PIN ya tarakimu 4\n3. Shiriki PIN kwa usalama na mfanyakazi\n\n## Kuweka Upya PIN\n\n1. Nenda **Wafanyakazi**\n2. Bonyeza **Hariri** kwa mfanyakazi\n3. Bonyeza **Weka Upya PIN**\n4. Shiriki PIN mpya naye\n\n## Hali ya Kubadilisha Haraka\n\nKwenye vituo vya POS vinavyoshirikiwa:\n1. Mkusanyaji fedha wa sasa anatoka\n2. Mkusanyaji fedha mpya anaingiza PIN yake\n3. Mara moja anabadilika kwenye kikao chake\n\n## Vidokezo vya Usalama\n\n- Usishiriki PIN kati ya wafanyakazi\n- Badilisha PIN zikiharibiwa\n- Tumia PIN za kipekee (epuka 1234, 0000)\n- Zima akaunti za wafanyakazi wanaoondoka",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'branches',
+                'icon' => 'bi-building',
+                'sort_order' => 6,
+                'translations' => [
+                    'en' => [
+                        'name' => 'Branch Management',
+                        'description' => 'Manage multiple business locations.',
+                    ],
+                    'sw' => [
+                        'name' => 'Usimamizi wa Matawi',
+                        'description' => 'Simamia maeneo mengi ya biashara.',
+                    ],
+                ],
+                'articles' => [
+                    [
+                        'slug' => 'multi-branch-setup',
+                        'sort_order' => 1,
+                        'is_featured' => true,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'Multi-Branch Setup',
+                                'excerpt' => 'Set up and manage multiple business locations.',
+                                'content' => "# Multi-Branch Setup\n\nExpand your business with multiple branches.\n\n## Creating a Branch\n\n1. Go to **Branches** in the menu\n2. Click **Add Branch**\n3. Fill in:\n   - **Name**: Branch name (e.g., \"Downtown Store\")\n   - **Code**: Short code (e.g., \"DT\")\n   - **Address**: Branch location\n   - **Phone**: Contact number\n4. Click **Save**\n\n## Main Branch\n\nYour first branch is the \"Main Branch\". It:\n- Cannot be deleted\n- Is the default for new products\n- Contains your primary data\n\n## Branch Settings\n\nEach branch can have:\n- Its own staff members\n- Separate inventory\n- Individual reports\n\n## Assigning Staff to Branches\n\n1. Go to **Branches**\n2. Click **Users** on a branch\n3. Add staff members to that branch\n4. Set their default branch\n\n## Switching Branches\n\nUse the branch switcher in the sidebar to:\n- View different branch data\n- Process sales for specific branches\n- Check branch-specific reports",
+                            ],
+                            'sw' => [
+                                'title' => 'Kuweka Matawi Mengi',
+                                'excerpt' => 'Weka na simamia maeneo mengi ya biashara.',
+                                'content' => "# Kuweka Matawi Mengi\n\nPanua biashara yako na matawi mengi.\n\n## Kuunda Tawi\n\n1. Nenda **Matawi** kwenye menyu\n2. Bonyeza **Ongeza Tawi**\n3. Jaza:\n   - **Jina**: Jina la tawi (mfano, \"Duka la Mjini\")\n   - **Msimbo**: Msimbo mfupi (mfano, \"MJ\")\n   - **Anwani**: Mahali pa tawi\n   - **Simu**: Nambari ya mawasiliano\n4. Bonyeza **Hifadhi**\n\n## Tawi Kuu\n\nTawi lako la kwanza ni \"Tawi Kuu\". Linaweza:\n- Haliwezi kufutwa\n- Ni chaguo-msingi kwa bidhaa mpya\n- Lina data yako ya msingi\n\n## Mipangilio ya Tawi\n\nKila tawi linaweza kuwa na:\n- Wafanyakazi wake\n- Stoku tofauti\n- Ripoti za kibinafsi\n\n## Kuwapa Wafanyakazi Matawi\n\n1. Nenda **Matawi**\n2. Bonyeza **Watumiaji** kwenye tawi\n3. Ongeza wafanyakazi kwenye tawi hilo\n4. Weka tawi lao la kawaida\n\n## Kubadilisha Matawi\n\nTumia kibadilishi cha tawi kwenye upau wa pembeni:\n- Tazama data ya matawi tofauti\n- Fanya mauzo kwa matawi maalum\n- Angalia ripoti za tawi maalum",
+                            ],
+                        ],
+                    ],
+                    [
+                        'slug' => 'branch-reports',
+                        'sort_order' => 2,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'Branch Reports',
+                                'excerpt' => 'View reports for individual branches.',
+                                'content' => "# Branch Reports\n\nAnalyze performance across your branches.\n\n## Viewing Branch Data\n\n### As Company Owner\nCompany owners see combined data from ALL branches:\n- Total sales across all locations\n- Combined inventory\n- Unified transaction history\n\n### As Staff Member\nStaff see only their assigned branch data:\n- Sales from their branch\n- Branch inventory\n- Their transactions\n\n## Dashboard Overview\n\nThe dashboard shows:\n- **Owners**: All branch data combined\n- **Staff**: Current branch data only\n\n## Filtering by Branch\n\nIn reports, you can:\n1. Select a specific branch\n2. Compare branch performance\n3. Export branch-specific data\n\n## Best Practices\n\n- Review branch performance weekly\n- Compare sales across locations\n- Identify top-performing branches\n- Address underperforming locations",
+                            ],
+                            'sw' => [
+                                'title' => 'Ripoti za Tawi',
+                                'excerpt' => 'Tazama ripoti za matawi ya kibinafsi.',
+                                'content' => "# Ripoti za Tawi\n\nChanganua utendaji kwenye matawi yako.\n\n## Kutazama Data ya Tawi\n\n### Kama Mmiliki wa Kampuni\nWamiliki wa kampuni wanaona data iliyounganishwa kutoka matawi YOTE:\n- Jumla ya mauzo kwenye maeneo yote\n- Stoku iliyounganishwa\n- Historia ya miamala iliyounganishwa\n\n### Kama Mfanyakazi\nWafanyakazi wanaona data ya tawi lao tu:\n- Mauzo kutoka tawi lao\n- Stoku ya tawi\n- Miamala yao\n\n## Muhtasari wa Dashibodi\n\nDashibodi inaonyesha:\n- **Wamiliki**: Data yote ya matawi iliyounganishwa\n- **Wafanyakazi**: Data ya tawi la sasa tu\n\n## Kuchuja kwa Tawi\n\nKatika ripoti, unaweza:\n1. Chagua tawi maalum\n2. Linganisha utendaji wa matawi\n3. Hamisha data ya tawi maalum\n\n## Mazoea Bora\n\n- Pitia utendaji wa tawi kila wiki\n- Linganisha mauzo kwenye maeneo\n- Tambua matawi yanayofanya vizuri\n- Shughulikia maeneo yanayofanya vibaya",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'settings',
+                'icon' => 'bi-gear',
+                'sort_order' => 7,
+                'translations' => [
+                    'en' => [
+                        'name' => 'Settings',
+                        'description' => 'Configure your business settings and preferences.',
+                    ],
+                    'sw' => [
+                        'name' => 'Mipangilio',
+                        'description' => 'Sanidi mipangilio na mapendekezo ya biashara yako.',
+                    ],
+                ],
+                'articles' => [
+                    [
+                        'slug' => 'company-settings',
+                        'sort_order' => 1,
+                        'is_featured' => true,
+                        'translations' => [
+                            'en' => [
+                                'title' => 'Company Settings',
+                                'excerpt' => 'Configure your company profile and preferences.',
+                                'content' => "# Company Settings\n\nCustomize Sasampa POS for your business.\n\n## Accessing Settings\n\n1. Click **Settings** in the menu\n2. Only company owners can access settings\n\n## Company Profile\n\nUpdate your business information:\n- **Company Name**: Your business name\n- **Email**: Contact email\n- **Phone**: Business phone number\n- **Address**: Business address\n- **Logo**: Upload your logo (appears on receipts)\n\n## Receipt Settings\n\nCustomize your receipts:\n- Add company logo\n- Include address and phone\n- Add custom footer message\n- Show/hide tax information\n\n## Tax Settings\n\nConfigure tax:\n- Enable/disable tax\n- Set tax percentage\n- Include tax in prices or add separately\n\n## Currency\n\nThe system uses Tanzanian Shillings (TZS) by default.\n\n## Tips\n\n- Keep your logo simple for better printing\n- Update contact info when it changes\n- Test receipt layout after changes",
+                            ],
+                            'sw' => [
+                                'title' => 'Mipangilio ya Kampuni',
+                                'excerpt' => 'Sanidi wasifu wa kampuni yako na mapendekezo.',
+                                'content' => "# Mipangilio ya Kampuni\n\nBinafsisha Sasampa POS kwa biashara yako.\n\n## Kufikia Mipangilio\n\n1. Bonyeza **Mipangilio** kwenye menyu\n2. Wamiliki wa kampuni tu wanaweza kufikia mipangilio\n\n## Wasifu wa Kampuni\n\nSasisha taarifa za biashara yako:\n- **Jina la Kampuni**: Jina la biashara yako\n- **Barua pepe**: Barua pepe ya mawasiliano\n- **Simu**: Nambari ya simu ya biashara\n- **Anwani**: Anwani ya biashara\n- **Nembo**: Pakia nembo yako (inaonekana kwenye risiti)\n\n## Mipangilio ya Risiti\n\nBinafsisha risiti zako:\n- Ongeza nembo ya kampuni\n- Jumuisha anwani na simu\n- Ongeza ujumbe wa chini wa kawaida\n- Onyesha/ficha taarifa za kodi\n\n## Mipangilio ya Kodi\n\nSanidi kodi:\n- Wezesha/zima kodi\n- Weka asilimia ya kodi\n- Jumuisha kodi katika bei au ongeza tofauti\n\n## Sarafu\n\nMfumo unatumia Shilingi za Tanzania (TZS) kwa chaguo-msingi.\n\n## Vidokezo\n\n- Weka nembo yako rahisi kwa uchapishaji bora\n- Sasisha taarifa za mawasiliano zinapobadilika\n- Jaribu mpangilio wa risiti baada ya mabadiliko",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
                 'slug' => 'faq',
                 'icon' => 'bi-question-circle',
-                'sort_order' => 5,
+                'sort_order' => 8,
                 'translations' => [
                     'en' => [
                         'name' => 'FAQ & Troubleshooting',
