@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminSandukuController;
 use App\Http\Controllers\Admin\CompanyManagementController;
+use App\Http\Controllers\Admin\AdminUserLimitRequestController;
 use App\Http\Controllers\Admin\DocumentationArticleController;
 use App\Http\Controllers\Admin\DocumentationCategoryController;
 use App\Http\Controllers\Auth\InvitationController;
@@ -135,6 +136,16 @@ Route::middleware('auth')->group(function () {
             Route::delete('/sanduku/{sanduku}', [AdminSandukuController::class, 'destroy'])
                 ->name('sanduku.destroy');
 
+            // User Limit Requests
+            Route::get('/user-limit-requests', [AdminUserLimitRequestController::class, 'index'])
+                ->name('user-limit-requests.index');
+            Route::get('/user-limit-requests/{userLimitRequest}', [AdminUserLimitRequestController::class, 'show'])
+                ->name('user-limit-requests.show');
+            Route::post('/user-limit-requests/{userLimitRequest}/approve', [AdminUserLimitRequestController::class, 'approve'])
+                ->name('user-limit-requests.approve');
+            Route::post('/user-limit-requests/{userLimitRequest}/reject', [AdminUserLimitRequestController::class, 'reject'])
+                ->name('user-limit-requests.reject');
+
             // Documentation Management
             Route::prefix('documentation')->name('documentation.')->group(function () {
                 Route::resource('categories', DocumentationCategoryController::class)
@@ -183,6 +194,8 @@ Route::middleware('auth')->group(function () {
                 ->name('users.reset-pin');
             Route::patch('/users/{user}/toggle-active', [UserManagementController::class, 'toggleActive'])
                 ->name('users.toggle-active');
+            Route::post('/users/request-more', [UserManagementController::class, 'requestMoreUsers'])
+                ->name('users.request-more');
         });
 
         // PIN Session Management (authenticated users)
