@@ -59,9 +59,25 @@ class DocumentationCategory extends Model
         return $this->translation()?->name ?? $this->slug;
     }
 
+    public function getName(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'en');
+        return $translation?->name ?? $this->slug;
+    }
+
     public function getDescriptionAttribute(): ?string
     {
         return $this->translation()?->description;
+    }
+
+    public function getDescription(?string $locale = null): ?string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'en');
+        return $translation?->description;
     }
 
     /*

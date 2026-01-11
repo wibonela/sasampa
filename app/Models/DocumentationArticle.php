@@ -70,14 +70,38 @@ class DocumentationArticle extends Model
         return $this->translation()?->title ?? $this->slug;
     }
 
+    public function getTitle(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'en');
+        return $translation?->title ?? $this->slug;
+    }
+
     public function getExcerptAttribute(): ?string
     {
         return $this->translation()?->excerpt;
     }
 
+    public function getExcerpt(?string $locale = null): ?string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'en');
+        return $translation?->excerpt;
+    }
+
     public function getContentAttribute(): string
     {
         return $this->translation()?->content ?? '';
+    }
+
+    public function getContent(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'en');
+        return $translation?->content ?? '';
     }
 
     public function getMetaDescriptionAttribute(): ?string
