@@ -12,16 +12,24 @@
         border-radius: 50px;
         font-size: 14px;
         font-weight: 600;
-        cursor: pointer;
+        cursor: grab;
         box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
         display: flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.3s ease;
+        transition: box-shadow 0.3s ease, opacity 0.3s ease;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        user-select: none;
+        touch-action: none;
+    }
+    .sanduku-btn:active {
+        cursor: grabbing;
+    }
+    .sanduku-btn.dragging {
+        opacity: 0.8;
+        box-shadow: 0 16px 40px rgba(99, 102, 241, 0.6);
     }
     .sanduku-btn:hover {
-        transform: translateY(-2px);
         box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
     }
     .sanduku-btn i {
@@ -450,7 +458,7 @@
         });
     }
 
-    // Drag and drop support
+    // Drag and drop support for file upload
     const uploadArea = document.getElementById('sandukuUpload');
     if (uploadArea) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -479,4 +487,138 @@
             }
         }, false);
     }
+
+    // =============================================
+    // DRAGGABLE SANDUKU BUTTON (Desktop + Mobile)
+    // =============================================
+    (function() {
+        const btn = document.getElementById('sandukuBtn');
+        if (!btn) return;
+
+        let isDragging = false;
+        let hasMoved = false;
+        let startX, startY, startLeft, startTop;
+        const dragThreshold = 5; // pixels to move before considering it a drag
+
+        // Load saved position from localStorage
+        const savedPos = localStorage.getItem('sandukuPosition');
+        if (savedPos) {
+            try {
+                const pos = JSON.parse(savedPos);
+                btn.style.right = 'auto';
+                btn.style.bottom = 'auto';
+                btn.style.left = pos.left + 'px';
+                btn.style.top = pos.top + 'px';
+                // Ensure button is visible
+                constrainToViewport();
+            } catch (e) {}
+        }
+
+        function constrainToViewport() {
+            const rect = btn.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            let left = parseInt(btn.style.left) || (vw - rect.width - 24);
+            let top = parseInt(btn.style.top) || (vh - rect.height - 24);
+
+            // Keep within viewport
+            left = Math.max(8, Math.min(left, vw - rect.width - 8));
+            top = Math.max(8, Math.min(top, vh - rect.height - 8));
+
+            btn.style.left = left + 'px';
+            btn.style.top = top + 'px';
+            btn.style.right = 'auto';
+            btn.style.bottom = 'auto';
+        }
+
+        function startDrag(e) {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            isDragging = true;
+            hasMoved = false;
+            startX = clientX;
+            startY = clientY;
+
+            const rect = btn.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+
+            btn.classList.add('dragging');
+        }
+
+        function moveDrag(e) {
+            if (!isDragging) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+
+            // Check if moved enough to be considered a drag
+            if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
+                hasMoved = true;
+            }
+
+            if (hasMoved) {
+                e.preventDefault();
+
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const rect = btn.getBoundingClientRect();
+
+                let newLeft = startLeft + deltaX;
+                let newTop = startTop + deltaY;
+
+                // Constrain to viewport
+                newLeft = Math.max(8, Math.min(newLeft, vw - rect.width - 8));
+                newTop = Math.max(8, Math.min(newTop, vh - rect.height - 8));
+
+                btn.style.left = newLeft + 'px';
+                btn.style.top = newTop + 'px';
+                btn.style.right = 'auto';
+                btn.style.bottom = 'auto';
+            }
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+
+            isDragging = false;
+            btn.classList.remove('dragging');
+
+            // Save position
+            if (hasMoved) {
+                const rect = btn.getBoundingClientRect();
+                localStorage.setItem('sandukuPosition', JSON.stringify({
+                    left: rect.left,
+                    top: rect.top
+                }));
+            }
+        }
+
+        // Mouse events
+        btn.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        btn.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', moveDrag, { passive: false });
+        document.addEventListener('touchend', endDrag);
+
+        // Override click to prevent opening modal during drag
+        btn.addEventListener('click', function(e) {
+            if (hasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                hasMoved = false;
+            }
+        }, true);
+
+        // Reposition on window resize
+        window.addEventListener('resize', constrainToViewport);
+    })();
 </script>
