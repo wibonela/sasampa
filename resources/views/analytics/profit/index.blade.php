@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h1 class="page-title">Profit Analytics</h1>
-                <p class="page-subtitle">Comprehensive profit and loss analysis</p>
+                <p class="page-subtitle">Revenue, Cost of Goods, Expenses & Profit Analysis</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('analytics.profit.branches') }}" class="btn btn-outline-primary">
@@ -61,6 +61,74 @@
             </div>
         </div>
 
+        <!-- Profit Breakdown Cards -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Profit Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <!-- Revenue -->
+                    <div class="col-6 col-md-2">
+                        <div class="p-3 rounded" style="background: rgba(0, 122, 255, 0.1);">
+                            <div class="small text-secondary">Revenue</div>
+                            <h5 class="mb-0 text-primary">{{ number_format($totalRevenue / 1000) }}K</h5>
+                            @if($revenueGrowth != 0)
+                                <small class="{{ $revenueGrowth >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <i class="bi {{ $revenueGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                    {{ number_format(abs($revenueGrowth), 1) }}%
+                                </small>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-flex align-items-center">
+                        <i class="bi bi-dash-lg text-secondary"></i>
+                    </div>
+                    <!-- COGS -->
+                    <div class="col-6 col-md-2">
+                        <div class="p-3 rounded" style="background: rgba(255, 149, 0, 0.1);">
+                            <div class="small text-secondary">Cost of Goods</div>
+                            <h5 class="mb-0 text-warning">{{ number_format($cogs / 1000) }}K</h5>
+                            <small class="text-secondary">Product costs</small>
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-flex align-items-center">
+                        <i class="bi bi-arrow-right text-secondary"></i>
+                    </div>
+                    <!-- Gross Profit -->
+                    <div class="col-6 col-md-2">
+                        <div class="p-3 rounded" style="background: {{ $grossProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }};">
+                            <div class="small text-secondary">Gross Profit</div>
+                            <h5 class="mb-0 {{ $grossProfit >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($grossProfit / 1000) }}K</h5>
+                            <small class="{{ $grossMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($grossMargin, 1) }}% margin</small>
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-flex align-items-center">
+                        <i class="bi bi-dash-lg text-secondary"></i>
+                    </div>
+                    <!-- Operating Expenses -->
+                    <div class="col-6 col-md-2">
+                        <div class="p-3 rounded" style="background: rgba(255, 59, 48, 0.1);">
+                            <div class="small text-secondary">Expenses</div>
+                            <h5 class="mb-0 text-danger">{{ number_format($operatingExpenses / 1000) }}K</h5>
+                            <small class="text-secondary">Matumizi</small>
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-flex align-items-center">
+                        <i class="bi bi-arrow-right text-secondary"></i>
+                    </div>
+                    <!-- Net Profit -->
+                    <div class="col-12 col-md-2">
+                        <div class="p-3 rounded" style="background: {{ $netProfit >= 0 ? 'rgba(52, 199, 89, 0.2)' : 'rgba(255, 59, 48, 0.2)' }}; border: 2px solid {{ $netProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};">
+                            <div class="small text-secondary">Net Profit</div>
+                            <h4 class="mb-0 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($netProfit / 1000) }}K</h4>
+                            <small class="{{ $netMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($netMargin, 1) }}% margin</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Key Metrics -->
         <div class="row g-3 mb-4">
             <!-- Net Profit - Main Card -->
@@ -75,10 +143,10 @@
                         </h2>
                         <p class="text-secondary mb-2">Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}</p>
                         <div class="d-flex justify-content-center align-items-center gap-2">
-                            @if($profitGrowth != 0)
-                                <span class="badge {{ $profitGrowth >= 0 ? 'bg-success' : 'bg-danger' }}">
-                                    <i class="bi {{ $profitGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
-                                    {{ number_format(abs($profitGrowth), 1) }}%
+                            @if($netProfitGrowth != 0)
+                                <span class="badge {{ $netProfitGrowth >= 0 ? 'bg-success' : 'bg-danger' }}">
+                                    <i class="bi {{ $netProfitGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                    {{ number_format(abs($netProfitGrowth), 1) }}%
                                 </span>
                                 <small class="text-secondary">vs previous period</small>
                             @endif
@@ -87,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- Total Sales -->
+            <!-- Total Revenue -->
             <div class="col-6 col-md-4">
                 <div class="card h-100">
                     <div class="card-body py-3">
@@ -96,17 +164,17 @@
                                 <i class="bi bi-graph-up-arrow" style="font-size: 20px; color: var(--apple-blue);"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="text-secondary small">Total Sales</div>
-                                <h4 class="mb-0">TZS {{ number_format($totalSales) }}</h4>
+                                <div class="text-secondary small">Total Revenue</div>
+                                <h4 class="mb-0">TZS {{ number_format($totalRevenue) }}</h4>
                             </div>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between small">
                             <span class="text-secondary">{{ $transactionCount }} transactions</span>
-                            @if($salesGrowth != 0)
-                                <span class="{{ $salesGrowth >= 0 ? 'text-success' : 'text-danger' }}">
-                                    <i class="bi {{ $salesGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
-                                    {{ number_format(abs($salesGrowth), 1) }}%
+                            @if($revenueGrowth != 0)
+                                <span class="{{ $revenueGrowth >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <i class="bi {{ $revenueGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                    {{ number_format(abs($revenueGrowth), 1) }}%
                                 </span>
                             @endif
                         </div>
@@ -114,26 +182,26 @@
                 </div>
             </div>
 
-            <!-- Total Expenses -->
+            <!-- Gross Profit -->
             <div class="col-6 col-md-4">
                 <div class="card h-100">
                     <div class="card-body py-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 59, 48, 0.1); display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-wallet2" style="font-size: 20px; color: var(--apple-red);"></i>
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(52, 199, 89, 0.1); display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-cash-stack" style="font-size: 20px; color: var(--apple-green);"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="text-secondary small">Total Expenses</div>
-                                <h4 class="mb-0">TZS {{ number_format($totalExpenses) }}</h4>
+                                <div class="text-secondary small">Gross Profit</div>
+                                <h4 class="mb-0 {{ $grossProfit >= 0 ? 'text-success' : 'text-danger' }}">TZS {{ number_format($grossProfit) }}</h4>
                             </div>
                         </div>
                         <hr class="my-2">
                         <div class="d-flex justify-content-between small">
-                            <span class="text-secondary">{{ $expenseCount }} records</span>
-                            @if($expenseGrowth != 0)
-                                <span class="{{ $expenseGrowth <= 0 ? 'text-success' : 'text-danger' }}">
-                                    <i class="bi {{ $expenseGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
-                                    {{ number_format(abs($expenseGrowth), 1) }}%
+                            <span class="text-secondary">{{ number_format($grossMargin, 1) }}% margin</span>
+                            @if($grossProfitGrowth != 0)
+                                <span class="{{ $grossProfitGrowth >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <i class="bi {{ $grossProfitGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                                    {{ number_format(abs($grossProfitGrowth), 1) }}%
                                 </span>
                             @endif
                         </div>
@@ -147,8 +215,16 @@
             <div class="col-6 col-md-3">
                 <div class="card">
                     <div class="card-body py-3 text-center">
-                        <div class="text-secondary small mb-1">Profit Margin</div>
-                        <h4 class="mb-0 {{ $profitMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($profitMargin, 1) }}%</h4>
+                        <div class="text-secondary small mb-1">Cost of Goods Sold</div>
+                        <h4 class="mb-0 text-warning">TZS {{ number_format($cogs) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card">
+                    <div class="card-body py-3 text-center">
+                        <div class="text-secondary small mb-1">Operating Expenses</div>
+                        <h4 class="mb-0 text-danger">TZS {{ number_format($operatingExpenses) }}</h4>
                     </div>
                 </div>
             </div>
@@ -164,15 +240,7 @@
                 <div class="card">
                     <div class="card-body py-3 text-center">
                         <div class="text-secondary small mb-1">Profitable Days</div>
-                        <h4 class="mb-0 text-success">{{ $performanceData['profitable_days'] ?? 0 }}</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card">
-                    <div class="card-body py-3 text-center">
-                        <div class="text-secondary small mb-1">Loss Days</div>
-                        <h4 class="mb-0 text-danger">{{ $performanceData['loss_days'] ?? 0 }}</h4>
+                        <h4 class="mb-0 text-success">{{ $performanceData['profitable_days'] ?? 0 }} / {{ $performanceData['total_days'] ?? 0 }}</h4>
                     </div>
                 </div>
             </div>
@@ -183,7 +251,7 @@
             <div class="col-md-8">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Profit Trend</h5>
+                        <h5 class="mb-0">Daily Breakdown</h5>
                         <small class="text-secondary">{{ \Carbon\Carbon::parse($dateFrom)->format('d M') }} - {{ \Carbon\Carbon::parse($dateTo)->format('d M Y') }}</small>
                     </div>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -226,7 +294,7 @@
                     </div>
                     <div class="card-body">
                         @forelse($topExpenseCategories as $category)
-                            @php $pct = $totalExpenses > 0 ? ($category->total / $totalExpenses) * 100 : 0; @endphp
+                            @php $pct = $operatingExpenses > 0 ? ($category->total / $operatingExpenses) * 100 : 0; @endphp
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="small">{{ $category->category }}</span>

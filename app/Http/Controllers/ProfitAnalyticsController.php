@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Expense;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,23 +45,44 @@ class ProfitAnalyticsController extends Controller
         }
 
         // Current period metrics
-        $totalSales = (clone $salesQuery)->sum('total');
-        $totalExpenses = (clone $expenseQuery)->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
-        $netProfit = $totalSales - $totalExpenses;
-        $profitMargin = $totalSales > 0 ? ($netProfit / $totalSales) * 100 : 0;
+        $totalRevenue = (clone $salesQuery)->sum('total');
         $transactionCount = (clone $salesQuery)->count();
+
+        // Calculate COGS from transaction items
+        $transactionIds = (clone $salesQuery)->pluck('id');
+        $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
+
+        // Gross Profit = Revenue - COGS
+        $grossProfit = $totalRevenue - $cogs;
+        $grossMargin = $totalRevenue > 0 ? ($grossProfit / $totalRevenue) * 100 : 0;
+
+        // Operating Expenses (Matumizi)
+        $operatingExpenses = (clone $expenseQuery)->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
         $expenseCount = (clone $expenseQuery)->count();
-        $avgTransactionValue = $transactionCount > 0 ? $totalSales / $transactionCount : 0;
+
+        // Net Profit = Gross Profit - Operating Expenses
+        $netProfit = $grossProfit - $operatingExpenses;
+        $netMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
+
+        $avgTransactionValue = $transactionCount > 0 ? $totalRevenue / $transactionCount : 0;
 
         // Previous period metrics for comparison
-        $prevSales = (clone $prevSalesQuery)->sum('total');
+        $prevRevenue = (clone $prevSalesQuery)->sum('total');
+        $prevTransactionIds = (clone $prevSalesQuery)->pluck('id');
+        $prevCogs = TransactionItem::whereIn('transaction_id', $prevTransactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
+        $prevGrossProfit = $prevRevenue - $prevCogs;
         $prevExpenses = (clone $prevExpenseQuery)->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
-        $prevProfit = $prevSales - $prevExpenses;
+        $prevNetProfit = $prevGrossProfit - $prevExpenses;
 
         // Calculate growth percentages
-        $salesGrowth = $prevSales > 0 ? (($totalSales - $prevSales) / $prevSales) * 100 : ($totalSales > 0 ? 100 : 0);
-        $expenseGrowth = $prevExpenses > 0 ? (($totalExpenses - $prevExpenses) / $prevExpenses) * 100 : ($totalExpenses > 0 ? 100 : 0);
-        $profitGrowth = $prevProfit != 0 ? (($netProfit - $prevProfit) / abs($prevProfit)) * 100 : ($netProfit > 0 ? 100 : ($netProfit < 0 ? -100 : 0));
+        $revenueGrowth = $prevRevenue > 0 ? (($totalRevenue - $prevRevenue) / $prevRevenue) * 100 : ($totalRevenue > 0 ? 100 : 0);
+        $grossProfitGrowth = $prevGrossProfit != 0 ? (($grossProfit - $prevGrossProfit) / abs($prevGrossProfit)) * 100 : ($grossProfit > 0 ? 100 : 0);
+        $expenseGrowth = $prevExpenses > 0 ? (($operatingExpenses - $prevExpenses) / $prevExpenses) * 100 : ($operatingExpenses > 0 ? 100 : 0);
+        $netProfitGrowth = $prevNetProfit != 0 ? (($netProfit - $prevNetProfit) / abs($prevNetProfit)) * 100 : ($netProfit > 0 ? 100 : ($netProfit < 0 ? -100 : 0));
 
         // Daily/Weekly/Monthly trend data
         $trendData = $this->getTrendData($dateFrom, $dateTo, $period, $branchId);
@@ -86,19 +108,24 @@ class ProfitAnalyticsController extends Controller
             'period',
             'dateFrom',
             'dateTo',
-            'totalSales',
-            'totalExpenses',
+            'totalRevenue',
+            'cogs',
+            'grossProfit',
+            'grossMargin',
+            'operatingExpenses',
             'netProfit',
-            'profitMargin',
+            'netMargin',
             'transactionCount',
             'expenseCount',
             'avgTransactionValue',
-            'salesGrowth',
+            'revenueGrowth',
+            'grossProfitGrowth',
             'expenseGrowth',
-            'profitGrowth',
-            'prevSales',
+            'netProfitGrowth',
+            'prevRevenue',
+            'prevGrossProfit',
             'prevExpenses',
-            'prevProfit',
+            'prevNetProfit',
             'trendData',
             'topExpenseCategories',
             'paymentBreakdown',
