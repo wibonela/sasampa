@@ -18,6 +18,7 @@ class TransactionItem extends Model
         'product_name',
         'quantity',
         'unit_price',
+        'cost_price',
         'tax_rate',
         'tax_amount',
         'subtotal',
@@ -25,10 +26,16 @@ class TransactionItem extends Model
 
     protected $casts = [
         'unit_price' => 'decimal:2',
+        'cost_price' => 'decimal:2',
         'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'subtotal' => 'decimal:2',
     ];
+
+    public function getGrossProfitAttribute(): float
+    {
+        return ($this->unit_price - $this->cost_price) * $this->quantity;
+    }
 
     public function transaction(): BelongsTo
     {
