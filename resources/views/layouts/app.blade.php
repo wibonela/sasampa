@@ -164,6 +164,24 @@
                 </div>
 
                 <div class="nav-section">
+                    <p class="nav-section-title">Matumizi (Expenses)</p>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('expenses.*') && !request()->routeIs('expenses.summary') ? 'active' : '' }}" href="{{ route('expenses.index') }}">
+                                <i class="bi bi-wallet2"></i>
+                                Expenses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('expense-categories.*') ? 'active' : '' }}" href="{{ route('expense-categories.index') }}">
+                                <i class="bi bi-folder"></i>
+                                Categories
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
                     <p class="nav-section-title">Reports</p>
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -176,6 +194,30 @@
                             <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                                 <i class="bi bi-bar-chart"></i>
                                 Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <p class="nav-section-title">Analytics</p>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('analytics.profit') && !request()->routeIs('analytics.profit.*') ? 'active' : '' }}" href="{{ route('analytics.profit') }}">
+                                <i class="bi bi-calculator"></i>
+                                Profit Analysis
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('analytics.profit.branches') ? 'active' : '' }}" href="{{ route('analytics.profit.branches') }}">
+                                <i class="bi bi-building"></i>
+                                By Branch
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('analytics.profit.trends') ? 'active' : '' }}" href="{{ route('analytics.profit.trends') }}">
+                                <i class="bi bi-graph-up"></i>
+                                Trends
                             </a>
                         </li>
                     </ul>

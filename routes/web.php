@@ -14,6 +14,9 @@ use App\Http\Controllers\BranchSwitchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CompanyRegistrationController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ProfitAnalyticsController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
@@ -241,6 +244,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
         Route::get('/reports/products', [ReportController::class, 'products'])->name('reports.products');
         Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+        Route::get('/reports/profit', [ReportController::class, 'profit'])->name('reports.profit');
+
+        // Expenses (Matumizi)
+        Route::resource('expenses', ExpenseController::class);
+        Route::get('/expenses-summary', [ExpenseController::class, 'summary'])->name('expenses.summary');
+        Route::resource('expense-categories', ExpenseCategoryController::class)->except(['show']);
+
+        // Profit Analytics
+        Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('/profit', [ProfitAnalyticsController::class, 'index'])->name('profit');
+            Route::get('/profit/branches', [ProfitAnalyticsController::class, 'byBranch'])->name('profit.branches');
+            Route::get('/profit/trends', [ProfitAnalyticsController::class, 'trends'])->name('profit.trends');
+        });
 
         // Settings (company owner only)
         Route::middleware('permission:manage_settings')->group(function () {
