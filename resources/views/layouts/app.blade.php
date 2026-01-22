@@ -97,6 +97,25 @@
                                 @endif
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                <i class="bi bi-person-gear"></i>
+                                User Management
+                                @php
+                                    $usersNeedingAttention = \App\Models\User::whereNotNull('company_id')
+                                        ->where(function($q) {
+                                            $q->whereNull('email_verified_at')
+                                              ->orWhere(function($q2) {
+                                                  $q2->whereNotNull('invitation_token')
+                                                     ->whereNull('invitation_accepted_at');
+                                              });
+                                        })->count();
+                                @endphp
+                                @if($usersNeedingAttention > 0)
+                                    <span class="badge bg-warning">{{ $usersNeedingAttention }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
