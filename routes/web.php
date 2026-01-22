@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminSandukuController;
+use App\Http\Controllers\Admin\AdminUserManagementController;
 use App\Http\Controllers\Admin\CompanyManagementController;
 use App\Http\Controllers\Admin\AdminUserLimitRequestController;
 use App\Http\Controllers\Admin\DocumentationArticleController;
@@ -154,6 +155,19 @@ Route::middleware('auth')->group(function () {
                 ->name('user-limit-requests.approve');
             Route::post('/user-limit-requests/{userLimitRequest}/reject', [AdminUserLimitRequestController::class, 'reject'])
                 ->name('user-limit-requests.reject');
+
+            // User Management (Platform Admin)
+            Route::prefix('users')->name('users.')->group(function () {
+                Route::get('/', [AdminUserManagementController::class, 'index'])->name('index');
+                Route::get('/{user}', [AdminUserManagementController::class, 'show'])->name('show');
+                Route::post('/{user}/verify-email', [AdminUserManagementController::class, 'verifyEmail'])->name('verify-email');
+                Route::post('/{user}/resend-verification', [AdminUserManagementController::class, 'resendVerification'])->name('resend-verification');
+                Route::post('/{user}/regenerate-invitation', [AdminUserManagementController::class, 'regenerateInvitation'])->name('regenerate-invitation');
+                Route::post('/{user}/force-accept-invitation', [AdminUserManagementController::class, 'forceAcceptInvitation'])->name('force-accept-invitation');
+                Route::post('/{user}/reset-password', [AdminUserManagementController::class, 'resetPassword'])->name('reset-password');
+                Route::post('/{user}/reset-pin', [AdminUserManagementController::class, 'resetPin'])->name('reset-pin');
+                Route::patch('/{user}/toggle-active', [AdminUserManagementController::class, 'toggleActive'])->name('toggle-active');
+            });
 
             // Documentation Management
             Route::prefix('documentation')->name('documentation.')->group(function () {
