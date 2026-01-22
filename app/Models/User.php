@@ -385,7 +385,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if invitation is expired (older than 7 days)
+     * Check if invitation is expired (older than 2 days)
      */
     public function isInvitationExpired(): bool
     {
@@ -393,7 +393,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        return $this->invitation_sent_at->addDays(7)->isPast();
+        return $this->invitation_sent_at->addDays(2)->isPast();
     }
 
     /**
