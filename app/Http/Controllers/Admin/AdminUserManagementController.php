@@ -5,9 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\UserInvitation;
 use App\Models\Company;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use App\Models\Inventory;
+use App\Models\PinSession;
+use App\Models\Setting;
+use App\Models\StockAdjustment;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
@@ -227,5 +234,97 @@ class AdminUserManagementController extends Controller
 
         $status = $user->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "{$user->name} has been {$status}.");
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        if ($user->isPlatformAdmin()) {
+            abort(404);
+        }
+
+        $userName = $user->name;
+        $isOwner = $user->isCompanyOwner();
+
+        if ($isOwner && $user->company) {
+            // Delete company owner - this deletes the entire company and all related data
+            $companyName = $user->company->name;
+            $company = $user->company;
+
+            DB::transaction(function () use ($company) {
+                // Delete all related data explicitly to ensure clean removal
+                $companyId = $company->id;
+
+                // Delete transactions and their items
+                $company->transactions()->each(function ($transaction) {
+                    $transaction->items()->delete();
+                });
+                $company->transactions()->delete();
+
+                // Delete stock adjustments
+                StockAdjustment::where('company_id', $companyId)->delete();
+
+                // Delete inventory
+                Inventory::where('company_id', $companyId)->delete();
+
+                // Delete products
+                $company->products()->delete();
+
+                // Delete categories
+                $company->categories()->delete();
+
+                // Delete expenses
+                Expense::where('company_id', $companyId)->delete();
+
+                // Delete expense categories
+                ExpenseCategory::where('company_id', $companyId)->delete();
+
+                // Delete settings
+                Setting::where('company_id', $companyId)->delete();
+
+                // Delete PIN sessions
+                PinSession::where('company_id', $companyId)->delete();
+
+                // Delete user limit requests
+                $company->userLimitRequests()->delete();
+
+                // Delete branches (detach users first)
+                $company->branches()->each(function ($branch) {
+                    $branch->users()->detach();
+                });
+                $company->branches()->delete();
+
+                // Delete all users permissions first
+                $company->users()->each(function ($user) {
+                    $user->permissions()->detach();
+                });
+
+                // Delete all users
+                $company->users()->delete();
+
+                // Finally delete the company
+                $company->delete();
+            });
+
+            return redirect()->route('admin.users.index')
+                ->with('success', "Company '{$companyName}' and all its data (including user {$userName}) have been permanently deleted.");
+        }
+
+        // Regular user (cashier) - just delete the user
+        DB::transaction(function () use ($user) {
+            // Detach from branches
+            $user->branches()->detach();
+
+            // Delete user's permissions
+            $user->permissions()->detach();
+
+            // Delete PIN sessions
+            $user->pinSessions()->delete();
+
+            // Delete the user
+            $user->delete();
+        });
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "User '{$userName}' has been permanently deleted.");
     }
 }
