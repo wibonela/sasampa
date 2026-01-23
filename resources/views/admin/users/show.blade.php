@@ -410,6 +410,29 @@
                             <a href="mailto:{{ $user->email }}" class="btn btn-outline-primary btn-sm w-100">
                                 <i class="bi bi-envelope me-2"></i>Send Email
                             </a>
+
+                            <hr class="my-2">
+
+                            <!-- Delete User -->
+                            @if($user->isCompanyOwner())
+                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                      data-confirm='{"title":"Delete Company & Owner","message":"WARNING: This will permanently delete the company \"{{ $user->company?->name }}\" and ALL its data including:\n\n• All users ({{ $user->company?->users()->count() ?? 0 }} users)\n• All products\n• All transactions\n• All branches\n• All categories\n\nThis action CANNOT be undone!","type":"danger","confirmText":"Delete Everything"}'>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                        <i class="bi bi-trash me-2"></i>Delete Company & Owner
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                      data-confirm='{"title":"Delete User","message":"Are you sure you want to permanently delete {{ $user->name }}? This action cannot be undone.","type":"danger","confirmText":"Delete User"}'>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                        <i class="bi bi-trash me-2"></i>Delete User
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>

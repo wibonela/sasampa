@@ -167,6 +167,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{user}/reset-password', [AdminUserManagementController::class, 'resetPassword'])->name('reset-password');
                 Route::post('/{user}/reset-pin', [AdminUserManagementController::class, 'resetPin'])->name('reset-pin');
                 Route::patch('/{user}/toggle-active', [AdminUserManagementController::class, 'toggleActive'])->name('toggle-active');
+                Route::delete('/{user}', [AdminUserManagementController::class, 'destroy'])->name('destroy');
             });
 
             // Documentation Management
