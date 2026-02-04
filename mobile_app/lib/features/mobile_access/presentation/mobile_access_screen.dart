@@ -353,27 +353,47 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextFormField(
-          controller: _reasonController,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Reason for Request',
-            hintText: 'Explain why you need mobile access...',
-            alignLabelWithHint: true,
+        // Reason field with border
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray4),
+          ),
+          child: TextFormField(
+            controller: _reasonController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Reason for Request',
+              hintText: 'Explain why you need mobile access...',
+              alignLabelWithHint: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.all(16),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _devicesController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Expected Number of Devices',
-            hintText: 'How many devices will use the app?',
+        const SizedBox(height: 20),
+        // Devices field with border
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray4),
+          ),
+          child: TextFormField(
+            controller: _devicesController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Expected Number of Devices',
+              hintText: 'How many devices will use the app?',
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.all(16),
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
         SizedBox(
-          height: 50,
+          height: 54,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _requestAccess,
             child: _isLoading
