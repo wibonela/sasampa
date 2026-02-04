@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/theme.dart';
 import 'app/theme/colors.dart';
 import 'core/providers.dart';
+import 'core/storage/secure_storage.dart';
+
+// Global storage instance to avoid reinitialization issues
+late final SecureStorage globalStorage;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize storage first
+  try {
+    await SharedPreferences.getInstance();
+    globalStorage = SecureStorage();
+    await globalStorage.init();
+    print('MAIN: Storage initialized successfully');
+  } catch (e) {
+    print('MAIN: Storage init error - $e');
+  }
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
