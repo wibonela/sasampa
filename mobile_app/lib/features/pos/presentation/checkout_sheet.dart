@@ -66,14 +66,29 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       ref.read(cartProvider.notifier).clearCart();
 
       if (mounted) {
-        Navigator.pop(context);
-
-        // Show success dialog
-        showDialog(
+        // Show success dialog first (while sheet is still mounted)
+        // Returns true if user wants to see receipt, false otherwise
+        // ignore: use_build_context_synchronously
+        final showReceipt = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => _buildSuccessDialog(data['data']),
+          builder: (dialogContext) => _buildSuccessDialog(dialogContext, data['data']),
         );
+
+        // If user wants to see receipt, show it before closing
+        if (showReceipt == true && mounted) {
+          // ignore: use_build_context_synchronously
+          await showDialog(
+            context: context,
+            builder: (ctx) => _buildReceiptDialog(ctx, data['data']),
+          );
+        }
+
+        // Then close the sheet
+        if (mounted) {
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       setState(() {
@@ -81,6 +96,287 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
         _isProcessing = false;
       });
     }
+  }
+
+  void _showReceiptPreview(Map<String, dynamic> transaction) {
+    final items = transaction['items'] as List? ?? [];
+    final authState = ref.read(authProvider);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: double.maxFinite,
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Text(
+                  authState.user?.company?.name ?? 'SASAMPA POS',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const Text('------------------------'),
+                const SizedBox(height: 8),
+                Text(
+                  transaction['transaction_number'] ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  transaction['created_at']?.toString().substring(0, 19) ?? '',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                if (transaction['customer_name'] != null) ...[
+                  const SizedBox(height: 4),
+                  Text('Customer: ${transaction['customer_name']}'),
+                ],
+                if (transaction['customer_tin'] != null) ...[
+                  Text('TIN: ${transaction['customer_tin']}'),
+                ],
+                const Text('------------------------'),
+                const SizedBox(height: 8),
+
+                // Items
+                ...items.map((item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${item['product_name']} x${item['quantity']}',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      Text(
+                        _currencyFormat.format((item['subtotal'] ?? 0).toDouble()),
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
+                )),
+
+                const Text('------------------------'),
+                const SizedBox(height: 8),
+
+                // Totals
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Subtotal:'),
+                    Text(_currencyFormat.format((transaction['subtotal'] ?? 0).toDouble())),
+                  ],
+                ),
+                if ((transaction['tax_amount'] ?? 0) > 0)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Tax:'),
+                      Text(_currencyFormat.format((transaction['tax_amount'] ?? 0).toDouble())),
+                    ],
+                  ),
+                if ((transaction['discount_amount'] ?? 0) > 0)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Discount:'),
+                      Text('-${_currencyFormat.format((transaction['discount_amount'] ?? 0).toDouble())}'),
+                    ],
+                  ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('TOTAL:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      _currencyFormat.format((transaction['total'] ?? 0).toDouble()),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Amount Paid:'),
+                    Text(_currencyFormat.format((transaction['amount_paid'] ?? 0).toDouble())),
+                  ],
+                ),
+                if ((transaction['change_given'] ?? 0) > 0)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Change:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        _currencyFormat.format((transaction['change_given'] ?? 0).toDouble()),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+
+                const SizedBox(height: 16),
+                const Text(
+                  'Thank you for your purchase!',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+                const SizedBox(height: 16),
+
+                // Close button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReceiptDialog(BuildContext dialogContext, Map<String, dynamic> transaction) {
+    final items = transaction['items'] as List? ?? [];
+    final authState = ref.read(authProvider);
+
+    return Dialog(
+      child: Container(
+        width: double.maxFinite,
+        padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Text(
+                authState.user?.company?.name ?? 'SASAMPA POS',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Text('------------------------'),
+              const SizedBox(height: 8),
+              Text(
+                transaction['transaction_number'] ?? '',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                transaction['created_at']?.toString().substring(0, 19) ?? '',
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              if (transaction['customer_name'] != null) ...[
+                const SizedBox(height: 4),
+                Text('Customer: ${transaction['customer_name']}'),
+              ],
+              if (transaction['customer_tin'] != null) ...[
+                Text('TIN: ${transaction['customer_tin']}'),
+              ],
+              const Text('------------------------'),
+              const SizedBox(height: 8),
+
+              // Items
+              ...items.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${item['product_name']} x${item['quantity']}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                    Text(
+                      _currencyFormat.format((item['subtotal'] ?? 0).toDouble()),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ),
+              )),
+
+              const Text('------------------------'),
+              const SizedBox(height: 8),
+
+              // Totals
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Subtotal:'),
+                  Text(_currencyFormat.format((transaction['subtotal'] ?? 0).toDouble())),
+                ],
+              ),
+              if ((transaction['tax_amount'] ?? 0) > 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Tax:'),
+                    Text(_currencyFormat.format((transaction['tax_amount'] ?? 0).toDouble())),
+                  ],
+                ),
+              if ((transaction['discount_amount'] ?? 0) > 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Discount:'),
+                    Text('-${_currencyFormat.format((transaction['discount_amount'] ?? 0).toDouble())}'),
+                  ],
+                ),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('TOTAL:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    _currencyFormat.format((transaction['total'] ?? 0).toDouble()),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Amount Paid:'),
+                  Text(_currencyFormat.format((transaction['amount_paid'] ?? 0).toDouble())),
+                ],
+              ),
+              if ((transaction['change_given'] ?? 0) > 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Change:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      _currencyFormat.format((transaction['change_given'] ?? 0).toDouble()),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+
+              const SizedBox(height: 16),
+              const Text(
+                'Thank you for your purchase!',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              const SizedBox(height: 16),
+
+              // Close button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showQuantityDialog(int productId, int currentQuantity) {
@@ -117,7 +413,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     );
   }
 
-  Widget _buildSuccessDialog(Map<String, dynamic> transaction) {
+  Widget _buildSuccessDialog(BuildContext dialogContext, Map<String, dynamic> transaction) {
     final change = (transaction['change_given'] ?? 0).toDouble();
 
     return Dialog(
@@ -199,19 +495,16 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pop(dialogContext, false),
                     child: const Text('Close'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      // TODO: Print receipt
-                    },
-                    icon: const Icon(Icons.print, size: 18),
-                    label: const Text('Print'),
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    icon: const Icon(Icons.receipt_long, size: 18),
+                    label: const Text('Receipt'),
                   ),
                 ),
               ],
