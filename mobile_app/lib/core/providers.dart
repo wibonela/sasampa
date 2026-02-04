@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'network/api_client.dart';
 import 'storage/secure_storage.dart';
 import '../shared/models/user.dart';
@@ -65,6 +67,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await _storage.saveToken(data['token']);
       state = AuthState(user: user, mobileAccess: mobileAccess);
+
+      // Auto-register device if mobile access is approved
+      if (mobileAccess.canUseMobile) {
+        await _autoRegisterDevice();
+      }
+
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _getErrorMessage(e));
@@ -83,10 +91,49 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await _storage.saveToken(data['token']);
       state = AuthState(user: user, mobileAccess: mobileAccess);
+
+      // Auto-register device if mobile access is approved
+      if (mobileAccess.canUseMobile) {
+        await _autoRegisterDevice();
+      }
+
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _getErrorMessage(e));
       return false;
+    }
+  }
+
+  Future<void> _autoRegisterDevice() async {
+    try {
+      final deviceId = await _storage.getOrCreateDeviceId();
+      final deviceInfo = DeviceInfoPlugin();
+
+      String deviceName = 'Unknown Device';
+      String deviceModel = '';
+      String osVersion = '';
+
+      if (Platform.isIOS) {
+        final info = await deviceInfo.iosInfo;
+        deviceName = info.name;
+        deviceModel = info.model;
+        osVersion = 'iOS ${info.systemVersion}';
+      } else if (Platform.isAndroid) {
+        final info = await deviceInfo.androidInfo;
+        deviceName = '${info.brand} ${info.model}';
+        deviceModel = info.model;
+        osVersion = 'Android ${info.version.release}';
+      }
+
+      await _api.registerDevice(
+        deviceIdentifier: deviceId,
+        deviceName: deviceName,
+        deviceModel: deviceModel,
+        osVersion: osVersion,
+        appVersion: '1.0.0',
+      );
+    } catch (e) {
+      // Silently fail - device registration is best effort
     }
   }
 
