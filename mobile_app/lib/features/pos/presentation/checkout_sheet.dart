@@ -15,9 +15,8 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   final _customerNameController = TextEditingController();
   final _customerPhoneController = TextEditingController();
   final _amountPaidController = TextEditingController();
-  final _notesController = TextEditingController();
+  final _tinController = TextEditingController();
 
-  String _paymentMethod = 'cash';
   bool _isProcessing = false;
   String? _error;
 
@@ -28,24 +27,15 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     _customerNameController.dispose();
     _customerPhoneController.dispose();
     _amountPaidController.dispose();
-    _notesController.dispose();
+    _tinController.dispose();
     super.dispose();
   }
 
   Future<void> _processCheckout() async {
     final cart = ref.read(cartProvider);
 
-    // Validate amount for cash
-    double amountPaid = double.tryParse(_amountPaidController.text) ?? 0;
-    if (_paymentMethod == 'cash' && amountPaid < cart.total) {
-      setState(() => _error = 'Amount paid must be at least ${_currencyFormat.format(cart.total)}');
-      return;
-    }
-
-    // For non-cash, amount equals total
-    if (_paymentMethod != 'cash') {
-      amountPaid = cart.total;
-    }
+    // Get amount paid (no minimum validation - allow any amount)
+    double amountPaid = double.tryParse(_amountPaidController.text) ?? cart.total;
 
     setState(() {
       _isProcessing = true;
@@ -56,7 +46,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       final api = ref.read(apiClientProvider);
       final response = await api.checkout(
         items: cart.toCheckoutItems(),
-        paymentMethod: _paymentMethod,
+        paymentMethod: 'cash',
         amountPaid: amountPaid,
         customerName: _customerNameController.text.trim().isNotEmpty
             ? _customerNameController.text.trim()
@@ -64,10 +54,10 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
         customerPhone: _customerPhoneController.text.trim().isNotEmpty
             ? _customerPhoneController.text.trim()
             : null,
-        discountAmount: cart.discountAmount > 0 ? cart.discountAmount : null,
-        notes: _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
+        customerTin: _tinController.text.trim().isNotEmpty
+            ? _tinController.text.trim()
             : null,
+        discountAmount: cart.discountAmount > 0 ? cart.discountAmount : null,
       );
 
       final data = response.data;
@@ -91,6 +81,40 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
         _isProcessing = false;
       });
     }
+  }
+
+  void _showQuantityDialog(int productId, int currentQuantity) {
+    final controller = TextEditingController(text: '$currentQuantity');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter Quantity'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Quantity',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final qty = int.tryParse(controller.text) ?? currentQuantity;
+              if (qty > 0) {
+                ref.read(cartProvider.notifier).updateQuantity(productId, qty);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSuccessDialog(Map<String, dynamic> transaction) {
@@ -301,9 +325,22 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                                   iconSize: 20,
                                   visualDensity: VisualDensity.compact,
                                 ),
-                                Text(
-                                  '${item.quantity}',
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                GestureDetector(
+                                  onTap: () => _showQuantityDialog(item.product.id, item.quantity),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '${item.quantity}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.add_circle_outline),
@@ -391,37 +428,15 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 
                   const SizedBox(height: 24),
 
-                  // Payment Method
-                  const Text(
-                    'Payment Method',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                  // Amount Paid
+                  TextField(
+                    controller: _amountPaidController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Amount Paid',
+                      prefixText: 'TZS ',
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildPaymentOption('cash', Icons.payments, 'Cash'),
-                      const SizedBox(width: 8),
-                      _buildPaymentOption('card', Icons.credit_card, 'Card'),
-                      const SizedBox(width: 8),
-                      _buildPaymentOption('mobile', Icons.phone_android, 'Mobile'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Amount Paid (for cash)
-                  if (_paymentMethod == 'cash')
-                    TextField(
-                      controller: _amountPaidController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Amount Paid',
-                        prefixText: 'TZS ',
-                      ),
-                    ),
 
                   const SizedBox(height: 16),
 
@@ -448,11 +463,11 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                       ),
                       const SizedBox(height: 12),
                       TextField(
-                        controller: _notesController,
-                        maxLines: 2,
+                        controller: _tinController,
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          labelText: 'Notes',
-                          prefixIcon: Icon(Icons.note_outlined),
+                          labelText: 'TIN Number',
+                          prefixIcon: Icon(Icons.badge_outlined),
                         ),
                       ),
                     ],
@@ -503,37 +518,4 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     );
   }
 
-  Widget _buildPaymentOption(String value, IconData icon, String label) {
-    final isSelected = _paymentMethod == value;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _paymentMethod = value),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : AppColors.gray6,
-            borderRadius: BorderRadius.circular(10),
-            border: isSelected ? null : Border.all(color: AppColors.gray4),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

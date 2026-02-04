@@ -6,10 +6,12 @@ import 'storage/secure_storage.dart';
 import '../shared/models/user.dart';
 import '../shared/models/product.dart';
 import '../shared/models/cart.dart';
+import '../main.dart' show globalStorage;
 
-// Storage
+// Storage - uses the global instance initialized in main.dart
 final secureStorageProvider = Provider<SecureStorage>((ref) {
-  return SecureStorage();
+  // Import globalStorage from main.dart
+  return globalStorage;
 });
 
 // API Client
