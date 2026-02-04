@@ -20,7 +20,18 @@ class _POSScreenState extends ConsumerState<POSScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    // Load data after frame to avoid Riverpod errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDataIfNeeded();
+    });
+  }
+
+  Future<void> _loadDataIfNeeded() async {
+    final productsState = ref.read(productsProvider);
+    // Only load if products are empty (not already loaded)
+    if (productsState.products.isEmpty) {
+      await _loadData();
+    }
   }
 
   Future<void> _loadData() async {
