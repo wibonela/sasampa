@@ -68,13 +68,6 @@
                     <span>Tax:</span>
                     <span id="cartTax">TZS 0</span>
                 </div>
-                <div class="cart-summary-row">
-                    <span>Discount:</span>
-                    <div class="input-group input-group-sm" style="width: 120px;">
-                        <span class="input-group-text">TZS</span>
-                        <input type="number" class="form-control form-control-sm" id="discountAmount" value="0" min="0">
-                    </div>
-                </div>
                 <div class="cart-summary-row total">
                     <span>Total:</span>
                     <span id="cartTotal">TZS 0</span>
@@ -107,6 +100,20 @@
                     <div class="mb-3">
                         <label class="form-label">Total Amount</label>
                         <div class="h3 text-primary" id="paymentTotal">TZS 0</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Discount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">TZS</span>
+                            <input type="number" class="form-control" id="paymentDiscount" value="0" min="0">
+                        </div>
+                        <small class="text-muted">Enter discount amount if customer pays less</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Amount to Pay</label>
+                        <div class="h3 text-success" id="finalPaymentAmount">TZS 0</div>
                     </div>
 
                     <div class="mb-3">
@@ -383,9 +390,6 @@
             // Global function to add to cart (for onclick backup)
             window.addSelectedToCart = doAddToCart;
 
-            // Discount change
-            document.getElementById('discountAmount').addEventListener('input', renderCart);
-
             function renderCart() {
                 const container = document.getElementById('cartItems');
 
@@ -469,8 +473,7 @@
                     totalItems += item.quantity;
                 });
 
-                const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
-                const total = subtotal + tax - discount;
+                const total = subtotal + tax;
 
                 document.getElementById('cartSubtotal').textContent = 'TZS ' + formatNumber(subtotal);
                 document.getElementById('cartTax').textContent = 'TZS ' + formatNumber(tax);
@@ -483,7 +486,7 @@
 
                 // Update mobile cart bar
                 if (typeof updateMobileCart === 'function') {
-                    updateMobileCart(cart, subtotal, tax, total, discount);
+                    updateMobileCart(cart, subtotal, tax, total, 0);
                 }
             }
 
@@ -491,20 +494,24 @@
             document.getElementById('clearCartBtn').addEventListener('click', function() {
                 if (confirm('Clear all items from cart?')) {
                     cart = [];
-                    document.getElementById('discountAmount').value = 0;
                     renderCart();
                 }
             });
 
             // Open payment modal function (for mobile)
             window.openPaymentModal = function() {
+                // Calculate total without discount
                 const total = cart.reduce((sum, item) => {
                     const itemSubtotal = item.price * item.quantity;
                     return sum + itemSubtotal + (itemSubtotal * item.tax / 100);
-                }, 0) - (parseFloat(document.getElementById('discountAmount').value) || 0);
+                }, 0);
 
+                // Reset discount and show totals
+                document.getElementById('paymentDiscount').value = 0;
                 document.getElementById('paymentTotal').textContent = 'TZS ' + formatNumber(total);
+                document.getElementById('finalPaymentAmount').textContent = 'TZS ' + formatNumber(total);
                 document.getElementById('amountPaid').value = Math.ceil(total);
+                document.getElementById('changeSection').style.display = 'none';
 
                 // Close mobile cart sheet if open
                 document.getElementById('mobileCartBar')?.classList.remove('expanded');
@@ -512,6 +519,23 @@
                 const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
                 modal.show();
             };
+
+            // Handle discount change in payment modal
+            document.getElementById('paymentDiscount').addEventListener('input', function() {
+                const total = cart.reduce((sum, item) => {
+                    const itemSubtotal = item.price * item.quantity;
+                    return sum + itemSubtotal + (itemSubtotal * item.tax / 100);
+                }, 0);
+
+                const discount = parseFloat(this.value) || 0;
+                const finalAmount = Math.max(0, total - discount);
+
+                document.getElementById('finalPaymentAmount').textContent = 'TZS ' + formatNumber(finalAmount);
+                document.getElementById('amountPaid').value = Math.ceil(finalAmount);
+
+                // Trigger change calculation
+                document.getElementById('amountPaid').dispatchEvent(new Event('input'));
+            });
 
             // Pay button (desktop)
             document.getElementById('payBtn').addEventListener('click', function() {
@@ -523,10 +547,12 @@
                 const total = cart.reduce((sum, item) => {
                     const itemSubtotal = item.price * item.quantity;
                     return sum + itemSubtotal + (itemSubtotal * item.tax / 100);
-                }, 0) - (parseFloat(document.getElementById('discountAmount').value) || 0);
+                }, 0);
+                const discount = parseFloat(document.getElementById('paymentDiscount').value) || 0;
+                const finalAmount = Math.max(0, total - discount);
 
                 const paid = parseFloat(this.value) || 0;
-                const change = paid - total;
+                const change = paid - finalAmount;
 
                 if (change >= 0) {
                     document.getElementById('changeSection').style.display = 'block';
@@ -542,7 +568,7 @@
                 btn.disabled = true;
                 btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
 
-                const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+                const discount = parseFloat(document.getElementById('paymentDiscount').value) || 0;
                 const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
 
                 fetch('{{ route("pos.checkout") }}', {
@@ -581,7 +607,6 @@
 
                         // Reset cart
                         cart = [];
-                        document.getElementById('discountAmount').value = 0;
                         document.getElementById('customerName').value = '';
                         document.getElementById('customerPhone').value = '';
                         document.getElementById('customerTin').value = '';

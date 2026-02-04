@@ -13,10 +13,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     // Role constants
     const ROLE_PLATFORM_ADMIN = 'platform_admin';
@@ -92,6 +93,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function pinSessions(): HasMany
     {
         return $this->hasMany(PinSession::class);
+    }
+
+    public function mobileDevices(): HasMany
+    {
+        return $this->hasMany(MobileDevice::class);
     }
 
     /*

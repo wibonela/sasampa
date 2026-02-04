@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminMobileAccessController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminSandukuController;
 use App\Http\Controllers\Admin\AdminUserManagementController;
@@ -178,6 +179,18 @@ Route::middleware('auth')->group(function () {
                     ->except(['show']);
                 Route::post('articles/{article}/toggle-publish', [DocumentationArticleController::class, 'togglePublish'])
                     ->name('articles.toggle-publish');
+            });
+
+            // Mobile Access Management
+            Route::prefix('mobile-access')->name('mobile-access.')->group(function () {
+                Route::get('/', [AdminMobileAccessController::class, 'index'])->name('index');
+                Route::get('/devices', [AdminMobileAccessController::class, 'devices'])->name('devices');
+                Route::get('/{mobileAppRequest}', [AdminMobileAccessController::class, 'show'])->name('show');
+                Route::post('/{mobileAppRequest}/approve', [AdminMobileAccessController::class, 'approve'])->name('approve');
+                Route::post('/{mobileAppRequest}/reject', [AdminMobileAccessController::class, 'reject'])->name('reject');
+                Route::post('/{mobileAppRequest}/revoke', [AdminMobileAccessController::class, 'revoke'])->name('revoke');
+                Route::post('/devices/{device}/deactivate', [AdminMobileAccessController::class, 'deactivateDevice'])->name('devices.deactivate');
+                Route::post('/devices/{device}/activate', [AdminMobileAccessController::class, 'activateDevice'])->name('devices.activate');
             });
         });
 

@@ -199,10 +199,19 @@ class POSController extends Controller
         $transaction->load('items.product', 'user');
 
         // Calculate dynamic height based on number of items
-        // Base height (header, footer, totals) ~150mm + ~20mm per item
-        $baseHeight = 150;
-        $itemHeight = 20;
+        // Base height (header, footer, totals, margins) + height per item
+        // Being generous to ensure no page breaks
+        $baseHeight = 180; // Header, footer, totals, payment info, margins
+        $itemHeight = 12;  // Per item row
         $totalHeight = $baseHeight + ($transaction->items->count() * $itemHeight);
+
+        // Add extra for discount/tax rows if present
+        if ($transaction->discount_amount > 0) {
+            $totalHeight += 8;
+        }
+        if ($transaction->tax_amount > 0) {
+            $totalHeight += 8;
+        }
 
         // Convert mm to points (1mm = 2.83465 points)
         $widthPoints = 80 * 2.83465;  // 80mm width
@@ -211,6 +220,7 @@ class POSController extends Controller
         $pdf = Pdf::loadView('pos.receipt-pdf', compact('transaction'));
         $pdf->setPaper([0, 0, $widthPoints, $heightPoints], 'portrait');
         $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('dpi', 96);
 
         return $pdf->download('receipt-' . $transaction->transaction_number . '.pdf');
     }

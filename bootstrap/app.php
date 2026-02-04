@@ -9,8 +9,10 @@ use Illuminate\Session\TokenMismatchException;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
@@ -24,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'company.approved' => \App\Http\Middleware\EnsureCompanyApproved::class,
             'platform.admin' => \App\Http\Middleware\PlatformAdmin::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            // Mobile API middleware
+            'mobile.approved' => \App\Http\Middleware\EnsureMobileAccessApproved::class,
+            'device.registered' => \App\Http\Middleware\EnsureDeviceRegistered::class,
+            'device.activity' => \App\Http\Middleware\TrackDeviceActivity::class,
         ]);
 
         // Rate limiting for API routes

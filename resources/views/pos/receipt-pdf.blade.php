@@ -6,28 +6,38 @@
     <title>Receipt - {{ $transaction->transaction_number }}</title>
     <style>
         @page {
-            margin: 10mm;
-            size: 80mm auto;
+            margin: 5mm;
+            size: 80mm 297mm; /* Will be overridden by setPaper */
+        }
+        * {
+            page-break-inside: avoid !important;
+            page-break-before: avoid !important;
+            page-break-after: avoid !important;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: auto !important;
         }
         body {
             font-family: 'DejaVu Sans', sans-serif;
             font-size: 10px;
             line-height: 1.4;
             color: #1a2942;
-            margin: 0;
-            padding: 0;
         }
 
         .receipt {
             width: 100%;
-            max-width: 60mm;
+            max-width: 70mm;
             margin: 0 auto;
+            page-break-inside: avoid;
         }
 
         /* Header */
         .header {
             text-align: center;
             margin-bottom: 10px;
+            page-break-inside: avoid;
         }
         .logo {
             width: 50px;
@@ -63,6 +73,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 5px;
+            page-break-inside: avoid;
         }
         .info-table td {
             padding: 2px 0;
@@ -82,6 +93,7 @@
         .items-table {
             width: 100%;
             border-collapse: collapse;
+            page-break-inside: avoid;
         }
         .items-table th {
             font-size: 9px;
@@ -124,6 +136,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 5px;
+            page-break-inside: avoid;
         }
         .totals-table td {
             padding: 2px 0;
@@ -142,6 +155,7 @@
         .footer {
             text-align: center;
             margin-top: 10px;
+            page-break-inside: avoid;
         }
         .thank-you {
             font-size: 9px;
