@@ -300,9 +300,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
       try {
         final api = ref.read(apiClientProvider);
         final productId = product['product_id'] ?? product['id'];
+        // Map UI type to API type
+        final apiType = adjustmentType == 'add' ? 'received' : 'damaged';
         await api.adjustStock(
           productId,
-          adjustmentType,
+          apiType,
           int.parse(quantityController.text),
           reason,
         );

@@ -401,7 +401,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Profile Card
+          // Profile Card with Company Logo
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -410,26 +410,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      (user?.name.isNotEmpty ?? false)
-                          ? user!.name[0].toUpperCase()
-                          : 'U',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildCompanyLogo(user),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -703,6 +684,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCompanyLogo(dynamic user) {
+    final logoUrl = user?.company?.logo;
+    final companyName = user?.company?.name ?? '';
+    final initial = companyName.isNotEmpty
+        ? companyName[0].toUpperCase()
+        : (user?.name?.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U');
+
+    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
+      return Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.gray5, width: 1),
+          image: DecorationImage(
+            image: NetworkImage(logoUrl.toString()),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
       ),
     );
   }
