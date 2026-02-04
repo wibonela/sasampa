@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/services/receipt_service.dart';
 import '../../../shared/models/transaction.dart';
 
 class TransactionDetailScreen extends ConsumerStatefulWidget {
@@ -81,6 +82,50 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
     }
   }
 
+  Future<void> _printReceipt() async {
+    if (_transaction == null) return;
+
+    try {
+      // Fetch full receipt data from API (includes company logo, etc.)
+      final api = ref.read(apiClientProvider);
+      final response = await api.getReceipt(widget.transactionId);
+      final receiptData = response.data['data'];
+
+      await ReceiptService.printReceiptFromApi(receiptData);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to print receipt'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareReceipt() async {
+    if (_transaction == null) return;
+
+    try {
+      // Fetch full receipt data from API (includes company logo, etc.)
+      final api = ref.read(apiClientProvider);
+      final response = await api.getReceipt(widget.transactionId);
+      final receiptData = response.data['data'];
+
+      await ReceiptService.shareReceiptFromApi(receiptData);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share receipt'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,12 +156,24 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                     ],
                   ),
                 ),
+                const PopupMenuItem(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      Icon(Icons.share_outlined),
+                      SizedBox(width: 8),
+                      Text('Share Receipt'),
+                    ],
+                  ),
+                ),
               ],
-              onSelected: (value) {
+              onSelected: (value) async {
                 if (value == 'void') {
                   _voidTransaction();
                 } else if (value == 'print') {
-                  // TODO: Print receipt
+                  await _printReceipt();
+                } else if (value == 'share') {
+                  await _shareReceipt();
                 }
               },
             ),

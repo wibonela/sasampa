@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'network/api_client.dart';
@@ -127,7 +128,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         osVersion = 'Android ${info.version.release}';
       }
 
-      print('DEVICE_REG: Registering device $deviceId as $deviceName');
+      debugPrint('DEVICE_REG: Registering device $deviceId as $deviceName');
       final response = await _api.registerDevice(
         deviceIdentifier: deviceId,
         deviceName: deviceName,
@@ -135,9 +136,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         osVersion: osVersion,
         appVersion: '1.0.0',
       );
-      print('DEVICE_REG: Success - ${response.data}');
+      debugPrint('DEVICE_REG: Success - ${response.data}');
     } catch (e) {
-      print('DEVICE_REG: Failed - $e');
+      debugPrint('DEVICE_REG: Failed - $e');
       // Continue anyway - device registration is best effort
     }
   }
@@ -173,17 +174,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> checkAuth() async {
     try {
-      print('AUTH_CHECK: Starting');
+      debugPrint('AUTH_CHECK: Starting');
+
+      // Ensure storage is initialized
+      await _storage.init();
+
       final isLoggedIn = await _storage.isLoggedIn();
-      print('AUTH_CHECK: isLoggedIn=$isLoggedIn');
+      debugPrint('AUTH_CHECK: isLoggedIn=$isLoggedIn');
+
       if (isLoggedIn) {
         await refreshUser();
       }
-      print('AUTH_CHECK: Complete');
-    } catch (e) {
-      print('AUTH_CHECK: Error - $e');
-      // On any error, reset to logged out state
-      await _storage.clearAll();
+      debugPrint('AUTH_CHECK: Complete');
+    } catch (e, stack) {
+      debugPrint('AUTH_CHECK: Error - $e');
+      debugPrint('AUTH_CHECK: Stack - $stack');
+      // On any error, reset to logged out state safely
+      try {
+        await _storage.clearAll();
+      } catch (_) {}
       state = AuthState();
     }
   }

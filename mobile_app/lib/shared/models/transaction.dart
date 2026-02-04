@@ -84,6 +84,39 @@ class Transaction {
         return paymentMethod;
     }
   }
+
+  /// Convert to receipt data format for PDF generation
+  Map<String, dynamic> toReceiptData() {
+    return {
+      'id': id,
+      'transaction_number': transactionNumber,
+      'status': status,
+      'subtotal': subtotal,
+      'tax_amount': taxAmount,
+      'discount_amount': discountAmount,
+      'total': total,
+      'payment_method': paymentMethod,
+      'amount_paid': amountPaid,
+      'change_given': changeGiven,
+      'customer_name': customerName,
+      'customer_phone': customerPhone,
+      'customer_tin': customerTin,
+      'notes': notes,
+      'cashier': {'name': cashierName},
+      'branch': branchName,
+      'created_at': createdAt,
+      'items': items.map((item) => {
+        'id': item.id,
+        'product_id': item.productId,
+        'product_name': item.productName,
+        'quantity': item.quantity,
+        'unit_price': item.unitPrice,
+        'tax_rate': item.taxRate,
+        'tax_amount': item.taxAmount,
+        'subtotal': item.subtotal,
+      }).toList(),
+    };
+  }
 }
 
 class TransactionItem {

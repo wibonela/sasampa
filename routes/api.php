@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\InventoryController;
 use App\Http\Controllers\Api\V1\MobileAccessController;
 use App\Http\Controllers\Api\V1\POSController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\SettingsController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +120,35 @@ Route::prefix('v1')->group(function () {
             Route::prefix('reports')->group(function () {
                 Route::get('/dashboard', [ReportController::class, 'dashboard']);
                 Route::get('/sales', [ReportController::class, 'sales']);
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Expenses (Matumizi)
+            |--------------------------------------------------------------------------
+            */
+            Route::prefix('expenses')->group(function () {
+                Route::get('/', [ExpenseController::class, 'index']);
+                Route::get('/today', [ExpenseController::class, 'today']);
+                Route::get('/categories', [ExpenseController::class, 'categories']);
+                Route::post('/categories', [ExpenseController::class, 'storeCategory']);
+                Route::get('/summary', [ExpenseController::class, 'summary']);
+                Route::post('/', [ExpenseController::class, 'store']);
+                Route::get('/{id}', [ExpenseController::class, 'show']);
+                Route::put('/{id}', [ExpenseController::class, 'update']);
+                Route::delete('/{id}', [ExpenseController::class, 'destroy']);
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Store Settings
+            |--------------------------------------------------------------------------
+            */
+            Route::prefix('settings')->group(function () {
+                Route::get('/', [SettingsController::class, 'index']);
+                Route::put('/', [SettingsController::class, 'update']);
+                Route::post('/logo', [SettingsController::class, 'uploadLogo']);
+                Route::delete('/logo', [SettingsController::class, 'removeLogo']);
             });
 
             /*
