@@ -41,12 +41,22 @@ class _SasampaAppState extends ConsumerState<SasampaApp> {
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+    // Use addPostFrameCallback to avoid modifying providers during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeApp();
+    });
   }
 
   Future<void> _initializeApp() async {
-    // Check if user is already logged in
-    await ref.read(authProvider.notifier).checkAuth();
+    try {
+      // Check if user is already logged in (with timeout)
+      await ref.read(authProvider.notifier).checkAuth()
+        .timeout(const Duration(seconds: 10), onTimeout: () {
+          print('AUTH_CHECK: Timeout after 10 seconds');
+        });
+    } catch (e) {
+      print('AUTH_CHECK: Error - $e');
+    }
     if (mounted) {
       setState(() => _isInitializing = false);
     }
