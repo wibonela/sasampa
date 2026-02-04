@@ -108,14 +108,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = AuthState(user: user, mobileAccess: mobileAccess);
     } catch (e) {
-      // If refresh fails, user might need to re-login
+      // If refresh fails, clear token and force re-login
+      await _storage.clearAll();
+      state = AuthState();
     }
   }
 
   Future<void> checkAuth() async {
-    final isLoggedIn = await _storage.isLoggedIn();
-    if (isLoggedIn) {
-      await refreshUser();
+    try {
+      final isLoggedIn = await _storage.isLoggedIn();
+      if (isLoggedIn) {
+        await refreshUser();
+      }
+    } catch (e) {
+      // On any error, reset to logged out state
+      await _storage.clearAll();
+      state = AuthState();
     }
   }
 
