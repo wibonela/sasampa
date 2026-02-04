@@ -150,12 +150,19 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  // Store Logo Section
+                  // Store Logo & Header Section
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primary.withValues(alpha: 0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
                       children: [
@@ -163,37 +170,73 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            color: AppColors.gray6,
-                            borderRadius: BorderRadius.circular(16),
-                            image: _logoUrl != null
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            image: _logoUrl != null && _logoUrl!.isNotEmpty
                                 ? DecorationImage(
                                     image: NetworkImage(_logoUrl!),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
-                          child: _logoUrl == null
-                              ? const Icon(
-                                  Icons.store,
-                                  size: 40,
-                                  color: AppColors.gray3,
+                          child: _logoUrl == null || _logoUrl!.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    _storeNameController.text.isNotEmpty
+                                        ? _storeNameController.text[0].toUpperCase()
+                                        : 'S',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
                                 )
                               : null,
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Store Logo',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 16),
                         Text(
-                          'Logo is managed in web dashboard',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
+                          _storeNameController.text.isNotEmpty
+                              ? _storeNameController.text
+                              : 'Your Store',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (_storeAddressController.text.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            _storeAddressController.text,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Logo managed in web dashboard',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
