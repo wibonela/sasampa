@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -90,6 +91,16 @@ class Company extends Model
     public function userLimitRequests(): HasMany
     {
         return $this->hasMany(UserLimitRequest::class);
+    }
+
+    public function mobileAppRequest(): HasOne
+    {
+        return $this->hasOne(MobileAppRequest::class)->latest();
+    }
+
+    public function mobileDevices(): HasMany
+    {
+        return $this->hasMany(MobileDevice::class);
     }
 
     /*
@@ -219,5 +230,46 @@ class Company extends Model
     public function needsOnboarding(): bool
     {
         return !$this->onboarding_completed;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Access Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Check if company has approved mobile access
+     */
+    public function hasMobileAccess(): bool
+    {
+        $request = $this->mobileAppRequest;
+        return $request && $request->isApproved();
+    }
+
+    /**
+     * Check if company has a pending mobile access request
+     */
+    public function hasPendingMobileRequest(): bool
+    {
+        $request = $this->mobileAppRequest;
+        return $request && $request->isPending();
+    }
+
+    /**
+     * Get mobile access status
+     */
+    public function getMobileAccessStatus(): ?string
+    {
+        $request = $this->mobileAppRequest;
+        return $request?->status;
+    }
+
+    /**
+     * Get active mobile devices count
+     */
+    public function getActiveMobileDevicesCount(): int
+    {
+        return $this->mobileDevices()->active()->count();
     }
 }
