@@ -22,7 +22,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDashboard();
+    // Load data after frame to avoid Riverpod errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDashboard();
+    });
   }
 
   Future<void> _loadDashboard() async {
