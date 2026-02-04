@@ -116,6 +116,16 @@
                                 @endif
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.mobile-access.*') ? 'active' : '' }}" href="{{ route('admin.mobile-access.index') }}">
+                                <i class="bi bi-phone"></i>
+                                Mobile Access
+                                @php $pendingMobileRequests = \App\Models\MobileAppRequest::where('status', 'pending')->count(); @endphp
+                                @if($pendingMobileRequests > 0)
+                                    <span class="badge bg-warning">{{ $pendingMobileRequests }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
