@@ -67,6 +67,11 @@ class Transaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(TransactionItem::class);
