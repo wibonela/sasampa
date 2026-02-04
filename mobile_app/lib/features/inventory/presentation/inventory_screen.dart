@@ -119,14 +119,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                product['name'],
+                product['product_name']?.toString() ?? product['name']?.toString() ?? 'Unknown Product',
                 style: const TextStyle(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
-                'Current Stock: ${product['stock']}',
+                'Current Stock: ${product['quantity'] ?? product['stock'] ?? 0}',
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
@@ -299,8 +299,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
     if (result == true && quantityController.text.isNotEmpty) {
       try {
         final api = ref.read(apiClientProvider);
+        final productId = product['product_id'] ?? product['id'];
         await api.adjustStock(
-          product['id'],
+          productId,
           adjustmentType,
           int.parse(quantityController.text),
           reason,
@@ -487,9 +488,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
   }
 
   Widget _buildProductItem(Map<String, dynamic> product) {
-    final stock = product['stock'] ?? 0;
+    // Handle both inventory API (quantity, product_name) and products API (stock, name)
+    final stock = product['quantity'] ?? product['stock'] ?? 0;
     final isLowStock = product['is_low_stock'] ?? false;
-    final isOutOfStock = stock <= 0;
+    final isOutOfStock = (product['is_out_of_stock'] ?? false) || stock <= 0;
+    final name = product['product_name']?.toString() ?? product['name']?.toString() ?? 'Unknown Product';
+    final sku = product['sku']?.toString() ?? 'N/A';
+    final imageUrl = product['image_url']?.toString();
+    final sellingPrice = product['selling_price'] ?? 0;
 
     Color stockColor = AppColors.success;
     if (isOutOfStock) {
@@ -512,19 +518,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
           decoration: BoxDecoration(
             color: AppColors.gray6,
             borderRadius: BorderRadius.circular(8),
-            image: product['image_url'] != null
+            image: imageUrl != null && imageUrl.isNotEmpty
                 ? DecorationImage(
-                    image: NetworkImage(product['image_url']),
+                    image: NetworkImage(imageUrl),
                     fit: BoxFit.cover,
                   )
                 : null,
           ),
-          child: product['image_url'] == null
+          child: imageUrl == null || imageUrl.isEmpty
               ? const Icon(Icons.inventory_2, color: AppColors.gray3)
               : null,
         ),
         title: Text(
-          product['name'],
+          name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
@@ -532,14 +538,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
           children: [
             const SizedBox(height: 4),
             Text(
-              'SKU: ${product['sku'] ?? 'N/A'}',
+              'SKU: $sku',
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
               ),
             ),
             Text(
-              'TZS ${_currencyFormat.format(product['selling_price'])}',
+              'TZS ${_currencyFormat.format(sellingPrice)}',
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

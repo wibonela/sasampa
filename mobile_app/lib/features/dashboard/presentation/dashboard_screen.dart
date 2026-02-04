@@ -90,26 +90,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ],
                         ),
                       ),
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            (user?.name.isNotEmpty ?? false)
-                                ? user!.name[0].toUpperCase()
-                                : 'U',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ),
+                      _buildCompanyAvatar(user),
                     ],
                   ),
                 ),
@@ -398,6 +379,49 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompanyAvatar(dynamic user) {
+    final logoUrl = user?.company?.logo;
+    final companyName = user?.company?.name ?? '';
+    final userName = user?.name ?? '';
+    final initial = companyName.isNotEmpty
+        ? companyName[0].toUpperCase()
+        : (userName.isNotEmpty ? userName[0].toUpperCase() : 'U');
+
+    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.gray5, width: 1),
+          image: DecorationImage(
+            image: NetworkImage(logoUrl.toString()),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
         ),
       ),
     );
