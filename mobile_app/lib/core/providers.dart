@@ -124,8 +124,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   String _getErrorMessage(dynamic error) {
-    if (error is Exception) {
-      return error.toString().replaceAll('Exception: ', '');
+    // Handle Dio errors
+    if (error.toString().contains('DioException')) {
+      // Check for common error codes
+      if (error.toString().contains('422')) {
+        return 'Invalid email or password. Please try again.';
+      }
+      if (error.toString().contains('401')) {
+        return 'Invalid credentials. Please check your email and password.';
+      }
+      if (error.toString().contains('403')) {
+        return 'Access denied. Your account may be deactivated.';
+      }
+      if (error.toString().contains('404')) {
+        return 'Service not found. Please try again later.';
+      }
+      if (error.toString().contains('500')) {
+        return 'Server error. Please try again later.';
+      }
+      if (error.toString().contains('SocketException') ||
+          error.toString().contains('connection')) {
+        return 'No internet connection. Please check your network.';
+      }
     }
     return 'An error occurred. Please try again.';
   }
