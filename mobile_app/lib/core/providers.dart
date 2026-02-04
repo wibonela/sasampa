@@ -125,15 +125,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
         osVersion = 'Android ${info.version.release}';
       }
 
-      await _api.registerDevice(
+      print('DEVICE_REG: Registering device $deviceId as $deviceName');
+      final response = await _api.registerDevice(
         deviceIdentifier: deviceId,
         deviceName: deviceName,
         deviceModel: deviceModel,
         osVersion: osVersion,
         appVersion: '1.0.0',
       );
+      print('DEVICE_REG: Success - ${response.data}');
     } catch (e) {
-      // Silently fail - device registration is best effort
+      print('DEVICE_REG: Failed - $e');
+      // Continue anyway - device registration is best effort
     }
   }
 
@@ -154,6 +157,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final mobileAccess = MobileAccess.fromJson(data['mobile_access']);
 
       state = AuthState(user: user, mobileAccess: mobileAccess);
+
+      // Auto-register device if mobile access is approved
+      if (mobileAccess.canUseMobile) {
+        await _autoRegisterDevice();
+      }
     } catch (e) {
       // If refresh fails, clear token and force re-login
       await _storage.clearAll();
@@ -163,11 +171,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> checkAuth() async {
     try {
+      print('AUTH_CHECK: Starting');
       final isLoggedIn = await _storage.isLoggedIn();
+      print('AUTH_CHECK: isLoggedIn=$isLoggedIn');
       if (isLoggedIn) {
         await refreshUser();
       }
+      print('AUTH_CHECK: Complete');
     } catch (e) {
+      print('AUTH_CHECK: Error - $e');
       // On any error, reset to logged out state
       await _storage.clearAll();
       state = AuthState();

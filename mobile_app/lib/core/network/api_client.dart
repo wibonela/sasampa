@@ -28,11 +28,9 @@ class ApiClient {
           options.headers['Authorization'] = 'Bearer $token';
         }
 
-        // Add device ID
-        final deviceId = await _storage.getDeviceId();
-        if (deviceId != null) {
-          options.headers['X-Device-ID'] = deviceId;
-        }
+        // Add device ID (create if doesn't exist)
+        final deviceId = await _storage.getOrCreateDeviceId();
+        options.headers['X-Device-ID'] = deviceId;
 
         // Add app version
         options.headers['X-App-Version'] = '1.0.0';
