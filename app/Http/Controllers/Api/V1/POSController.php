@@ -72,10 +72,8 @@ class POSController extends Controller
                 $amountPaid = $validated['amount_paid'];
                 $changeGiven = max(0, $amountPaid - $total);
 
-                // Validate payment amount
-                if ($amountPaid < $total && $validated['payment_method'] === 'cash') {
-                    throw new \Exception("Insufficient payment. Total: " . number_format($total, 2) . ", Paid: " . number_format($amountPaid, 2));
-                }
+                // Note: No payment validation - user can accept any amount
+                // (allows flexibility for verbal discounts, negotiations, etc.)
 
                 // Create transaction
                 $user = $request->user();
