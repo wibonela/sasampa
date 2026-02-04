@@ -62,17 +62,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/images/
-    - assets/icons/
+  # Assets - uncomment when assets are added
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
 
-  fonts:
-    - family: SF Pro Display
-      fonts:
-        - asset: assets/fonts/SF-Pro-Display-Regular.otf
-        - asset: assets/fonts/SF-Pro-Display-Medium.otf
-          weight: 500
-        - asset: assets/fonts/SF-Pro-Display-Semibold.otf
-          weight: 600
-        - asset: assets/fonts/SF-Pro-Display-Bold.otf
-          weight: 700
+  # Using system fonts (SF Pro on iOS, Roboto on Android)
+  # Custom fonts can be added later if needed
