@@ -1,4 +1,6 @@
 PODS:
+  - app_settings (5.1.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -64,7 +66,11 @@ PODS:
   - nanopb/encode (2.30910.0)
   - package_info_plus (0.4.5):
     - Flutter
+  - printing (1.0.0):
+    - Flutter
   - PromisesObjC (2.4.0)
+  - share_plus (0.0.1):
+    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -73,6 +79,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
@@ -80,6 +87,8 @@ DEPENDENCIES:
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - printing (from `.symlinks/plugins/printing/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
@@ -99,6 +108,8 @@ SPEC REPOS:
     - PromisesObjC
 
 EXTERNAL SOURCES:
+  app_settings:
+    :path: ".symlinks/plugins/app_settings/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
@@ -113,12 +124,17 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/mobile_scanner/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
+  printing:
+    :path: ".symlinks/plugins/printing/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
 
 SPEC CHECKSUMS:
+  app_settings: 5127ae0678de1dcc19f2293271c51d37c89428b2
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
@@ -137,7 +153,9 @@ SPEC CHECKSUMS:
   mobile_scanner: 92e8812bf22a8f84131e2a7f9d0f44dad1a4742b
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  share_plus: 011d6fb4f9d2576b83179a3a5c5e323202cdabcf
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 

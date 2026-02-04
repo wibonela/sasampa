@@ -138,7 +138,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                 Text(
                                   _filter == 'today' ? "Today's Sales" : 'Total Sales',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha:0.8),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -212,7 +212,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha:0.7),
             fontSize: 12,
           ),
         ),
@@ -235,97 +235,109 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       onTap: () => context.go('/transactions/${tx.id}'),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
+            // Payment method icon
             Container(
-              width: 44,
-              height: 44,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: isVoided
-                    ? AppColors.error.withOpacity(0.1)
-                    : _getPaymentMethodColor(tx.paymentMethod).withOpacity(0.1),
+                    ? AppColors.error.withValues(alpha: 0.1)
+                    : _getPaymentMethodColor(tx.paymentMethod).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 isVoided ? Icons.cancel_outlined : _getPaymentMethodIcon(tx.paymentMethod),
                 color: isVoided ? AppColors.error : _getPaymentMethodColor(tx.paymentMethod),
+                size: 20,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
+            // Transaction info - takes remaining space
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
-                      Text(
-                        tx.transactionNumber,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          decoration: isVoided ? TextDecoration.lineThrough : null,
-                          color: isVoided ? AppColors.textSecondary : AppColors.textPrimary,
+                      Expanded(
+                        child: Text(
+                          tx.transactionNumber,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            decoration: isVoided ? TextDecoration.lineThrough : null,
+                            color: isVoided ? AppColors.textSecondary : AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                       if (isVoided) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.1),
+                            color: AppColors.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
-                            'VOIDED',
+                            'VOID',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 8,
                               fontWeight: FontWeight.w600,
                               color: AppColors.error,
                             ),
                           ),
                         ),
                       ],
+                      const SizedBox(width: 8),
+                      // Amount on same row
+                      Text(
+                        _currencyFormat.format(tx.total),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          decoration: isVoided ? TextDecoration.lineThrough : null,
+                          color: isVoided ? AppColors.textSecondary : AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    tx.createdAtHuman ?? '',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          tx.createdAtHuman ?? '',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        tx.paymentMethodLabel,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  _currencyFormat.format(tx.total),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    decoration: isVoided ? TextDecoration.lineThrough : null,
-                    color: isVoided ? AppColors.textSecondary : AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  tx.paymentMethodLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: AppColors.gray3),
+            const SizedBox(width: 4),
+            const Icon(Icons.chevron_right, color: AppColors.gray3, size: 18),
           ],
         ),
       ),

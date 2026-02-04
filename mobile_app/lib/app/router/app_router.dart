@@ -8,6 +8,11 @@ import '../../features/pos/presentation/pos_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
 import '../../features/transactions/presentation/transaction_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/store_settings_screen.dart';
+import '../../features/expenses/presentation/expenses_screen.dart';
+import '../../features/expenses/presentation/add_expense_screen.dart';
+import '../../features/expenses/presentation/expense_summary_screen.dart';
+import '../../features/inventory/presentation/inventory_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -78,6 +83,36 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
         ],
+      ),
+      // Standalone screens (not in bottom nav shell)
+      GoRoute(
+        path: '/store-settings',
+        builder: (context, state) => const StoreSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/expenses',
+        builder: (context, state) => const ExpensesScreen(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (context, state) => const AddExpenseScreen(),
+          ),
+          GoRoute(
+            path: 'edit/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return AddExpenseScreen(expenseId: id);
+            },
+          ),
+          GoRoute(
+            path: 'summary',
+            builder: (context, state) => const ExpenseSummaryScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/inventory',
+        builder: (context, state) => const InventoryScreen(),
       ),
     ],
   );
