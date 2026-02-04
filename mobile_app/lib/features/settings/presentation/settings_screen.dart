@@ -1,6 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:app_settings/app_settings.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -257,6 +261,132 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _showPrinterSetup() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Printer Setup'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Receipt Printing Options:',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.print, color: AppColors.primary),
+              title: const Text('AirPrint'),
+              subtitle: const Text('Print to any AirPrint-enabled printer'),
+              contentPadding: EdgeInsets.zero,
+              onTap: () async {
+                Navigator.pop(context);
+                // Test print
+                await Printing.layoutPdf(
+                  onLayout: (_) async {
+                    // Generate a simple test page
+                    final pdf = await _generateTestReceipt();
+                    return pdf;
+                  },
+                  name: 'Test Receipt',
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.share, color: AppColors.primary),
+              title: const Text('Share as PDF'),
+              subtitle: const Text('Save or share receipts as PDF'),
+              contentPadding: EdgeInsets.zero,
+              onTap: () async {
+                Navigator.pop(context);
+                final pdf = await _generateTestReceipt();
+                await Printing.sharePdf(bytes: pdf, filename: 'test_receipt.pdf');
+              },
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tip: Use the Print or Share buttons on receipts to print directly.',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<Uint8List> _generateTestReceipt() async {
+    final pdf = await Printing.convertHtml(
+      format: PdfPageFormat.roll80,
+      html: '''
+        <html>
+        <body style="font-family: monospace; font-size: 12px; text-align: center;">
+          <h2>Test Receipt</h2>
+          <p>-----------------------</p>
+          <p>SASAMPA POS</p>
+          <p>Test Print</p>
+          <p>-----------------------</p>
+          <p>Date: ${DateTime.now().toString().substring(0, 16)}</p>
+          <p>-----------------------</p>
+          <p>If you can see this,</p>
+          <p>printing is working!</p>
+          <p>-----------------------</p>
+        </body>
+        </html>
+      ''',
+    );
+    return Uint8List.fromList(pdf);
+  }
+
+  Future<void> _showNotificationSettings() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Notification Settings'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Manage your notification preferences:'),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.settings, color: AppColors.primary),
+              title: const Text('Open System Settings'),
+              subtitle: const Text('Configure app notifications'),
+              contentPadding: EdgeInsets.zero,
+              onTap: () {
+                Navigator.pop(context);
+                AppSettings.openAppSettings(type: AppSettingsType.notification);
+              },
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Notifications include:',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            const Text('Low stock alerts', style: TextStyle(fontSize: 13)),
+            const Text('New order notifications', style: TextStyle(fontSize: 13)),
+            const Text('System updates', style: TextStyle(fontSize: 13)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -284,7 +414,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -331,6 +461,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ],
                   ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Business Section
+          const Text(
+            'Business',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _buildSettingItem(
+                  icon: Icons.store_outlined,
+                  title: 'Store Settings',
+                  subtitle: 'Name, address, receipt settings',
+                  onTap: () => context.push('/store-settings'),
+                ),
+                const Divider(height: 1, indent: 56),
+                _buildSettingItem(
+                  icon: Icons.wallet_outlined,
+                  title: 'Expenses (Matumizi)',
+                  subtitle: 'Track operational costs',
+                  onTap: () => context.push('/expenses'),
+                ),
+                const Divider(height: 1, indent: 56),
+                _buildSettingItem(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'Inventory',
+                  subtitle: 'Stock levels & adjustments',
+                  onTap: () => context.push('/inventory'),
                 ),
               ],
             ),
@@ -395,26 +568,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.print_outlined,
                   title: 'Printer Setup',
                   subtitle: 'Configure receipt printer',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Printer setup coming soon'),
-                      ),
-                    );
-                  },
+                  onTap: _showPrinterSetup,
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
                   subtitle: 'Manage push notifications',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Notifications settings coming soon'),
-                      ),
-                    );
-                  },
+                  onTap: _showNotificationSettings,
                 ),
               ],
             ),
@@ -487,7 +648,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             Text('A modern point of sale system for your business.'),
                             SizedBox(height: 16),
                             Text(
-                              '© 2024 Sasampa POS',
+                              '2024 Sasampa POS',
                               style: TextStyle(color: AppColors.textSecondary),
                             ),
                           ],
@@ -559,7 +720,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
+          color: AppColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: AppColors.primary, size: 20),

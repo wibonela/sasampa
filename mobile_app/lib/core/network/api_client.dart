@@ -300,4 +300,105 @@ class ApiClient {
   Future<Response> getSyncStatus() {
     return _dio.get('/sync/status');
   }
+
+  // Expenses (Matumizi)
+  Future<Response> getExpenses({
+    String? search,
+    int? categoryId,
+    String? dateFrom,
+    String? dateTo,
+    String? paymentMethod,
+    int page = 1,
+    int perPage = 20,
+  }) {
+    return _dio.get('/expenses', queryParameters: {
+      if (search != null) 'search': search,
+      if (categoryId != null) 'category_id': categoryId,
+      if (dateFrom != null) 'date_from': dateFrom,
+      if (dateTo != null) 'date_to': dateTo,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
+      'page': page,
+      'per_page': perPage,
+    });
+  }
+
+  Future<Response> getTodayExpenses() {
+    return _dio.get('/expenses/today');
+  }
+
+  Future<Response> getExpenseCategories() {
+    return _dio.get('/expenses/categories');
+  }
+
+  Future<Response> createExpenseCategory(String name, String? description) {
+    return _dio.post('/expenses/categories', data: {
+      'name': name,
+      if (description != null) 'description': description,
+    });
+  }
+
+  Future<Response> getExpenseSummary({String? dateFrom, String? dateTo}) {
+    return _dio.get('/expenses/summary', queryParameters: {
+      if (dateFrom != null) 'date_from': dateFrom,
+      if (dateTo != null) 'date_to': dateTo,
+    });
+  }
+
+  Future<Response> createExpense({
+    required int categoryId,
+    required String description,
+    required double amount,
+    required double quantity,
+    String? unit,
+    required String expenseDate,
+    String? referenceNumber,
+    String? supplier,
+    required String paymentMethod,
+    String? notes,
+  }) {
+    return _dio.post('/expenses', data: {
+      'expense_category_id': categoryId,
+      'description': description,
+      'amount': amount,
+      'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      'expense_date': expenseDate,
+      if (referenceNumber != null) 'reference_number': referenceNumber,
+      if (supplier != null) 'supplier': supplier,
+      'payment_method': paymentMethod,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  Future<Response> getExpense(int id) {
+    return _dio.get('/expenses/$id');
+  }
+
+  Future<Response> updateExpense(int id, Map<String, dynamic> data) {
+    return _dio.put('/expenses/$id', data: data);
+  }
+
+  Future<Response> deleteExpense(int id) {
+    return _dio.delete('/expenses/$id');
+  }
+
+  // Store Settings
+  Future<Response> getSettings() {
+    return _dio.get('/settings');
+  }
+
+  Future<Response> updateSettings(Map<String, dynamic> settings) {
+    return _dio.put('/settings', data: settings);
+  }
+
+  Future<Response> uploadLogo(String filePath) async {
+    final formData = FormData.fromMap({
+      'logo': await MultipartFile.fromFile(filePath),
+    });
+    return _dio.post('/settings/logo', data: formData);
+  }
+
+  Future<Response> removeLogo() {
+    return _dio.delete('/settings/logo');
+  }
 }
