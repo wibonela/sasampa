@@ -693,12 +693,12 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </div>
-                    <p class="testimonial-text">"Sasampa imebadilisha biashara yangu kabisa. Sasa najua mauzo yangu kila siku bila kuhesabu kwa mkono. Rahisi sana kutumia!"</p>
+                    <p class="testimonial-text">"Bro! App hii ni moto 🔥 Kwanza stock tracking yake ni next level. Siku hizi sichanganyikiwi na hesabu, kila kitu kiko clear. Hata wateja wangu wanashangaa speed ya service!"</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">JM</div>
+                        <div class="testimonial-avatar">DK</div>
                         <div>
-                            <div class="testimonial-name">John Mwanga</div>
-                            <div class="testimonial-role">Supermarket Owner, Dar es Salaam</div>
+                            <div class="testimonial-name">Dennis Kaaya</div>
+                            <div class="testimonial-role">Duka la Simu, Sinza</div>
                         </div>
                     </div>
                 </div>
@@ -710,12 +710,12 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </div>
-                    <p class="testimonial-text">"I manage 3 branches and Sasampa lets me see everything from my phone. The PIN system for cashiers is genius - so fast!"</p>
+                    <p class="testimonial-text">"As a restaurant owner, having a reliable POS system is essential. Sasampa has streamlined our operations significantly. The reporting features provide valuable insights that help us make informed business decisions."</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">FK</div>
+                        <div class="testimonial-avatar">CT</div>
                         <div>
-                            <div class="testimonial-name">Fatma Khalid</div>
-                            <div class="testimonial-role">Pharmacy Chain Owner, Arusha</div>
+                            <div class="testimonial-name">Cozy Taste Restaurant</div>
+                            <div class="testimonial-role">Restaurant & Catering, Dar es Salaam</div>
                         </div>
                     </div>
                 </div>
@@ -727,12 +727,12 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </div>
-                    <p class="testimonial-text">"The reports help me understand my business better. I can see which products sell best and plan my stock accordingly."</p>
+                    <p class="testimonial-text">"Nilidhani POS ni ngumu lakini Sasampa ni rahisi kupindukia! Wafanyakazi wangu wamejifunza ndani ya dakika 10. Sasa naweza kuangalia mauzo hata nikiwa likizo."</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">PM</div>
+                        <div class="testimonial-avatar">AM</div>
                         <div>
-                            <div class="testimonial-name">Peter Msomi</div>
-                            <div class="testimonial-role">Electronics Shop, Mwanza</div>
+                            <div class="testimonial-name">Agnes Mushi</div>
+                            <div class="testimonial-role">Boutique Owner, Mwenge</div>
                         </div>
                     </div>
                 </div>
