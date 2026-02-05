@@ -299,7 +299,7 @@
                         </a>
                     @else
                         <a href="{{ route('company.register') }}" class="btn-primary">
-                            Start free trial
+                            Get Started
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                         <a href="{{ route('login') }}" class="btn-secondary">Sign in</a>
@@ -782,7 +782,7 @@
                     </a>
                 @else
                     <a href="{{ route('company.register') }}" class="btn-primary">
-                        Start your free trial
+                        Get Started
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </a>
                     <a href="{{ route('login') }}" class="btn-secondary">Sign in to your account</a>

@@ -70,7 +70,7 @@ class SasampaApp extends ConsumerStatefulWidget {
   ConsumerState<SasampaApp> createState() => _SasampaAppState();
 }
 
-class _SasampaAppState extends ConsumerState<SasampaApp> {
+class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObserver {
   bool _isInitializing = true;
   bool _hasError = false;
   String? _errorMessage;
@@ -78,10 +78,67 @@ class _SasampaAppState extends ConsumerState<SasampaApp> {
   @override
   void initState() {
     super.initState();
+    // Listen to app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
     // Schedule initialization after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeApp();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    debugPrint('APP_LIFECYCLE: State changed to $state');
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // App came back to foreground - refresh data if needed
+        _onAppResumed();
+        break;
+      case AppLifecycleState.paused:
+        // App going to background - save any pending state
+        _onAppPaused();
+        break;
+      case AppLifecycleState.detached:
+        // App being terminated - final cleanup
+        _onAppDetached();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        // Transitional states, no action needed
+        break;
+    }
+  }
+
+  void _onAppResumed() {
+    debugPrint('APP_LIFECYCLE: App resumed');
+    // Optionally refresh user data when app comes back
+    // Only if already logged in and not currently initializing
+    if (!_isInitializing) {
+      final authState = ref.read(authProvider);
+      if (authState.isAuthenticated) {
+        // Silently refresh in background
+        ref.read(authProvider.notifier).refreshUser();
+      }
+    }
+  }
+
+  void _onAppPaused() {
+    debugPrint('APP_LIFECYCLE: App paused');
+    // Any state that needs saving should already be persisted
+    // This is just for logging/debugging
+  }
+
+  void _onAppDetached() {
+    debugPrint('APP_LIFECYCLE: App detached');
+    // Final cleanup if needed
   }
 
   Future<void> _initializeApp() async {
