@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,12 +28,14 @@ class AuthState {
   final MobileAccess? mobileAccess;
   final bool isLoading;
   final String? error;
+  final bool isInitialized; // Track if auth check has completed
 
   AuthState({
     this.user,
     this.mobileAccess,
     this.isLoading = false,
     this.error,
+    this.isInitialized = false,
   });
 
   bool get isAuthenticated => user != null;
@@ -43,12 +46,14 @@ class AuthState {
     MobileAccess? mobileAccess,
     bool? isLoading,
     String? error,
+    bool? isInitialized,
   }) {
     return AuthState(
       user: user ?? this.user,
       mobileAccess: mobileAccess ?? this.mobileAccess,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 }
@@ -69,7 +74,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final mobileAccess = MobileAccess.fromJson(data['mobile_access']);
 
       await _storage.saveToken(data['token']);
-      state = AuthState(user: user, mobileAccess: mobileAccess);
+      // Cache user data for offline access
+      await _storage.saveUserData(jsonEncode({
+        'user': data['user'],
+        'mobile_access': data['mobile_access'],
+      }));
+      state = AuthState(user: user, mobileAccess: mobileAccess, isInitialized: true);
 
       // Auto-register device if mobile access is approved
       if (mobileAccess.canUseMobile) {
@@ -93,7 +103,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final mobileAccess = MobileAccess.fromJson(data['mobile_access']);
 
       await _storage.saveToken(data['token']);
-      state = AuthState(user: user, mobileAccess: mobileAccess);
+      // Cache user data for offline access
+      await _storage.saveUserData(jsonEncode({
+        'user': data['user'],
+        'mobile_access': data['mobile_access'],
+      }));
+      state = AuthState(user: user, mobileAccess: mobileAccess, isInitialized: true);
 
       // Auto-register device if mobile access is approved
       if (mobileAccess.canUseMobile) {
@@ -148,27 +163,49 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _api.logout();
     } catch (_) {}
     await _storage.clearAll();
-    state = AuthState();
+    state = AuthState(isInitialized: true);
   }
 
-  Future<void> refreshUser() async {
+  Future<bool> refreshUser() async {
     try {
-      final response = await _api.getUser();
+      final response = await _api.getUser().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Network timeout'),
+      );
       final data = response.data;
 
       final user = User.fromJson(data['user']);
       final mobileAccess = MobileAccess.fromJson(data['mobile_access']);
 
-      state = AuthState(user: user, mobileAccess: mobileAccess);
+      // Cache user data for offline access
+      await _storage.saveUserData(jsonEncode({
+        'user': data['user'],
+        'mobile_access': data['mobile_access'],
+      }));
+
+      state = AuthState(user: user, mobileAccess: mobileAccess, isInitialized: true);
 
       // Auto-register device if mobile access is approved
       if (mobileAccess.canUseMobile) {
         await _autoRegisterDevice();
       }
+      return true;
     } catch (e) {
-      // If refresh fails, clear token and force re-login
-      await _storage.clearAll();
-      state = AuthState();
+      debugPrint('AUTH_REFRESH: Error - $e');
+      // Check if it's an authentication error (401/403) vs network error
+      final errorStr = e.toString();
+      if (errorStr.contains('401') || errorStr.contains('403') || errorStr.contains('Unauthenticated')) {
+        // Token is invalid - clear and force re-login
+        debugPrint('AUTH_REFRESH: Token invalid, clearing auth');
+        await _storage.clearAll();
+        state = AuthState(isInitialized: true);
+        return false;
+      }
+      // Network error - keep user logged in if they have a token
+      // Don't clear storage, just mark as initialized
+      debugPrint('AUTH_REFRESH: Network error, keeping session');
+      state = state.copyWith(isInitialized: true);
+      return false;
     }
   }
 
@@ -183,17 +220,62 @@ class AuthNotifier extends StateNotifier<AuthState> {
       debugPrint('AUTH_CHECK: isLoggedIn=$isLoggedIn');
 
       if (isLoggedIn) {
-        await refreshUser();
+        // Try to refresh user from API
+        final refreshed = await refreshUser();
+        if (!refreshed) {
+          // If refresh failed but we have a token, try to load cached user data
+          final cachedUserData = await _storage.getUserData();
+          if (cachedUserData != null && cachedUserData.isNotEmpty) {
+            try {
+              final userData = _parseJson(cachedUserData);
+              if (userData['user'] != null) {
+                final user = User.fromJson(userData['user']);
+                final mobileAccess = userData['mobile_access'] != null
+                    ? MobileAccess.fromJson(userData['mobile_access'])
+                    : null;
+                state = AuthState(
+                  user: user,
+                  mobileAccess: mobileAccess,
+                  isInitialized: true
+                );
+                debugPrint('AUTH_CHECK: Loaded cached user data');
+              } else {
+                state = AuthState(isInitialized: true);
+              }
+            } catch (e) {
+              debugPrint('AUTH_CHECK: Failed to parse cached data - $e');
+              state = AuthState(isInitialized: true);
+            }
+          } else {
+            debugPrint('AUTH_CHECK: No cached data available');
+            // We have a token but no cached data and can't reach server
+            // Keep the session valid, user can retry
+            state = state.copyWith(isInitialized: true);
+          }
+        }
+      } else {
+        state = AuthState(isInitialized: true);
       }
-      debugPrint('AUTH_CHECK: Complete');
+      debugPrint('AUTH_CHECK: Complete, isAuthenticated=${state.isAuthenticated}');
     } catch (e, stack) {
       debugPrint('AUTH_CHECK: Error - $e');
       debugPrint('AUTH_CHECK: Stack - $stack');
-      // On any error, reset to logged out state safely
-      try {
-        await _storage.clearAll();
-      } catch (_) {}
-      state = AuthState();
+      // On critical error, mark as initialized but not logged in
+      state = AuthState(isInitialized: true);
+    }
+  }
+
+  Map<String, dynamic> _parseJson(String jsonStr) {
+    try {
+      if (jsonStr.isEmpty) return {};
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {};
+    } catch (e) {
+      debugPrint('JSON_PARSE: Error - $e');
+      return {};
     }
   }
 

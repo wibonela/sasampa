@@ -22,8 +22,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/login',
     redirect: (context, state) {
       final isLoggedIn = authState.isAuthenticated;
+      final isInitialized = authState.isInitialized;
       final isLoginRoute = state.matchedLocation == '/login';
       final isMobileAccessRoute = state.matchedLocation == '/mobile-access';
+
+      // Wait for auth check to complete before redirecting
+      // This prevents the race condition where router redirects to login
+      // before the auth check has finished loading cached credentials
+      if (!isInitialized) {
+        // Stay on current route until auth is initialized
+        return null;
+      }
 
       // Not logged in - go to login
       if (!isLoggedIn && !isLoginRoute) {
