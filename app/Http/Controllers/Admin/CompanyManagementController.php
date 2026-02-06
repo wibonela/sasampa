@@ -102,4 +102,28 @@ class CompanyManagementController extends Controller
 
         return back()->with('success', "User limit for '{$company->name}' has been updated to {$validated['user_limit']}.");
     }
+
+    public function destroy(Company $company)
+    {
+        // Only allow deletion of pending companies older than 3 days
+        if ($company->status !== Company::STATUS_PENDING) {
+            return back()->with('error', 'Only pending companies can be deleted.');
+        }
+
+        if ($company->created_at->diffInDays(now()) < 3) {
+            return back()->with('error', 'Companies can only be deleted after being pending for 3 days.');
+        }
+
+        $companyName = $company->name;
+
+        // Delete related data
+        $company->users()->delete();
+        $company->branches()->delete();
+        $company->categories()->delete();
+
+        // Delete the company
+        $company->delete();
+
+        return back()->with('success', "Company '{$companyName}' has been permanently deleted.");
+    }
 }

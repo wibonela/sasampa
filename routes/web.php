@@ -136,6 +136,8 @@ Route::middleware('auth')->group(function () {
                 ->name('companies.unsuspend');
             Route::patch('/companies/{company}/update-limit', [CompanyManagementController::class, 'updateLimit'])
                 ->name('companies.update-limit');
+            Route::delete('/companies/{company}', [CompanyManagementController::class, 'destroy'])
+                ->name('companies.destroy');
 
             // Sanduku Feedback
             Route::get('/sanduku', [AdminSandukuController::class, 'index'])
