@@ -119,6 +119,16 @@
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
                                         </form>
+                                        @if($company->created_at->diffInDays(now()) >= 3)
+                                            <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" class="d-inline ms-1"
+                                                  data-confirm='{"title":"Delete Company","message":"Permanently delete {{ $company->name }} and all its data? This cannot be undone.","type":"danger","confirmText":"Delete Forever"}'>
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
                                     @else
                                         <a href="{{ route('admin.companies.show', $company) }}" class="btn btn-sm btn-outline-primary">View</a>
                                     @endif
