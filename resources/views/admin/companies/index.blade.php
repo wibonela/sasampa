@@ -10,7 +10,7 @@
 
         <!-- Stats -->
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-card">
                     <div class="stat-icon orange">
                         <i class="bi bi-hourglass-split"></i>
@@ -19,16 +19,25 @@
                     <div class="stat-label">Pending Approval</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <div class="stat-value">{{ $stats['pending_setup'] }}</div>
+                    <div class="stat-label">Pending Setup</div>
+                </div>
+            </div>
+            <div class="col-md-3">
                 <div class="stat-card">
                     <div class="stat-icon green">
                         <i class="bi bi-check-circle"></i>
                     </div>
                     <div class="stat-value">{{ $stats['approved'] }}</div>
-                    <div class="stat-label">Approved</div>
+                    <div class="stat-label">Active</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-card">
                     <div class="stat-icon blue">
                         <i class="bi bi-building"></i>
@@ -44,9 +53,10 @@
             <div class="card-body py-3">
                 <form method="GET" class="d-flex align-items-center gap-3">
                     <span class="text-secondary" style="font-size: 13px;">Filter</span>
-                    <select name="status" class="form-select form-select-sm" style="width: 160px;" onchange="this.form.submit()">
+                    <select name="status" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
                         <option value="">All Companies</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending Approval</option>
+                        <option value="pending_setup" {{ request('status') == 'pending_setup' ? 'selected' : '' }}>Pending Setup</option>
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                     </select>
@@ -101,14 +111,22 @@
                                 <td>
                                     @if($company->status === 'pending')
                                         <span class="badge bg-warning">Pending</span>
+                                    @elseif($company->status === 'approved' && !$company->onboarding_completed)
+                                        <span class="badge" style="background: #8b5cf6;">Pending Setup</span>
                                     @elseif($company->status === 'approved')
-                                        <span class="badge bg-success">Approved</span>
+                                        <span class="badge bg-success">Active</span>
                                     @else
                                         <span class="badge bg-danger">Rejected</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    @if($company->status === 'pending')
+                                    @php
+                                        $isPending = $company->status === 'pending';
+                                        $isPendingSetup = $company->status === 'approved' && !$company->onboarding_completed;
+                                        $canDelete = ($isPending || $isPendingSetup) && $company->created_at->diffInDays(now()) >= 3;
+                                    @endphp
+
+                                    @if($isPending)
                                         <form action="{{ route('admin.companies.approve', $company) }}" method="POST" class="d-inline"
                                               data-confirm='{"title":"Approve Company","message":"Approve {{ $company->name }}?","type":"success","confirmText":"Approve"}'>
                                             @csrf
@@ -119,18 +137,21 @@
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
                                         </form>
-                                        @if($company->created_at->diffInDays(now()) >= 3)
-                                            <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" class="d-inline ms-1"
-                                                  data-confirm='{"title":"Delete Company","message":"Permanently delete {{ $company->name }} and all its data? This cannot be undone.","type":"danger","confirmText":"Delete Forever"}'>
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Delete
-                                                </button>
-                                            </form>
-                                        @endif
+                                    @elseif($isPendingSetup)
+                                        <a href="{{ route('admin.companies.show', $company) }}" class="btn btn-sm btn-outline-primary">View</a>
                                     @else
                                         <a href="{{ route('admin.companies.show', $company) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    @endif
+
+                                    @if($canDelete)
+                                        <form action="{{ route('admin.companies.destroy', $company) }}" method="POST" class="d-inline ms-1"
+                                              data-confirm='{"title":"Delete Company","message":"Permanently delete {{ $company->name }} and all its data? This cannot be undone.","type":"danger","confirmText":"Delete Forever"}'>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>

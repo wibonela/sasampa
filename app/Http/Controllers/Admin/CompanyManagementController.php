@@ -21,14 +21,22 @@ class CompanyManagementController extends Controller
         $query = Company::with('owner');
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'pending_setup') {
+                // Approved but onboarding not completed
+                $query->where('status', Company::STATUS_APPROVED)
+                      ->where('onboarding_completed', false);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         $companies = $query->latest()->paginate(20);
 
         $stats = [
             'pending' => Company::pending()->count(),
-            'approved' => Company::approved()->count(),
+            'pending_setup' => Company::where('status', Company::STATUS_APPROVED)
+                                      ->where('onboarding_completed', false)->count(),
+            'approved' => Company::approved()->where('onboarding_completed', true)->count(),
             'total' => Company::count(),
         ];
 
@@ -105,13 +113,18 @@ class CompanyManagementController extends Controller
 
     public function destroy(Company $company)
     {
-        // Only allow deletion of pending companies older than 3 days
-        if ($company->status !== Company::STATUS_PENDING) {
-            return back()->with('error', 'Only pending companies can be deleted.');
+        // Allow deletion of:
+        // 1. Pending companies older than 3 days
+        // 2. Pending setup (approved but onboarding not completed) older than 3 days
+        $isPending = $company->status === Company::STATUS_PENDING;
+        $isPendingSetup = $company->status === Company::STATUS_APPROVED && !$company->onboarding_completed;
+
+        if (!$isPending && !$isPendingSetup) {
+            return back()->with('error', 'Only pending or pending setup companies can be deleted.');
         }
 
         if ($company->created_at->diffInDays(now()) < 3) {
-            return back()->with('error', 'Companies can only be deleted after being pending for 3 days.');
+            return back()->with('error', 'Companies can only be deleted after 3 days.');
         }
 
         $companyName = $company->name;
