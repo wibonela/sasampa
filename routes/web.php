@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminMobileAccessController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminSandukuController;
 use App\Http\Controllers\Admin\AdminUserManagementController;
+use App\Http\Controllers\Admin\AdminWaitlistController;
 use App\Http\Controllers\Admin\CompanyManagementController;
 use App\Http\Controllers\Admin\AdminUserLimitRequestController;
 use App\Http\Controllers\Admin\DocumentationArticleController;
@@ -31,12 +32,20 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SandukuController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\MobileWaitlistController;
 use Illuminate\Support\Facades\Route;
 
 // Sanduku feedback (public API with rate limiting)
 Route::post('/api/sanduku', [SandukuController::class, 'store'])
     ->middleware('throttle:10,1') // 10 requests per minute
     ->name('sanduku.store');
+
+// Mobile App Waitlist (public API)
+Route::post('/api/mobile-waitlist', [MobileWaitlistController::class, 'store'])
+    ->middleware('throttle:5,1') // 5 requests per minute
+    ->name('mobile-waitlist.store');
+Route::get('/api/mobile-waitlist/count', [MobileWaitlistController::class, 'count'])
+    ->name('mobile-waitlist.count');
 
 // Landing page
 Route::get('/', function () {
@@ -193,6 +202,17 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{mobileAppRequest}/revoke', [AdminMobileAccessController::class, 'revoke'])->name('revoke');
                 Route::post('/devices/{device}/deactivate', [AdminMobileAccessController::class, 'deactivateDevice'])->name('devices.deactivate');
                 Route::post('/devices/{device}/activate', [AdminMobileAccessController::class, 'activateDevice'])->name('devices.activate');
+            });
+
+            // Mobile App Waitlist Management
+            Route::prefix('waitlist')->name('waitlist.')->group(function () {
+                Route::get('/', [AdminWaitlistController::class, 'index'])->name('index');
+                Route::get('/analytics', [AdminWaitlistController::class, 'analytics'])->name('analytics');
+                Route::get('/export', [AdminWaitlistController::class, 'export'])->name('export');
+                Route::post('/bulk-update', [AdminWaitlistController::class, 'bulkUpdate'])->name('bulk-update');
+                Route::get('/{waitlist}', [AdminWaitlistController::class, 'show'])->name('show');
+                Route::patch('/{waitlist}', [AdminWaitlistController::class, 'update'])->name('update');
+                Route::delete('/{waitlist}', [AdminWaitlistController::class, 'destroy'])->name('destroy');
             });
         });
 

@@ -225,6 +225,39 @@
         .share-btn.copy { background: #fff; color: #1a1a1a; }
         .share-btn.copy:hover { background: #f5f5f5; }
 
+        /* Mobile App Waitlist */
+        .mobile-app-waitlist { padding: 100px 24px; background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%); }
+        .waitlist-card { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 60px 48px; max-width: 720px; margin: 0 auto; text-align: center; }
+        .waitlist-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+        .waitlist-badge-icon { display: flex; align-items: center; }
+        .waitlist-title { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.02em; }
+        .waitlist-desc { font-size: 17px; color: #999; margin-bottom: 40px; }
+        .waitlist-content { text-align: left; }
+        .waitlist-form { display: flex; flex-direction: column; gap: 20px; }
+        .waitlist-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .waitlist-field { display: flex; flex-direction: column; gap: 6px; }
+        .waitlist-field label { font-size: 13px; font-weight: 500; color: #ccc; }
+        .waitlist-field input, .waitlist-field select { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 14px 16px; font-size: 15px; color: #fff; transition: all 0.2s; }
+        .waitlist-field input::placeholder { color: #666; }
+        .waitlist-field input:focus, .waitlist-field select:focus { outline: none; border-color: #22c55e; background: rgba(255,255,255,0.12); }
+        .waitlist-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; cursor: pointer; }
+        .waitlist-field select option { background: #1a1a1a; color: #fff; }
+        .waitlist-radios { display: flex; gap: 16px; padding: 10px 0; }
+        .waitlist-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #ccc; }
+        .waitlist-radio input { accent-color: #22c55e; width: 18px; height: 18px; cursor: pointer; }
+        .waitlist-submit { background: #22c55e; color: #fff; border: none; padding: 16px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+        .waitlist-submit:hover { background: #16a34a; transform: translateY(-2px); }
+        .waitlist-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .waitlist-success { text-align: center; padding: 40px 20px; }
+        .waitlist-success .success-icon { margin-bottom: 20px; }
+        .waitlist-success h3 { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+        .waitlist-success p { font-size: 15px; color: #999; }
+        .waitlist-error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 14px 18px; border-radius: 10px; font-size: 14px; margin-top: 16px; }
+        .waitlist-footer { display: flex; justify-content: center; gap: 32px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .waitlist-counter, .waitlist-price { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #888; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
         /* Responsive */
         @media (max-width: 968px) {
             .hero-container { grid-template-columns: 1fr; text-align: center; gap: 60px; }
@@ -239,6 +272,8 @@
             .step-connector { width: 2px; height: 40px; margin: 0; }
             .why-grid { grid-template-columns: repeat(2, 1fr); }
             .testimonials-grid { grid-template-columns: 1fr; }
+            .waitlist-form-row { grid-template-columns: 1fr; }
+            .waitlist-card { padding: 40px 24px; }
 
             /* Show phone mockup on tablets and mobile */
             .desktop-mockup { display: none; }
@@ -254,6 +289,9 @@
             .share-title { font-size: 24px; }
             .share-buttons { flex-direction: column; }
             .share-btn { justify-content: center; }
+            .waitlist-title { font-size: 28px; }
+            .waitlist-footer { flex-direction: column; gap: 16px; align-items: center; }
+            .waitlist-radios { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -770,6 +808,104 @@
         </div>
     </section>
 
+    <!-- Mobile App Waitlist Section -->
+    <section class="mobile-app-waitlist" id="mobile-app">
+        <div class="features-container">
+            <div class="waitlist-card">
+                <div class="waitlist-badge">
+                    <span class="waitlist-badge-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+                    </span>
+                    Coming Soon
+                </div>
+                <h2 class="waitlist-title">Sasampa Mobile App</h2>
+                <p class="waitlist-desc">Manage your business from anywhere. POS in your pocket - iOS & Android</p>
+
+                <div class="waitlist-content">
+                    <form id="waitlistForm" class="waitlist-form">
+                        @csrf
+                        <div class="waitlist-form-row">
+                            <div class="waitlist-field">
+                                <label for="wl_name">Full Name *</label>
+                                <input type="text" id="wl_name" name="name" placeholder="Your full name" required>
+                            </div>
+                            <div class="waitlist-field">
+                                <label for="wl_phone">Phone Number *</label>
+                                <input type="tel" id="wl_phone" name="phone" placeholder="+255 XXX XXX XXX" required>
+                            </div>
+                        </div>
+                        <div class="waitlist-form-row">
+                            <div class="waitlist-field">
+                                <label for="wl_business">Business Name *</label>
+                                <input type="text" id="wl_business" name="business_name" placeholder="Your business name" required>
+                            </div>
+                            <div class="waitlist-field">
+                                <label for="wl_email">Email (Optional)</label>
+                                <input type="email" id="wl_email" name="email" placeholder="your@email.com">
+                            </div>
+                        </div>
+                        <div class="waitlist-form-row">
+                            <div class="waitlist-field">
+                                <label for="wl_type">Business Type *</label>
+                                <select id="wl_type" name="business_type" required>
+                                    <option value="">Select type...</option>
+                                    <option value="restaurant">Restaurant</option>
+                                    <option value="retail">Retail Shop</option>
+                                    <option value="pharmacy">Pharmacy</option>
+                                    <option value="supermarket">Supermarket</option>
+                                    <option value="salon">Salon</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="waitlist-field">
+                                <label>Platform Preference *</label>
+                                <div class="waitlist-radios">
+                                    <label class="waitlist-radio">
+                                        <input type="radio" name="platform" value="ios"> iOS
+                                    </label>
+                                    <label class="waitlist-radio">
+                                        <input type="radio" name="platform" value="android"> Android
+                                    </label>
+                                    <label class="waitlist-radio">
+                                        <input type="radio" name="platform" value="both" checked> Both
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="waitlist-submit" id="waitlistSubmitBtn">
+                            <span class="btn-text">Join the Waitlist</span>
+                            <span class="btn-loading" style="display: none;">
+                                <svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></circle></svg>
+                                Joining...
+                            </span>
+                        </button>
+                    </form>
+
+                    <div id="waitlistSuccess" class="waitlist-success" style="display: none;">
+                        <div class="success-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <h3>Hongera! You're on the list!</h3>
+                        <p>We'll notify you when we launch. Get ready to manage your business from anywhere!</p>
+                    </div>
+
+                    <div id="waitlistError" class="waitlist-error" style="display: none;"></div>
+                </div>
+
+                <div class="waitlist-footer">
+                    <div class="waitlist-counter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span id="waitlistCount">0</span> businesses already waiting
+                    </div>
+                    <div class="waitlist-price">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 15h6"/></svg>
+                        Only 13,000 TZS/month
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="cta">
         <div class="cta-container">
             <h2 class="cta-title">Ready to modernize your business?</h2>
@@ -839,6 +975,67 @@
                 alert('Link copied: ' + url);
             });
         }
+
+        // Mobile App Waitlist Form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial count
+            fetch('/api/mobile-waitlist/count')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('waitlistCount').textContent = data.count;
+                })
+                .catch(() => {});
+
+            const form = document.getElementById('waitlistForm');
+            const submitBtn = document.getElementById('waitlistSubmitBtn');
+            const successDiv = document.getElementById('waitlistSuccess');
+            const errorDiv = document.getElementById('waitlistError');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                errorDiv.style.display = 'none';
+
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.querySelector('.btn-text').style.display = 'none';
+                submitBtn.querySelector('.btn-loading').style.display = 'flex';
+
+                const formData = new FormData(form);
+
+                fetch('/api/mobile-waitlist', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        form.style.display = 'none';
+                        successDiv.style.display = 'block';
+                        document.getElementById('waitlistCount').textContent = data.count;
+                    } else if (data.errors) {
+                        const errors = Object.values(data.errors).flat().join('<br>');
+                        errorDiv.innerHTML = errors;
+                        errorDiv.style.display = 'block';
+                    } else if (data.message) {
+                        errorDiv.innerHTML = data.message;
+                        errorDiv.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    errorDiv.innerHTML = 'Something went wrong. Please try again.';
+                    errorDiv.style.display = 'block';
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.querySelector('.btn-text').style.display = 'inline';
+                    submitBtn.querySelector('.btn-loading').style.display = 'none';
+                });
+            });
+        });
     </script>
 </body>
 </html>
