@@ -126,6 +126,16 @@
                                 @endif
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.waitlist.*') ? 'active' : '' }}" href="{{ route('admin.waitlist.index') }}">
+                                <i class="bi bi-phone-vibrate"></i>
+                                App Waitlist
+                                @php $waitlistCount = \App\Models\MobileWaitlist::pending()->count(); @endphp
+                                @if($waitlistCount > 0)
+                                    <span class="badge bg-success">{{ $waitlistCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
