@@ -57,6 +57,11 @@ Route::get('/language/{locale}', [LanguageController::class, 'switch'])
     ->name('language.switch')
     ->where('locale', 'en|sw');
 
+// Privacy Policy (public - required for Play Store)
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
 // Public Documentation
 Route::prefix('docs')->name('docs.')->group(function () {
     Route::get('/', [DocumentationController::class, 'index'])->name('index');
