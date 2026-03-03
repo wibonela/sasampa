@@ -845,6 +845,8 @@ body {
 
     .sidebar {
         transform: translateX(-100%);
+        top: 56px;
+        height: calc(100vh - 56px);
     }
 
     .sidebar.show {
