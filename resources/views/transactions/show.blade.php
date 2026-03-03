@@ -1,22 +1,22 @@
 <x-app-layout>
     <div class="fade-in">
         <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-start mb-4">
-            <div class="d-flex align-items-center gap-2">
+        <div class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
                 <a href="{{ route('transactions.index') }}" class="text-secondary" style="text-decoration: none;">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div>
-                    <h1 class="page-title mb-0">{{ $transaction->transaction_number }}</h1>
+                    <h1 class="page-title mb-0" style="font-size: clamp(16px, 4vw, 24px); word-break: break-all;">{{ $transaction->transaction_number }}</h1>
                     <p class="page-subtitle mb-0">Transaction details</p>
                 </div>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('pos.receipt', $transaction) }}" class="btn btn-outline-primary btn-sm" target="_blank">
                     <i class="bi bi-printer me-1"></i>Print
                 </a>
                 <a href="{{ route('pos.receipt.pdf', $transaction) }}" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-file-pdf me-1"></i>Download PDF
+                    <i class="bi bi-file-pdf me-1"></i>PDF
                 </a>
                 @if($transaction->status === 'completed' && auth()->user()->isAdmin())
                     <form action="{{ route('transactions.void', $transaction) }}" method="POST"
