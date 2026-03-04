@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Sasampa POS",
+    "name": "Sasampa",
     "slug": "sasampa-pos",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,13 +10,13 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a1a1a"
+      "backgroundColor": "#E53E3E"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#1a1a1a",
+          "backgroundColor": "#E53E3E",
           "image": "./assets/splash-icon.png",
           "imageWidth": 200
         }
@@ -26,6 +26,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sasampa.pos",
       "buildNumber": "1",
+      "associatedDomains": ["applinks:sasampa.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -36,7 +37,7 @@
         "backgroundColor": "#E53E3E"
       },
       "package": "com.sasampa.pos",
-      "versionCode": 1,
+      "versionCode": 2,
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.INTERNET",
