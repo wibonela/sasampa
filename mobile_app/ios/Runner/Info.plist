@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Sasampa uses Bluetooth to connect to receipt printers for printing sales receipts.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Sasampa uses the camera to scan product barcodes for quick checkout.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Sasampa uses local network to discover and connect to receipt printers.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Sasampa uses Face ID for secure login.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
