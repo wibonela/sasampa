@@ -1,5 +1,125 @@
 <x-app-layout>
-    <div class="fade-in">
+    {{-- ============================================= --}}
+    {{-- MOBILE DASHBOARD (matches native Flutter app) --}}
+    {{-- ============================================= --}}
+    <div class="mobile-dashboard d-lg-none">
+        {{-- Greeting --}}
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 style="font-size: 28px; font-weight: 700; color: var(--apple-text); margin: 0;">
+                    Hello, {{ strtoupper(explode(' ', auth()->user()->name)[0]) }}
+                </h1>
+                @if(auth()->user()->company)
+                    <p style="font-size: 14px; color: var(--apple-text-secondary); margin: 4px 0 0;">
+                        {{ strtoupper(auth()->user()->company->name) }}
+                    </p>
+                @endif
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--apple-gray-4); display: flex; align-items: center; justify-content: center; background: #fff;">
+                <span style="font-size: 20px; font-weight: 600; color: var(--apple-blue);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            </div>
+        </div>
+
+        {{-- Today Stats --}}
+        <div class="row g-3 mb-4">
+            <div class="col-6">
+                <div style="background: var(--apple-gray-6); border-radius: 16px; padding: 16px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(52, 199, 89, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <i class="bi bi-graph-up" style="font-size: 16px; color: var(--apple-green);"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 700; color: var(--apple-text);">TZS {{ number_format($todaySales) }}</div>
+                    <div style="font-size: 13px; color: var(--apple-text-secondary);">Today's Sales</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div style="background: var(--apple-gray-6); border-radius: 16px; padding: 16px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(0, 122, 255, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <i class="bi bi-receipt" style="font-size: 16px; color: var(--apple-blue);"></i>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 700; color: var(--apple-text);">{{ $todayTransactions }}</div>
+                    <div style="font-size: 13px; color: var(--apple-text-secondary);">Transactions</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Quick Actions --}}
+        <h3 style="font-size: 20px; font-weight: 700; color: var(--apple-text); margin: 0 0 12px;">Quick Actions</h3>
+        <div class="d-flex gap-3 mb-4">
+            <a href="{{ route('pos.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--apple-blue); color: #fff; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
+                <i class="bi bi-cart3" style="font-size: 20px;"></i>
+                New Sale
+            </a>
+            <a href="{{ route('transactions.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
+                <i class="bi bi-clock-history" style="font-size: 20px;"></i>
+                History
+            </a>
+        </div>
+
+        {{-- Today's Profit (compact) --}}
+        <div style="background: {{ $todayNetProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }}; border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-size: 13px; color: var(--apple-text-secondary);">Today's {{ $todayNetProfit >= 0 ? 'Profit' : 'Loss' }}</div>
+                    <div style="font-size: 20px; font-weight: 700; color: {{ $todayNetProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};">
+                        TZS {{ number_format(abs($todayNetProfit)) }}
+                    </div>
+                </div>
+                <a href="{{ route('analytics.profit') }}" style="font-size: 13px; color: var(--apple-blue); text-decoration: none;">
+                    Details <i class="bi bi-chevron-right" style="font-size: 11px;"></i>
+                </a>
+            </div>
+        </div>
+
+        {{-- Recent Transactions --}}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 style="font-size: 20px; font-weight: 700; color: var(--apple-text); margin: 0;">Recent Transactions</h3>
+            <a href="{{ route('transactions.index') }}" style="font-size: 15px; color: var(--apple-blue); text-decoration: none; font-weight: 500;">See All</a>
+        </div>
+
+        @forelse($recentTransactions->take(5) as $transaction)
+            <a href="{{ route('transactions.show', $transaction->id) }}" style="display: flex; align-items: center; gap: 12px; background: var(--apple-gray-6); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(52, 199, 89, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    @if($transaction->status === 'completed')
+                        <i class="bi bi-check-circle-fill" style="font-size: 20px; color: var(--apple-green);"></i>
+                    @elseif($transaction->status === 'pending')
+                        <i class="bi bi-clock-fill" style="font-size: 20px; color: var(--apple-orange);"></i>
+                    @else
+                        <i class="bi bi-x-circle-fill" style="font-size: 20px; color: var(--apple-red);"></i>
+                    @endif
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 15px; font-weight: 600; color: var(--apple-text);">{{ $transaction->transaction_number }}</div>
+                    <div style="font-size: 12px; color: var(--apple-text-secondary);">{{ $transaction->created_at->diffForHumans() }}</div>
+                </div>
+                <div style="font-size: 15px; font-weight: 600; color: var(--apple-text); white-space: nowrap;">
+                    TZS {{ number_format($transaction->total) }}
+                </div>
+            </a>
+        @empty
+            <div style="text-align: center; padding: 32px 16px; background: var(--apple-gray-6); border-radius: 14px;">
+                <i class="bi bi-receipt" style="font-size: 32px; color: var(--apple-gray-3);"></i>
+                <p style="font-size: 14px; color: var(--apple-text-secondary); margin: 8px 0 0;">No transactions yet</p>
+            </div>
+        @endforelse
+
+        @if($lowStockCount > 0)
+            <a href="{{ route('inventory.index') }}" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 59, 48, 0.08); border-radius: 14px; padding: 14px 16px; margin-top: 16px; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 18px; color: var(--apple-red);"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-size: 15px; font-weight: 600; color: var(--apple-red);">{{ $lowStockCount }} Low Stock Items</div>
+                    <div style="font-size: 12px; color: var(--apple-text-secondary);">Tap to view inventory</div>
+                </div>
+                <i class="bi bi-chevron-right" style="color: var(--apple-text-secondary);"></i>
+            </a>
+        @endif
+    </div>
+
+    {{-- ============================================= --}}
+    {{-- DESKTOP DASHBOARD (original web layout)       --}}
+    {{-- ============================================= --}}
+    <div class="desktop-dashboard d-none d-lg-block fade-in">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
