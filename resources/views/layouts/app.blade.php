@@ -356,6 +356,30 @@
         {{ $slot }}
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    @unless(auth()->user()->isPlatformAdmin())
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-bottom-nav-inner">
+            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ route('pos.index') }}" class="{{ request()->routeIs('pos.*') ? 'active' : '' }}">
+                <i class="bi bi-cart3"></i>
+                <span>POS</span>
+            </a>
+            <a href="{{ route('transactions.index') }}" class="{{ request()->routeIs('transactions.*') ? 'active' : '' }}">
+                <i class="bi bi-receipt"></i>
+                <span>Sales</span>
+            </a>
+            <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.*') || request()->routeIs('profile.*') ? 'active' : '' }}">
+                <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </nav>
+    @endunless
+
     <!-- Custom Confirm Modal -->
     <div class="custom-modal-overlay" id="confirmModal">
         <div class="custom-modal">
