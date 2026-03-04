@@ -12,7 +12,10 @@ class MainScaffold extends StatelessWidget {
     if (location == '/') return 0;
     if (location == '/pos') return 1;
     if (location.startsWith('/transactions')) return 2;
-    if (location == '/settings') return 3;
+    if (location == '/menu') return 3;
+    if (location.startsWith('/expenses')) return 3;
+    if (location.startsWith('/inventory')) return 3;
+    if (location == '/settings') return 4;
     return 0;
   }
 
@@ -40,6 +43,9 @@ class MainScaffold extends StatelessWidget {
                 context.go('/transactions');
                 break;
               case 3:
+                context.go('/menu');
+                break;
+              case 4:
                 context.go('/settings');
                 break;
             }
@@ -59,6 +65,11 @@ class MainScaffold extends StatelessWidget {
               icon: Icon(Icons.receipt_long_outlined),
               activeIcon: Icon(Icons.receipt_long),
               label: 'Sales',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.apps_outlined),
+              activeIcon: Icon(Icons.apps),
+              label: 'Menu',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined),

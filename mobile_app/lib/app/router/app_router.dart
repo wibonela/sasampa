@@ -13,7 +13,9 @@ import '../../features/expenses/presentation/expenses_screen.dart';
 import '../../features/expenses/presentation/add_expense_screen.dart';
 import '../../features/expenses/presentation/expense_summary_screen.dart';
 import '../../features/inventory/presentation/inventory_screen.dart';
+import '../../features/menu/presentation/menu_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
+import '../../shared/widgets/webview_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -88,40 +90,51 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(
+            path: '/menu',
+            builder: (context, state) => const MenuScreen(),
+          ),
+          GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsScreen(),
           ),
+          GoRoute(
+            path: '/expenses',
+            builder: (context, state) => const ExpensesScreen(),
+          ),
+          GoRoute(
+            path: '/inventory',
+            builder: (context, state) => const InventoryScreen(),
+          ),
         ],
       ),
-      // Standalone screens (not in bottom nav shell)
+      // Standalone screens (pushed on top, no bottom nav)
       GoRoute(
         path: '/store-settings',
         builder: (context, state) => const StoreSettingsScreen(),
       ),
       GoRoute(
-        path: '/expenses',
-        builder: (context, state) => const ExpensesScreen(),
-        routes: [
-          GoRoute(
-            path: 'add',
-            builder: (context, state) => const AddExpenseScreen(),
-          ),
-          GoRoute(
-            path: 'edit/:id',
-            builder: (context, state) {
-              final id = int.parse(state.pathParameters['id']!);
-              return AddExpenseScreen(expenseId: id);
-            },
-          ),
-          GoRoute(
-            path: 'summary',
-            builder: (context, state) => const ExpenseSummaryScreen(),
-          ),
-        ],
+        path: '/expenses/add',
+        builder: (context, state) => const AddExpenseScreen(),
       ),
       GoRoute(
-        path: '/inventory',
-        builder: (context, state) => const InventoryScreen(),
+        path: '/expenses/edit/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return AddExpenseScreen(expenseId: id);
+        },
+      ),
+      GoRoute(
+        path: '/expenses/summary',
+        builder: (context, state) => const ExpenseSummaryScreen(),
+      ),
+      // WebView screen for web-only features
+      GoRoute(
+        path: '/webview',
+        builder: (context, state) {
+          final path = state.uri.queryParameters['path'] ?? '/dashboard';
+          final title = state.uri.queryParameters['title'] ?? 'Sasampa';
+          return WebViewScreen(webPath: path, title: title);
+        },
       ),
     ],
   );
