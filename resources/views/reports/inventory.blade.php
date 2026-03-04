@@ -1,5 +1,17 @@
 <x-app-layout>
-    <x-slot name="header">Inventory Report</x-slot>
+    <x-slot name="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <span>Inventory Report</span>
+            <div class="d-flex gap-2">
+                <a href="{{ route('reports.inventory.pdf') }}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-file-pdf me-1"></i>PDF
+                </a>
+                <a href="{{ route('reports.inventory.csv') }}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Excel
+                </a>
+            </div>
+        </div>
+    </x-slot>
 
     <!-- Summary Cards -->
     <div class="row g-3 mb-4">
