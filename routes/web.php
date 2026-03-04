@@ -297,9 +297,20 @@ Route::middleware('auth')->group(function () {
         // Reports
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+        Route::get('/reports/sales/pdf', [ReportController::class, 'salesPdf'])->name('reports.sales.pdf');
+        Route::get('/reports/sales/csv', [ReportController::class, 'salesCsv'])->name('reports.sales.csv');
         Route::get('/reports/products', [ReportController::class, 'products'])->name('reports.products');
+        Route::get('/reports/products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
+        Route::get('/reports/products/csv', [ReportController::class, 'productsCsv'])->name('reports.products.csv');
         Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+        Route::get('/reports/inventory/pdf', [ReportController::class, 'inventoryPdf'])->name('reports.inventory.pdf');
+        Route::get('/reports/inventory/csv', [ReportController::class, 'inventoryCsv'])->name('reports.inventory.csv');
         Route::get('/reports/profit', [ReportController::class, 'profit'])->name('reports.profit');
+        Route::get('/reports/profit/pdf', [ReportController::class, 'profitPdf'])->name('reports.profit.pdf');
+        Route::get('/reports/profit/csv', [ReportController::class, 'profitCsv'])->name('reports.profit.csv');
+        Route::get('/reports/staff', [ReportController::class, 'staff'])->name('reports.staff');
+        Route::get('/reports/staff/pdf', [ReportController::class, 'staffPdf'])->name('reports.staff.pdf');
+        Route::get('/reports/staff/csv', [ReportController::class, 'staffCsv'])->name('reports.staff.csv');
 
         // Expenses (Matumizi)
         Route::resource('expenses', ExpenseController::class);

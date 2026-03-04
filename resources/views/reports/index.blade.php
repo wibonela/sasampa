@@ -63,6 +63,22 @@
                     </div>
                 </div>
             </div>
+            @if(auth()->user()->isAdmin())
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center py-5">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(88, 86, 214, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                            <i class="bi bi-people" style="font-size: 28px; color: #5856D6;"></i>
+                        </div>
+                        <h5 style="font-weight: 600; margin-bottom: 8px;">Staff Sales Report</h5>
+                        <p class="text-secondary mb-4" style="font-size: 13px;">Per-cashier sales performance and comparison.</p>
+                        <a href="{{ route('reports.staff') }}" class="btn text-white" style="background: #5856D6;">
+                            View Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </x-app-layout>
