@@ -33,7 +33,31 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SandukuController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\MobileWaitlistController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\PersonalAccessToken;
+
+// Mobile app token login (converts API token to web session for in-app WebView)
+Route::get('/mobile-token-login', function (\Illuminate\Http\Request $request) {
+    $token = $request->query('token');
+    $redirect = $request->query('redirect', '/dashboard');
+
+    if (!$token) {
+        abort(401, 'Token required');
+    }
+
+    $accessToken = PersonalAccessToken::findToken($token);
+
+    if (!$accessToken || !$accessToken->tokenable) {
+        abort(401, 'Invalid token');
+    }
+
+    Auth::login($accessToken->tokenable);
+
+    // Append in_app=1 to redirect URL
+    $separator = str_contains($redirect, '?') ? '&' : '?';
+    return redirect($redirect . $separator . 'in_app=1');
+})->middleware('throttle:10,1')->name('mobile.token-login');
 
 // Sanduku feedback (public API with rate limiting)
 Route::post('/api/sanduku', [SandukuController::class, 'store'])
