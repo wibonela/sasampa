@@ -13,6 +13,15 @@
     <link rel="apple-touch-icon" href="/favicon.svg">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- In-app mode: hide chrome when loaded inside Flutter WebView -->
+    <style>
+        body.in-app .sidebar,
+        body.in-app .mobile-header,
+        body.in-app .mobile-bottom-nav,
+        body.in-app .sidebar-overlay { display: none !important; }
+        body.in-app .main-content { margin-left: 0 !important; padding-top: 16px !important; }
+    </style>
 </head>
 <body>
     <!-- Mobile Header -->
@@ -509,6 +518,13 @@
                 closeConfirmModal();
             }
         });
+    </script>
+
+    <!-- Detect in-app mode from URL parameter -->
+    <script>
+        if (new URLSearchParams(location.search).has('in_app')) {
+            document.body.classList.add('in-app');
+        }
     </script>
 
     @stack('scripts')
