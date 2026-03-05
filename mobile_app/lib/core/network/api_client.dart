@@ -9,6 +9,9 @@ class ApiClient {
   late final Dio _dio;
   final SecureStorage _storage;
 
+  /// Called when API returns 403 (access revoked/denied) on protected routes
+  void Function()? onAccessDenied;
+
   ApiClient(this._storage) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
@@ -49,6 +52,11 @@ class ApiClient {
       onError: (error, handler) {
         if (kDebugMode) {
           print('ERROR[${error.response?.statusCode}] => MESSAGE: ${error.message}');
+        }
+        // On 403, trigger access denied callback to refresh user state
+        // This handles mid-session revocations
+        if (error.response?.statusCode == 403 && onAccessDenied != null) {
+          onAccessDenied!();
         }
         handler.next(error);
       },
