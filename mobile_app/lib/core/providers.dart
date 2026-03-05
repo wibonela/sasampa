@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -192,18 +193,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return true;
     } catch (e) {
       debugPrint('AUTH_REFRESH: Error - $e');
-      // Check if it's an authentication error (401/403) vs network error
-      final errorStr = e.toString();
-      if (errorStr.contains('401') || errorStr.contains('403') || errorStr.contains('Unauthenticated')) {
-        // Token is invalid - clear and force re-login
-        debugPrint('AUTH_REFRESH: Token invalid, clearing auth');
+      // Only clear session on definitive auth errors (401 Unauthenticated)
+      if (e is DioException && e.response?.statusCode == 401) {
+        debugPrint('AUTH_REFRESH: Token invalid (401), clearing auth');
         await _storage.clearAll();
         state = AuthState(isInitialized: true);
         return false;
       }
-      // Network error - keep user logged in if they have a token
-      // Don't clear storage, just mark as initialized
-      debugPrint('AUTH_REFRESH: Network error, keeping session');
+      // For all other errors (network, timeout, 500, etc.) keep user logged in
+      debugPrint('AUTH_REFRESH: Non-auth error, keeping session');
       state = state.copyWith(isInitialized: true);
       return false;
     }
@@ -284,27 +282,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   String _getErrorMessage(dynamic error) {
-    // Handle Dio errors
-    if (error.toString().contains('DioException')) {
-      // Check for common error codes
-      if (error.toString().contains('422')) {
+    // Handle Dio errors - extract actual server message when available
+    if (error is DioException) {
+      final response = error.response;
+      if (response != null && response.data is Map<String, dynamic>) {
+        final data = response.data as Map<String, dynamic>;
+        // Laravel validation errors: { "message": "...", "errors": { "email": ["..."] } }
+        if (data.containsKey('errors') && data['errors'] is Map) {
+          final errors = data['errors'] as Map;
+          final firstError = errors.values.first;
+          if (firstError is List && firstError.isNotEmpty) {
+            return firstError.first.toString();
+          }
+        }
+        // Simple message response: { "message": "..." }
+        if (data.containsKey('message') && data['message'] is String) {
+          return data['message'] as String;
+        }
+      }
+
+      // Fallback for status codes when no server message
+      final statusCode = response?.statusCode;
+      if (statusCode == 422) {
         return 'Invalid email or password. Please try again.';
       }
-      if (error.toString().contains('401')) {
+      if (statusCode == 401) {
         return 'Invalid credentials. Please check your email and password.';
       }
-      if (error.toString().contains('403')) {
+      if (statusCode == 403) {
         return 'Access denied. Your account may be deactivated.';
       }
-      if (error.toString().contains('404')) {
+      if (statusCode == 404) {
         return 'Service not found. Please try again later.';
       }
-      if (error.toString().contains('500')) {
+      if (statusCode == 500) {
         return 'Server error. Please try again later.';
       }
-      if (error.toString().contains('SocketException') ||
-          error.toString().contains('connection')) {
+
+      // Network errors
+      if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout) {
         return 'No internet connection. Please check your network.';
+      }
+      if (error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        return 'Connection timed out. Please try again.';
       }
     }
     return 'An error occurred. Please try again.';
