@@ -63,7 +63,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _api;
   final SecureStorage _storage;
 
-  AuthNotifier(this._api, this._storage) : super(AuthState());
+  AuthNotifier(this._api, this._storage) : super(AuthState()) {
+    // Listen for 403 responses (access revoked mid-session)
+    _api.onAccessDenied = () {
+      debugPrint('AUTH: Access denied (403) - refreshing user state');
+      refreshUser();
+    };
+  }
 
   Future<bool> login(String email, String password, String deviceName) async {
     state = state.copyWith(isLoading: true, error: null);
