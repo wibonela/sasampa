@@ -39,20 +39,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if email is verified
-        if (!$user->hasVerifiedEmail()) {
-            throw ValidationException::withMessages([
-                'email' => ['Please verify your email address before logging in.'],
-            ]);
-        }
-
-        // Check if user has a pending invitation
-        if ($user->hasPendingInvitation()) {
-            throw ValidationException::withMessages([
-                'email' => ['Please accept your invitation to complete account setup.'],
-            ]);
-        }
-
         // Create token with abilities based on role
         $abilities = $this->getAbilitiesForUser($user);
         $token = $user->createToken($request->device_name, $abilities);

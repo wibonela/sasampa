@@ -63,6 +63,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authNotifier = ref.read(authProvider.notifier);
     final storage = ref.read(secureStorageProvider);
 
+    // Save email before attempting login so it persists on error/rebuild
+    if (_rememberEmail) {
+      await storage.saveRememberEmail(_emailController.text.trim());
+    } else {
+      await storage.clearRememberEmail();
+    }
+
     bool success;
     if (_usePinLogin) {
       success = await authNotifier.loginWithPin(
@@ -79,13 +86,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     if (success && mounted) {
-      // Save email if remember is checked
-      if (_rememberEmail) {
-        await storage.saveRememberEmail(_emailController.text.trim());
-      } else {
-        await storage.clearRememberEmail();
-      }
-
       // Navigate based on mobile access status
       final authState = ref.read(authProvider);
       if (authState.canUseMobile) {

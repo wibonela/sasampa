@@ -897,10 +897,6 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         <span id="waitlistCount">0</span> businesses already waiting
                     </div>
-                    <div class="waitlist-price">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h6M9 15h6"/></svg>
-                        Only 13,000 TZS/month
-                    </div>
                 </div>
             </div>
         </div>
