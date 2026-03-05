@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,8 +43,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      String errorMsg = 'Failed to load dashboard';
+      if (e is DioException) {
+        final response = e.response;
+        if (response != null && response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          errorMsg = data['message'] ?? errorMsg;
+        } else if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout) {
+          errorMsg = 'No internet connection';
+        }
+      }
       setState(() {
-        _error = 'Failed to load dashboard';
+        _error = errorMsg;
         _isLoading = false;
       });
     }
