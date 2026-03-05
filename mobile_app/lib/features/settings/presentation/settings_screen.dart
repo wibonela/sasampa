@@ -695,22 +695,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ? companyName[0].toUpperCase()
         : (user?.name?.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U');
 
-    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
-      return Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.gray5, width: 1),
-          image: DecorationImage(
-            image: NetworkImage(logoUrl.toString()),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    }
-
-    return Container(
+    Widget initialWidget() => Container(
       width: 60,
       height: 60,
       decoration: BoxDecoration(
@@ -728,6 +713,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
+
+    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
+      return ClipOval(
+        child: SizedBox(
+          width: 60,
+          height: 60,
+          child: Image.network(
+            logoUrl.toString(),
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => initialWidget(),
+          ),
+        ),
+      );
+    }
+
+    return initialWidget();
   }
 
   Widget _buildSettingItem({

@@ -404,22 +404,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ? companyName[0].toUpperCase()
         : (userName.isNotEmpty ? userName[0].toUpperCase() : 'U');
 
-    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
-      return Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.gray5, width: 1),
-          image: DecorationImage(
-            image: NetworkImage(logoUrl.toString()),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    }
-
-    return Container(
+    Widget initialWidget() => Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
@@ -437,6 +422,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
       ),
     );
+
+    if (logoUrl != null && logoUrl.toString().isNotEmpty) {
+      return ClipOval(
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Image.network(
+            logoUrl.toString(),
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => initialWidget(),
+          ),
+        ),
+      );
+    }
+
+    return initialWidget();
   }
 
   Widget _buildTransactionItem(Map<String, dynamic> tx) {
