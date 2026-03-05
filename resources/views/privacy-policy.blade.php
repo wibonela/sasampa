@@ -25,8 +25,16 @@
             padding: 0 24px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
         }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .header-left:hover { opacity: 0.8; }
         .header-logo {
             width: 36px;
             height: 36px;
@@ -42,6 +50,32 @@
         .header-title {
             font-size: 18px;
             font-weight: 600;
+        }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-nav a {
+            color: #424245;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .header-nav a:hover {
+            background: #f5f5f7;
+            text-decoration: none;
+        }
+        .header-nav .btn-login {
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 8px;
+        }
+        .header-nav .btn-login:hover {
+            background: #333;
         }
         .container {
             max-width: 800px;
@@ -91,8 +125,14 @@
 <body>
     <div class="header">
         <div class="header-inner">
-            <div class="header-logo">S</div>
-            <div class="header-title">Sasampa POS</div>
+            <a href="/" class="header-left">
+                <div class="header-logo">S</div>
+                <div class="header-title">Sasampa POS</div>
+            </a>
+            <nav class="header-nav">
+                <a href="/">Home</a>
+                <a href="/login" class="btn-login">Login</a>
+            </nav>
         </div>
     </div>
 
