@@ -76,6 +76,11 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Mobile app waitlist page (shareable link)
+Route::get('/mobile', function () {
+    return view('mobile');
+})->name('mobile');
+
 // Language switching
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])
     ->name('language.switch')
