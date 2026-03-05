@@ -8,6 +8,8 @@ database.sqlite
 .env.backup
 .env.production
 .env.local
+*.p8
+AuthKey_*
 
 # ===========================================
 # Laravel Framework
