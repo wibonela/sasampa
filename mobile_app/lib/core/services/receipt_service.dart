@@ -40,6 +40,7 @@ class ReceiptService {
         pageFormat: PdfPageFormat.roll80,
         build: (pw.Context context) {
           return pw.Column(
+            mainAxisSize: pw.MainAxisSize.min,
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               // Company Logo
@@ -243,6 +244,7 @@ class ReceiptService {
         pageFormat: PdfPageFormat.roll80,
         build: (pw.Context context) {
           return pw.Column(
+            mainAxisSize: pw.MainAxisSize.min,
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               // Header
