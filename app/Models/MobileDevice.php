@@ -111,9 +111,8 @@ class MobileDevice extends Model
         array $attributes = []
     ): self {
         return self::updateOrCreate(
-            ['device_identifier' => $identifier],
+            ['device_identifier' => $identifier, 'user_id' => $userId],
             array_merge([
-                'user_id' => $userId,
                 'company_id' => $companyId,
                 'is_active' => true,
                 'last_active_at' => now(),
