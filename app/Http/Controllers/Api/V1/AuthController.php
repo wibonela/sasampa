@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -300,7 +301,7 @@ class AuthController extends Controller
             'company' => $user->company ? [
                 'id' => $user->company->id,
                 'name' => $user->company->name,
-                'logo' => $user->company->logo ? asset('storage/' . $user->company->logo) : null,
+                'logo' => $this->getCompanyLogo($user->company),
                 'status' => $user->company->status,
                 'branches_enabled' => $user->company->branches_enabled,
             ] : null,
@@ -311,6 +312,31 @@ class AuthController extends Controller
             ] : null,
             'permissions' => $user->isCompanyOwner() ? ['*'] : $user->permissions->pluck('slug')->toArray(),
         ];
+    }
+
+    /**
+     * Get company logo URL, falling back to settings table.
+     */
+    protected function getCompanyLogo($company): ?string
+    {
+        // Primary: companies table
+        if ($company->logo) {
+            return asset('storage/' . $company->logo);
+        }
+
+        // Fallback: settings table (store_logo)
+        $storeLogo = Setting::withoutGlobalScope('company')
+            ->where('key', 'store_logo')
+            ->where('company_id', $company->id)
+            ->value('value');
+
+        if ($storeLogo && $storeLogo !== '') {
+            // Sync to company record for future requests
+            $company->update(['logo' => $storeLogo]);
+            return asset('storage/' . $storeLogo);
+        }
+
+        return null;
     }
 
     /**

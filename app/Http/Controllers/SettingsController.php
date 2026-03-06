@@ -62,8 +62,14 @@ class SettingsController extends Controller
             if ($oldLogo) {
                 Storage::disk('public')->delete($oldLogo);
             }
-            $logoPath = $request->file('store_logo')->store('logos', 'public');
+            $logoPath = $request->file('store_logo')->store('company-logos', 'public');
             Setting::set('store_logo', $logoPath, 'string');
+
+            // Sync to company record so API/mobile app can access it
+            $company = auth()->user()->company;
+            if ($company) {
+                $company->update(['logo' => $logoPath]);
+            }
         }
 
         // Remove store_logo from validated array (handled separately)
@@ -88,6 +94,12 @@ class SettingsController extends Controller
         if ($logo) {
             Storage::disk('public')->delete($logo);
             Setting::set('store_logo', '', 'string');
+        }
+
+        // Sync removal to company record
+        $company = auth()->user()->company;
+        if ($company) {
+            $company->update(['logo' => null]);
         }
 
         return redirect()->route('settings.index')
