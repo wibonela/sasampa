@@ -7,7 +7,6 @@ use App\Models\MobileAppRequest;
 use App\Models\MobileDevice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class MobileAccessController extends Controller
 {
@@ -135,17 +134,6 @@ class MobileAccessController extends Controller
             'app_version' => 'nullable|string|max:50',
             'push_token' => 'nullable|string|max:500',
         ]);
-
-        // Check if device is already registered to another user
-        $existingDevice = MobileDevice::where('device_identifier', $validated['device_identifier'])
-            ->where('user_id', '!=', $user->id)
-            ->first();
-
-        if ($existingDevice) {
-            throw ValidationException::withMessages([
-                'device_identifier' => ['This device is already registered to another user.'],
-            ]);
-        }
 
         $device = MobileDevice::findOrCreateByIdentifier(
             $validated['device_identifier'],
