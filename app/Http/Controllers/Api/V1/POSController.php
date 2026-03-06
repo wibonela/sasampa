@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\Product;
 use App\Models\StockAdjustment;
 use App\Models\Transaction;
@@ -315,7 +316,7 @@ class POSController extends Controller
                 'address' => $company?->address,
                 'phone' => $company?->phone,
                 'email' => $company?->email,
-                'logo' => $company?->logo ? asset('storage/' . $company->logo) : null,
+                'logo' => $this->getCompanyLogo($company),
             ],
             'branch' => $transaction->branch ? [
                 'name' => $transaction->branch->name,
@@ -357,5 +358,28 @@ class POSController extends Controller
                 'message' => 'Thank you for your purchase!',
             ],
         ];
+    }
+
+    protected function getCompanyLogo($company): ?string
+    {
+        if (!$company) {
+            return null;
+        }
+
+        if ($company->logo) {
+            return asset('storage/' . $company->logo);
+        }
+
+        $storeLogo = Setting::withoutGlobalScope('company')
+            ->where('key', 'store_logo')
+            ->where('company_id', $company->id)
+            ->value('value');
+
+        if ($storeLogo && $storeLogo !== '') {
+            $company->update(['logo' => $storeLogo]);
+            return asset('storage/' . $storeLogo);
+        }
+
+        return null;
     }
 }
