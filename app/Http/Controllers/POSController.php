@@ -198,20 +198,23 @@ class POSController extends Controller
     {
         $transaction->load('items.product', 'user');
 
-        // Calculate dynamic height based on number of items
-        // Base height (header, footer, totals, margins) + height per item
-        // Being generous to ensure no page breaks
-        $baseHeight = 180; // Header, footer, totals, payment info, margins
+        // Calculate dynamic height based on content
+        $baseHeight = 135; // Header, footer, totals, payment, dividers, margins
         $itemHeight = 12;  // Per item row
         $totalHeight = $baseHeight + ($transaction->items->count() * $itemHeight);
 
-        // Add extra for discount/tax rows if present
-        if ($transaction->discount_amount > 0) {
-            $totalHeight += 8;
-        }
-        if ($transaction->tax_amount > 0) {
-            $totalHeight += 8;
-        }
+        // Add extra for optional rows
+        if ($transaction->discount_amount > 0) $totalHeight += 8;
+        if ($transaction->tax_amount > 0) $totalHeight += 8;
+        if ($transaction->customer_name) $totalHeight += 8;
+        if ($transaction->change_given > 0) $totalHeight += 8;
+
+        // Add logo height if exists
+        $logo = \App\Models\Setting::get('store_logo');
+        if ($logo) $totalHeight += 20;
+
+        // Small bottom padding
+        $totalHeight += 10;
 
         // Convert mm to points (1mm = 2.83465 points)
         $widthPoints = 80 * 2.83465;  // 80mm width
