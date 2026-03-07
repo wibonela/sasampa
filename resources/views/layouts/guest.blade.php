@@ -24,7 +24,7 @@
             <div class="card-body p-4">
                 <!-- Logo -->
                 <div class="text-center mb-4">
-                    <svg width="56" height="56" viewBox="0 0 32 32" style="margin-bottom: 12px;"><defs><linearGradient id="guestLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#guestLogoGrad)"/><rect x="8" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="8" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="14" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="20" y="14" width="4" height="4" rx="1" fill="#fff"/><rect x="8" y="20" width="16" height="4" rx="1" fill="#fff"/></svg>
+                    <svg width="56" height="56" viewBox="0 0 32 32" style="margin-bottom: 12px;"><defs><linearGradient id="guestLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FF2D20"/><stop offset="100%" style="stop-color:#E53E3E"/></linearGradient></defs><rect width="32" height="32" rx="6" fill="url(#guestLogoGrad)"/><rect x="7" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="7" y="17" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="17" width="8" height="8" rx="2" fill="#fff"/></svg>
                     <h4 style="font-weight: 600; margin: 0; color: var(--apple-text);">Sasampa POS</h4>
                     <p class="text-secondary mb-0" style="font-size: 13px;">Point of Sale System</p>
                 </div>
