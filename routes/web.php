@@ -91,6 +91,11 @@ Route::get('/privacy-policy', function () {
     return view('privacy-policy');
 })->name('privacy-policy');
 
+// App Update Guide (password-protected client-side)
+Route::get('/app-update-guide', function () {
+    return view('app-update-guide');
+})->name('app-update-guide');
+
 // Public Documentation
 Route::prefix('docs')->name('docs.')->group(function () {
     Route::get('/', [DocumentationController::class, 'index'])->name('index');
