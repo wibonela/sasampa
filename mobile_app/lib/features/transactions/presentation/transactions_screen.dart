@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../shared/models/transaction.dart';
 
 class TransactionsScreen extends ConsumerStatefulWidget {
@@ -17,8 +18,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   List<Transaction> _transactions = [];
   Map<String, dynamic>? _summary;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
   String? _error;
   String _filter = 'today';
+  String _searchQuery = '';
+  int _currentPage = 1;
+  bool _hasMore = true;
+  final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
 
@@ -26,19 +33,66 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   void initState() {
     super.initState();
     _loadTransactions();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_filter == 'all' &&
+        _hasMore &&
+        !_isLoadingMore &&
+        _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.getTransactions(
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: _currentPage + 1,
+      );
+      final data = response.data;
+      final newItems = (data['data'] as List)
+          .map((e) => Transaction.fromJson(e))
+          .toList();
+
+      setState(() {
+        _transactions.addAll(newItems);
+        _currentPage++;
+        _hasMore = newItems.length >= 20;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   Future<void> _loadTransactions() async {
     setState(() {
       _isLoading = true;
       _error = null;
+      _currentPage = 1;
+      _hasMore = true;
     });
 
     try {
       final api = ref.read(apiClientProvider);
       final response = _filter == 'today'
           ? await api.getTodayTransactions()
-          : await api.getTransactions();
+          : await api.getTransactions(
+              search: _searchQuery.isNotEmpty ? _searchQuery : null,
+            );
 
       final data = response.data;
 
@@ -47,11 +101,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             .map((e) => Transaction.fromJson(e))
             .toList();
         _summary = data['summary'];
+        _hasMore = _filter == 'all' && _transactions.length >= 20;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load transactions';
+        _error = extractErrorMessage(e, 'Failed to load transactions');
         _isLoading = false;
       });
     }
@@ -62,9 +117,41 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Transactions'),
-        centerTitle: true,
+        title: _searchQuery.isNotEmpty || _searchController.text.isNotEmpty
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search by number, customer...',
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                      _loadTransactions();
+                    },
+                  ),
+                ),
+                onSubmitted: (value) {
+                  setState(() => _searchQuery = value);
+                  _loadTransactions();
+                },
+                style: const TextStyle(fontSize: 16),
+              )
+            : const Text('Transactions'),
+        centerTitle: _searchQuery.isEmpty && _searchController.text.isEmpty,
         actions: [
+          if (_searchQuery.isEmpty && _searchController.text.isEmpty)
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _searchController.text = '';
+                  _filter = 'all';
+                });
+              },
+            ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.filter_list),
             onSelected: (value) {
@@ -117,6 +204,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     ),
                   )
                 : CustomScrollView(
+                    controller: _scrollController,
                     slivers: [
                       // Summary Card
                       if (_summary != null)
@@ -195,6 +283,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                               return _buildTransactionItem(tx);
                             },
                             childCount: _transactions.length,
+                          ),
+                        ),
+
+                      if (_isLoadingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
                           ),
                         ),
 

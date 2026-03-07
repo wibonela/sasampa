@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/utils/error_utils.dart';
 
 class ExpensesScreen extends ConsumerStatefulWidget {
   const ExpensesScreen({super.key});
@@ -18,7 +19,10 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
   Map<String, dynamic> _summary = {};
   List<Map<String, dynamic>> _categories = [];
   int? _selectedCategoryId;
+  String _dateFilter = 'today';
+  DateTimeRange? _customRange;
   final _currencyFormat = NumberFormat('#,###');
+  final _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
@@ -26,28 +30,62 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     _loadData();
   }
 
+  String get _dateFilterLabel => switch (_dateFilter) {
+    'today' => "Today's Expenses",
+    'week' => "This Week's Expenses",
+    'month' => "This Month's Expenses",
+    'custom' => 'Custom Range',
+    _ => 'Expenses',
+  };
+
+  (String?, String?) get _dateRange {
+    final now = DateTime.now();
+    return switch (_dateFilter) {
+      'today' => (_dateFormat.format(now), _dateFormat.format(now)),
+      'week' => (
+        _dateFormat.format(now.subtract(Duration(days: now.weekday - 1))),
+        _dateFormat.format(now),
+      ),
+      'month' => (
+        _dateFormat.format(DateTime(now.year, now.month, 1)),
+        _dateFormat.format(now),
+      ),
+      'custom' when _customRange != null => (
+        _dateFormat.format(_customRange!.start),
+        _dateFormat.format(_customRange!.end),
+      ),
+      _ => (null, null),
+    };
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
       final api = ref.read(apiClientProvider);
+      final (dateFrom, dateTo) = _dateRange;
 
-      // Load categories, expenses, and today's summary in parallel
       final results = await Future.wait([
         api.getExpenseCategories(),
-        api.getTodayExpenses(),
+        _dateFilter == 'today'
+            ? api.getTodayExpenses()
+            : api.getExpenses(
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                categoryId: _selectedCategoryId,
+              ),
       ]);
 
       final categoriesResponse = results[0];
-      final todayResponse = results[1];
+      final expensesResponse = results[1];
 
       setState(() {
         _categories = List<Map<String, dynamic>>.from(
           categoriesResponse.data['data'] ?? [],
         );
         _expenses = List<Map<String, dynamic>>.from(
-          todayResponse.data['data'] ?? [],
+          expensesResponse.data['data'] ?? [],
         );
-        _summary = todayResponse.data['summary'] ?? {};
+        _summary = expensesResponse.data['summary'] ?? {};
         _isLoading = false;
       });
     } catch (e) {
@@ -55,11 +93,27 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load expenses: $e'),
+            content: Text(extractErrorMessage(e, 'Failed to load expenses')),
             backgroundColor: AppColors.error,
           ),
         );
       }
+    }
+  }
+
+  Future<void> _pickCustomRange() async {
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2024),
+      lastDate: DateTime.now(),
+      initialDateRange: _customRange,
+    );
+    if (range != null) {
+      setState(() {
+        _dateFilter = 'custom';
+        _customRange = range;
+      });
+      _loadData();
     }
   }
 
@@ -101,7 +155,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete: $e'),
+            content: Text(extractErrorMessage(e, 'Failed to delete expense')),
             backgroundColor: AppColors.error,
           ),
         );
@@ -158,6 +212,34 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                     ),
                   ),
 
+                  // Date Filter
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 44,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          _buildDateChip('Today', 'today'),
+                          _buildDateChip('This Week', 'week'),
+                          _buildDateChip('This Month', 'month'),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(_dateFilter == 'custom' && _customRange != null
+                                  ? '${DateFormat('dd/MM').format(_customRange!.start)} - ${DateFormat('dd/MM').format(_customRange!.end)}'
+                                  : 'Custom'),
+                              selected: _dateFilter == 'custom',
+                              onSelected: (_) => _pickCustomRange(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 8)),
+
                   // Category Filter
                   if (_categories.isNotEmpty)
                     SliverToBoxAdapter(
@@ -205,7 +287,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'Today\'s Expenses',
+                        _dateFilterLabel,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -274,6 +356,20 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
         label: const Text('Add Expense'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildDateChip(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: _dateFilter == value,
+        onSelected: (_) {
+          setState(() => _dateFilter = value);
+          _loadData();
+        },
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/services/receipt_service.dart';
+import '../../../core/utils/error_utils.dart';
 
 class CheckoutSheet extends ConsumerStatefulWidget {
   const CheckoutSheet({super.key});
@@ -19,9 +20,20 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   final _tinController = TextEditingController();
 
   bool _isProcessing = false;
+  bool _showCustomerInfo = false;
+  String _selectedPaymentMethod = 'cash';
   String? _error;
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cart = ref.read(cartProvider);
+      _amountPaidController.text = cart.total.toStringAsFixed(0);
+    });
+  }
 
   @override
   void dispose() {
@@ -47,7 +59,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       final api = ref.read(apiClientProvider);
       final response = await api.checkout(
         items: cart.toCheckoutItems(),
-        paymentMethod: 'cash',
+        paymentMethod: _selectedPaymentMethod,
         amountPaid: amountPaid,
         customerName: _customerNameController.text.trim().isNotEmpty
             ? _customerNameController.text.trim()
@@ -93,7 +105,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       }
     } catch (e) {
       setState(() {
-        _error = 'Failed to process sale. Please try again.';
+        _error = extractErrorMessage(e, 'Failed to process sale. Please try again.');
         _isProcessing = false;
       });
     }
@@ -250,7 +262,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                 const SizedBox(height: 8),
 
                 // ===== PAYMENT =====
-                _buildInfoRow('Payment:', 'Cash'),
+                _buildInfoRow('Payment:', _paymentMethodLabel(transaction['payment_method'] ?? 'cash')),
                 _buildInfoRow('Amount Paid:', 'TZS ${NumberFormat('#,###').format((transaction['amount_paid'] ?? 0).toDouble())}'),
                 if ((transaction['change_given'] ?? 0) > 0)
                   _buildInfoRow('Change:', 'TZS ${NumberFormat('#,###').format((transaction['change_given'] ?? 0).toDouble())}', isBold: true),
@@ -390,6 +402,38 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
         ],
       ),
     );
+  }
+
+  Widget _buildPaymentChip(String value, String label, IconData icon) {
+    final selected = _selectedPaymentMethod == value;
+    return ChoiceChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: selected ? Colors.white : AppColors.textSecondary),
+          const SizedBox(width: 4),
+          Text(label),
+        ],
+      ),
+      selected: selected,
+      onSelected: (_) => setState(() => _selectedPaymentMethod = value),
+      selectedColor: AppColors.primary,
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : AppColors.textPrimary,
+        fontSize: 13,
+      ),
+      showCheckmark: false,
+    );
+  }
+
+  String _paymentMethodLabel(String method) {
+    return switch (method) {
+      'cash' => 'Cash',
+      'card' => 'Card',
+      'mobile' => 'Mobile Money',
+      'bank_transfer' => 'Bank Transfer',
+      _ => method,
+    };
   }
 
   void _showQuantityDialog(int productId, int currentQuantity) {
@@ -739,6 +783,27 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 
                   const SizedBox(height: 24),
 
+                  // Payment Method
+                  const Text(
+                    'Payment Method',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _buildPaymentChip('cash', 'Cash', Icons.payments),
+                      _buildPaymentChip('card', 'Card', Icons.credit_card),
+                      _buildPaymentChip('mobile', 'Mobile Money', Icons.phone_android),
+                      _buildPaymentChip('bank_transfer', 'Bank Transfer', Icons.account_balance),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Amount Paid
                   TextField(
                     controller: _amountPaidController,
@@ -749,40 +814,58 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
-                  // Customer Info (optional)
-                  ExpansionTile(
-                    title: const Text('Customer Info (Optional)'),
-                    tilePadding: EdgeInsets.zero,
-                    children: [
-                      TextField(
-                        controller: _customerNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Customer Name',
-                          prefixIcon: Icon(Icons.person_outline),
+                  // Customer Info (optional toggle)
+                  GestureDetector(
+                    onTap: () => setState(() => _showCustomerInfo = !_showCustomerInfo),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _showCustomerInfo ? Icons.remove_circle_outline : Icons.add_circle_outline,
+                          size: 18,
+                          color: AppColors.primary,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _customerPhoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          prefixIcon: Icon(Icons.phone_outlined),
+                        const SizedBox(width: 6),
+                        Text(
+                          _showCustomerInfo ? 'Hide Customer Info' : 'Add Customer Info (optional)',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _tinController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'TIN Number',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  if (_showCustomerInfo) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _customerNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Customer Name',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _customerPhoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Phone Number',
+                        prefixIcon: Icon(Icons.phone_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _tinController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'TIN Number',
+                        prefixIcon: Icon(Icons.badge_outlined),
+                      ),
+                    ),
+                  ],
 
                   // Error
                   if (_error != null)

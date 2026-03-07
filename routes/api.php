@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\InventoryController;
 use App\Http\Controllers\Api\V1\MobileAccessController;
+use App\Http\Controllers\Api\V1\OnboardingApiController;
 use App\Http\Controllers\Api\V1\POSController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
@@ -33,6 +34,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/login/pin', [AuthController::class, 'loginWithPin']);
+        Route::post('/register', [OnboardingApiController::class, 'register']);
     });
 
     /*
@@ -68,6 +70,20 @@ Route::prefix('v1')->group(function () {
             Route::patch('/device/push-token', [MobileAccessController::class, 'updatePushToken']);
             Route::get('/devices', [MobileAccessController::class, 'devices']);
             Route::delete('/devices/{device_identifier}', [MobileAccessController::class, 'deactivateDevice']);
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Onboarding (New Users - No Mobile Access Required)
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('auth')->group(function () {
+            Route::post('/resend-verification', [OnboardingApiController::class, 'resendVerification']);
+            Route::get('/verify-status', [OnboardingApiController::class, 'verifyStatus']);
+        });
+        Route::prefix('onboarding')->group(function () {
+            Route::post('/business', [OnboardingApiController::class, 'saveBusiness']);
+            Route::post('/complete', [OnboardingApiController::class, 'complete']);
         });
 
         /*

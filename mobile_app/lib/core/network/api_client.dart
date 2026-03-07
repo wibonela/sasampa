@@ -63,6 +63,47 @@ class ApiClient {
     ));
   }
 
+  // Registration & Onboarding
+  Future<Response> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    required String deviceName,
+  }) {
+    return _dio.post('/auth/register', data: {
+      'name': name,
+      'email': email,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+      'device_name': deviceName,
+    });
+  }
+
+  Future<Response> resendVerification() {
+    return _dio.post('/auth/resend-verification');
+  }
+
+  Future<Response> checkVerificationStatus() {
+    return _dio.get('/auth/verify-status');
+  }
+
+  Future<Response> saveBusinessDetails({
+    required String companyName,
+    String? companyPhone,
+    String? companyAddress,
+  }) {
+    return _dio.post('/onboarding/business', data: {
+      'company_name': companyName,
+      if (companyPhone != null) 'company_phone': companyPhone,
+      if (companyAddress != null) 'company_address': companyAddress,
+    });
+  }
+
+  Future<Response> completeOnboarding() {
+    return _dio.post('/onboarding/complete');
+  }
+
   // Auth
   Future<Response> login(String email, String password, String deviceName) {
     return _dio.post('/auth/login', data: {

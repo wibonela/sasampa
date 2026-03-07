@@ -1,7 +1,7 @@
 name: sasampa_pos
 description: "Sasampa POS - Premium Point of Sale Mobile App"
 publish_to: 'none'
-version: 1.0.0+7
+version: 1.1.0+8
 
 environment:
   sdk: ^3.10.4
@@ -71,10 +71,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Assets - uncomment when assets are added
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
+  assets:
+    - assets/icons/
 
   # Using system fonts (SF Pro on iOS, Roboto on Android)
   # Custom fonts can be added later if needed

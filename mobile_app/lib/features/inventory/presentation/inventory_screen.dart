@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/utils/error_utils.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -15,10 +16,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
   List<Map<String, dynamic>> _products = [];
   Map<String, dynamic>? _summary;
   String _searchQuery = '';
+  int _currentPage = 1;
+  bool _hasMore = true;
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
   final _currencyFormat = NumberFormat('#,###');
 
   @override
@@ -26,6 +31,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabChanged);
+    _scrollController.addListener(_onScroll);
     _loadData();
   }
 
@@ -33,7 +39,45 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_tabController.index == 0 &&
+        _hasMore &&
+        !_isLoadingMore &&
+        _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.getInventory(
+        lowStock: _tabController.index == 1 ? true : null,
+        outOfStock: _tabController.index == 2 ? true : null,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        page: _currentPage + 1,
+      );
+
+      final newItems = List<Map<String, dynamic>>.from(
+        response.data['data'] ?? [],
+      );
+
+      setState(() {
+        _products.addAll(newItems);
+        _currentPage++;
+        _hasMore = newItems.length >= 50;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   void _onTabChanged() {
@@ -43,7 +87,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _currentPage = 1;
+      _hasMore = true;
+    });
     try {
       final api = ref.read(apiClientProvider);
 
@@ -62,6 +110,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         _products = List<Map<String, dynamic>>.from(
           productsResponse.data['data'] ?? [],
         );
+        _hasMore = _tabController.index == 0 && _products.length >= 50;
         _isLoading = false;
       });
     } catch (e) {
@@ -69,7 +118,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load inventory: $e'),
+            content: Text(extractErrorMessage(e, 'Failed to load inventory')),
             backgroundColor: AppColors.error,
           ),
         );
@@ -322,7 +371,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to adjust: $e'),
+              content: Text(extractErrorMessage(e, 'Failed to adjust stock')),
               backgroundColor: AppColors.error,
             ),
           );
@@ -438,9 +487,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
                             ),
                           )
                         : ListView.builder(
+                            controller: _scrollController,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: _products.length,
+                            itemCount: _products.length + (_isLoadingMore ? 1 : 0),
                             itemBuilder: (context, index) {
+                              if (index == _products.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(child: CircularProgressIndicator()),
+                                );
+                              }
                               final product = _products[index];
                               return _buildProductItem(product);
                             },
