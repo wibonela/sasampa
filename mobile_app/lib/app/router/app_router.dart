@@ -18,6 +18,8 @@ import '../../features/expenses/presentation/add_expense_screen.dart';
 import '../../features/expenses/presentation/expense_summary_screen.dart';
 import '../../features/inventory/presentation/inventory_screen.dart';
 import '../../features/menu/presentation/menu_screen.dart';
+import '../../features/orders/presentation/orders_screen.dart';
+import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../shared/widgets/webview_screen.dart';
 
@@ -127,9 +129,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/inventory',
             builder: (context, state) => const InventoryScreen(),
           ),
+          GoRoute(
+            path: '/orders',
+            builder: (context, state) => const OrdersScreen(),
+          ),
         ],
       ),
       // Standalone screens (pushed on top, no bottom nav)
+      GoRoute(
+        path: '/orders/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return OrderDetailScreen(orderId: id);
+        },
+      ),
       GoRoute(
         path: '/store-settings',
         builder: (context, state) => const StoreSettingsScreen(),

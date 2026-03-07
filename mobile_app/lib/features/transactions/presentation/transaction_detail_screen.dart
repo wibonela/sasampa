@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/services/receipt_service.dart';
@@ -44,7 +45,7 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load transaction';
+        _error = 'failedToLoad';
         _isLoading = false;
       });
     }
@@ -63,18 +64,20 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       await api.voidTransaction(widget.transactionId, reason);
       await _loadTransaction();
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transaction voided successfully'),
+          SnackBar(
+            content: Text(l10n.transactionVoided),
             backgroundColor: AppColors.success,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to void transaction'),
+          SnackBar(
+            content: Text(l10n.failedToVoid),
             backgroundColor: AppColors.error,
           ),
         );
@@ -94,9 +97,10 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       await ReceiptService.printReceiptFromApi(receiptData);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to print receipt'),
+          SnackBar(
+            content: Text(l10n.failedToPrint),
             backgroundColor: AppColors.error,
           ),
         );
@@ -116,9 +120,10 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       await ReceiptService.shareReceiptFromApi(receiptData);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to share receipt'),
+          SnackBar(
+            content: Text(l10n.failedToShare),
             backgroundColor: AppColors.error,
           ),
         );
@@ -128,41 +133,42 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: Text(_transaction?.transactionNumber ?? 'Transaction'),
+        title: Text(_transaction?.transactionNumber ?? l10n.transaction),
         actions: [
           if (_transaction != null && !_transaction!.isVoided)
             PopupMenuButton(
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'void',
                   child: Row(
                     children: [
-                      Icon(Icons.cancel_outlined, color: AppColors.error),
-                      SizedBox(width: 8),
-                      Text('Void Transaction'),
+                      const Icon(Icons.cancel_outlined, color: AppColors.error),
+                      const SizedBox(width: 8),
+                      Text(l10n.voidTransaction),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'print',
                   child: Row(
                     children: [
-                      Icon(Icons.print_outlined),
-                      SizedBox(width: 8),
-                      Text('Print Receipt'),
+                      const Icon(Icons.print_outlined),
+                      const SizedBox(width: 8),
+                      Text(l10n.printReceipt),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'share',
                   child: Row(
                     children: [
-                      Icon(Icons.share_outlined),
-                      SizedBox(width: 8),
-                      Text('Share Receipt'),
+                      const Icon(Icons.share_outlined),
+                      const SizedBox(width: 8),
+                      Text(l10n.shareReceipt),
                     ],
                   ),
                 ),
@@ -188,11 +194,11 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                     children: [
                       const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                       const SizedBox(height: 16),
-                      Text(_error!),
+                      Text(l10n.failedToLoad),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadTransaction,
-                        child: const Text('Retry'),
+                        child: Text(l10n.retry),
                       ),
                     ],
                   ),
@@ -220,7 +226,7 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              _transaction!.isVoided ? 'Voided' : 'Completed',
+                              _transaction!.isVoided ? l10n.voided : l10n.completed,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -255,23 +261,23 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Details',
-                              style: TextStyle(
+                            Text(
+                              l10n.details,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const Divider(height: 24),
-                            _buildDetailRow('Transaction #', _transaction!.transactionNumber),
-                            _buildDetailRow('Date', _dateFormat.format(DateTime.parse(_transaction!.createdAt))),
-                            _buildDetailRow('Payment', _transaction!.paymentMethodLabel),
+                            _buildDetailRow(l10n.transactionNumber, _transaction!.transactionNumber),
+                            _buildDetailRow(l10n.date, _dateFormat.format(DateTime.parse(_transaction!.createdAt))),
+                            _buildDetailRow(l10n.payment, _transaction!.paymentMethodLabel),
                             if (_transaction!.cashierName != null)
-                              _buildDetailRow('Cashier', _transaction!.cashierName!),
+                              _buildDetailRow(l10n.cashier, _transaction!.cashierName!),
                             if (_transaction!.customerName != null)
-                              _buildDetailRow('Customer', _transaction!.customerName!),
+                              _buildDetailRow(l10n.customer, _transaction!.customerName!),
                             if (_transaction!.branchName != null)
-                              _buildDetailRow('Branch', _transaction!.branchName!),
+                              _buildDetailRow(l10n.branch, _transaction!.branchName!),
                           ],
                         ),
                       ),
@@ -289,7 +295,7 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Items (${_transaction!.items.length})',
+                              '${l10n.items} (${_transaction!.items.length})',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -341,17 +347,17 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                         ),
                         child: Column(
                           children: [
-                            _buildTotalRow('Subtotal', _transaction!.subtotal),
-                            _buildTotalRow('Tax', _transaction!.taxAmount),
+                            _buildTotalRow(l10n.subtotal, _transaction!.subtotal),
+                            _buildTotalRow(l10n.tax, _transaction!.taxAmount),
                             if (_transaction!.discountAmount > 0)
-                              _buildTotalRow('Discount', -_transaction!.discountAmount, isDiscount: true),
+                              _buildTotalRow(l10n.discount, -_transaction!.discountAmount, isDiscount: true),
                             const Divider(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'Total',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.total,
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -367,9 +373,9 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                               ],
                             ),
                             const SizedBox(height: 8),
-                            _buildTotalRow('Amount Paid', _transaction!.amountPaid),
+                            _buildTotalRow(l10n.amountPaid, _transaction!.amountPaid),
                             if (_transaction!.changeGiven > 0)
-                              _buildTotalRow('Change', _transaction!.changeGiven, isChange: true),
+                              _buildTotalRow(l10n.change, _transaction!.changeGiven, isChange: true),
                           ],
                         ),
                       ),
@@ -429,19 +435,20 @@ class _VoidDialogState extends State<_VoidDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('Void Transaction'),
+      title: Text(l10n.voidTransaction),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Are you sure you want to void this transaction?'),
+          Text(l10n.voidConfirm),
           const SizedBox(height: 16),
           TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              labelText: 'Reason',
-              hintText: 'Enter reason for voiding...',
+            decoration: InputDecoration(
+              labelText: l10n.voidReason,
+              hintText: l10n.voidReasonHint,
             ),
             maxLines: 2,
           ),
@@ -450,20 +457,20 @@ class _VoidDialogState extends State<_VoidDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: () {
             if (_controller.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please enter a reason')),
+                SnackBar(content: Text(l10n.pleaseEnterReason)),
               );
               return;
             }
             Navigator.pop(context, _controller.text.trim());
           },
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-          child: const Text('Void'),
+          child: Text(l10n.voidTransaction),
         ),
       ],
     );

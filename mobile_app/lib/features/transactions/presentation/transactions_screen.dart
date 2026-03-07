@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/error_utils.dart';
@@ -20,7 +21,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   bool _isLoading = true;
   bool _isLoadingMore = false;
   String? _error;
-  String _filter = 'today';
+  String? _paymentFilter;
   String _searchQuery = '';
   int _currentPage = 1;
   bool _hasMore = true;
@@ -32,7 +33,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTransactions();
+    _loadData();
     _scrollController.addListener(_onScroll);
   }
 
@@ -44,8 +45,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   }
 
   void _onScroll() {
-    if (_filter == 'all' &&
-        _hasMore &&
+    if (_hasMore &&
         !_isLoadingMore &&
         _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
@@ -60,6 +60,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       final api = ref.read(apiClientProvider);
       final response = await api.getTransactions(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        paymentMethod: _paymentFilter,
         page: _currentPage + 1,
       );
       final data = response.data;
@@ -78,7 +79,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     }
   }
 
-  Future<void> _loadTransactions() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _error = null;
@@ -88,20 +89,25 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
     try {
       final api = ref.read(apiClientProvider);
-      final response = _filter == 'today'
-          ? await api.getTodayTransactions()
-          : await api.getTransactions(
-              search: _searchQuery.isNotEmpty ? _searchQuery : null,
-            );
 
-      final data = response.data;
+      // Load summary and transactions in parallel
+      final results = await Future.wait([
+        api.getTransactionSummary(),
+        api.getTransactions(
+          search: _searchQuery.isNotEmpty ? _searchQuery : null,
+          paymentMethod: _paymentFilter,
+        ),
+      ]);
+
+      final summaryData = results[0].data;
+      final txData = results[1].data;
 
       setState(() {
-        _transactions = (data['data'] as List)
+        _summary = summaryData['data'];
+        _transactions = (txData['data'] as List)
             .map((e) => Transaction.fromJson(e))
             .toList();
-        _summary = data['summary'];
-        _hasMore = _filter == 'all' && _transactions.length >= 20;
+        _hasMore = _transactions.length >= 20;
         _isLoading = false;
       });
     } catch (e) {
@@ -112,8 +118,32 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     }
   }
 
+  String _getDateLabel(DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    if (dateOnly == today) return l10n.today;
+    if (dateOnly == today.subtract(const Duration(days: 1))) return l10n.yesterday;
+    return DateFormat('d MMM yyyy').format(date);
+  }
+
+  // Group transactions by date
+  Map<String, List<Transaction>> _groupByDate() {
+    final groups = <String, List<Transaction>>{};
+    for (final tx in _transactions) {
+      final dt = DateTime.parse(tx.createdAt);
+      final key = _getDateLabel(dt);
+      groups.putIfAbsent(key, () => []).add(tx);
+    }
+    return groups;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
@@ -122,69 +152,38 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search by number, customer...',
+                  hintText: l10n.searchHint,
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
                       _searchController.clear();
                       setState(() => _searchQuery = '');
-                      _loadTransactions();
+                      _loadData();
                     },
                   ),
                 ),
                 onSubmitted: (value) {
                   setState(() => _searchQuery = value);
-                  _loadTransactions();
+                  _loadData();
                 },
                 style: const TextStyle(fontSize: 16),
               )
-            : const Text('Transactions'),
+            : Text(l10n.transactions),
         centerTitle: _searchQuery.isEmpty && _searchController.text.isEmpty,
         actions: [
           if (_searchQuery.isEmpty && _searchController.text.isEmpty)
             IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {
-                setState(() {
-                  _searchController.text = '';
-                  _filter = 'all';
-                });
+                setState(() => _searchController.text = ' ');
+                _searchController.text = '';
               },
             ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (value) {
-              setState(() => _filter = value);
-              _loadTransactions();
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'today',
-                child: Row(
-                  children: [
-                    if (_filter == 'today') const Icon(Icons.check, size: 18),
-                    if (_filter == 'today') const SizedBox(width: 8),
-                    const Text('Today'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'all',
-                child: Row(
-                  children: [
-                    if (_filter == 'all') const Icon(Icons.check, size: 18),
-                    if (_filter == 'all') const SizedBox(width: 8),
-                    const Text('All Time'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadTransactions,
+        onRefresh: _loadData,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
@@ -197,8 +196,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                         Text(_error!),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: _loadTransactions,
-                          child: const Text('Retry'),
+                          onPressed: _loadData,
+                          child: Text(l10n.retry),
                         ),
                       ],
                     ),
@@ -206,85 +205,79 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 : CustomScrollView(
                     controller: _scrollController,
                     slivers: [
-                      // Summary Card
+                      // Summary Cards
                       if (_summary != null)
                         SliverToBoxAdapter(
-                          child: Container(
-                            margin: const EdgeInsets.all(16),
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.primary, AppColors.accent],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          child: SizedBox(
+                            height: 100,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                               children: [
-                                Text(
-                                  _filter == 'today' ? "Today's Sales" : 'Total Sales',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha:0.8),
-                                    fontSize: 14,
-                                  ),
+                                _buildSummaryCard(
+                                  l10n.today,
+                                  _currencyFormat.format((_summary!['today_total'] ?? 0).toDouble()),
+                                  '${_summary!['today_count'] ?? 0}',
+                                  AppColors.primary,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _currencyFormat.format((_summary!['total_sales'] ?? 0).toDouble()),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                const SizedBox(width: 12),
+                                _buildSummaryCard(
+                                  l10n.thisWeek,
+                                  _currencyFormat.format((_summary!['week_total'] ?? 0).toDouble()),
+                                  '${_summary!['week_count'] ?? 0}',
+                                  AppColors.accent,
                                 ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    _buildSummaryItem(
-                                      'Completed',
-                                      '${_summary!['completed_transactions'] ?? 0}',
-                                    ),
-                                    const SizedBox(width: 24),
-                                    _buildSummaryItem(
-                                      'Voided',
-                                      '${_summary!['voided_transactions'] ?? 0}',
-                                    ),
-                                  ],
+                                const SizedBox(width: 12),
+                                _buildSummaryCard(
+                                  l10n.thisMonth,
+                                  _currencyFormat.format((_summary!['month_total'] ?? 0).toDouble()),
+                                  '${_summary!['month_count'] ?? 0}',
+                                  AppColors.success,
                                 ),
                               ],
                             ),
                           ),
                         ),
 
-                      // Transactions List
+                      // Quick filters
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildFilterChip(null, l10n.all),
+                                const SizedBox(width: 8),
+                                _buildFilterChip('cash', l10n.cash),
+                                const SizedBox(width: 8),
+                                _buildFilterChip('card', l10n.card),
+                                const SizedBox(width: 8),
+                                _buildFilterChip('mobile', l10n.mobileMoney),
+                                const SizedBox(width: 8),
+                                _buildFilterChip('bank_transfer', l10n.bankTransfer),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Transactions grouped by date
                       if (_transactions.isEmpty)
-                        const SliverFillRemaining(
+                        SliverFillRemaining(
                           child: Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.receipt_long_outlined, size: 64, color: AppColors.gray3),
-                                SizedBox(height: 16),
-                                Text(
-                                  'No transactions yet',
-                                  style: TextStyle(color: AppColors.textSecondary),
-                                ),
+                                const Icon(Icons.receipt_long_outlined, size: 64, color: AppColors.gray3),
+                                const SizedBox(height: 16),
+                                Text(l10n.noTransactions, style: const TextStyle(color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
                         )
                       else
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final tx = _transactions[index];
-                              return _buildTransactionItem(tx);
-                            },
-                            childCount: _transactions.length,
-                          ),
-                        ),
+                        ..._buildGroupedList(),
 
                       if (_isLoadingMore)
                         const SliverToBoxAdapter(
@@ -301,31 +294,98 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     );
   }
 
-  Widget _buildSummaryItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha:0.7),
-            fontSize: 12,
+  List<Widget> _buildGroupedList() {
+    final groups = _groupByDate();
+    final slivers = <Widget>[];
+
+    for (final entry in groups.entries) {
+      // Date header
+      slivers.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              entry.key,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+      );
+
+      // Transactions for this date
+      slivers.add(
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _buildTransactionItem(entry.value[index]),
+            childCount: entry.value.length,
           ),
         ),
-      ],
+      );
+    }
+
+    return slivers;
+  }
+
+  Widget _buildSummaryCard(String label, String amount, String count, Color color) {
+    return Container(
+      width: 160,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color, color.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+              Text(count, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+            ],
+          ),
+          Text(
+            amount,
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String? value, String label) {
+    final selected = _paymentFilter == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) {
+        setState(() => _paymentFilter = selected ? null : value);
+        _loadData();
+      },
+      selectedColor: AppColors.primary,
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : AppColors.textPrimary,
+        fontSize: 12,
+      ),
+      showCheckmark: false,
+      visualDensity: VisualDensity.compact,
     );
   }
 
   Widget _buildTransactionItem(Transaction tx) {
     final isVoided = tx.isVoided;
+    final time = DateFormat('HH:mm').format(DateTime.parse(tx.createdAt));
 
     return GestureDetector(
       onTap: () => context.go('/transactions/${tx.id}'),
@@ -345,17 +405,16 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               decoration: BoxDecoration(
                 color: isVoided
                     ? AppColors.error.withValues(alpha: 0.1)
-                    : _getPaymentMethodColor(tx.paymentMethod).withValues(alpha: 0.1),
+                    : _getPaymentMethodColor(tx.paymentMethod ?? 'cash').withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                isVoided ? Icons.cancel_outlined : _getPaymentMethodIcon(tx.paymentMethod),
-                color: isVoided ? AppColors.error : _getPaymentMethodColor(tx.paymentMethod),
+                isVoided ? Icons.cancel_outlined : _getPaymentMethodIcon(tx.paymentMethod ?? 'cash'),
+                color: isVoided ? AppColors.error : _getPaymentMethodColor(tx.paymentMethod ?? 'cash'),
                 size: 20,
               ),
             ),
             const SizedBox(width: 10),
-            // Transaction info - takes remaining space
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,10 +424,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          tx.transactionNumber,
+                          tx.customerName ?? AppLocalizations.of(context)!.regularCustomer,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                            fontSize: 13,
                             decoration: isVoided ? TextDecoration.lineThrough : null,
                             color: isVoided ? AppColors.textSecondary : AppColors.textPrimary,
                           ),
@@ -384,18 +443,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             color: AppColors.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'VOID',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.error,
-                            ),
-                          ),
+                          child: const Text('VOID', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w600, color: AppColors.error)),
                         ),
                       ],
                       const SizedBox(width: 8),
-                      // Amount on same row
                       Text(
                         _currencyFormat.format(tx.total),
                         style: TextStyle(
@@ -410,22 +461,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          tx.createdAtHuman ?? '',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
                       Text(
-                        tx.paymentMethodLabel,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textSecondary,
-                        ),
+                        tx.transactionNumber,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                      const Spacer(),
+                      Text(
+                        time,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
                   ),

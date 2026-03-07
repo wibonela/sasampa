@@ -19,6 +19,7 @@ class TransactionController extends Controller
         $user = $request->user();
 
         $query = Transaction::where('company_id', $user->company_id)
+            ->sales()
             ->with(['user', 'branch', 'items']);
 
         // Filter by status
@@ -109,6 +110,7 @@ class TransactionController extends Controller
         $user = $request->user();
 
         $transactions = Transaction::where('company_id', $user->company_id)
+            ->sales()
             ->whereDate('created_at', today())
             ->with(['user', 'items'])
             ->orderByDesc('created_at')
@@ -145,6 +147,7 @@ class TransactionController extends Controller
         $user = $request->user();
 
         $query = Transaction::where('user_id', $user->id)
+            ->sales()
             ->with(['branch', 'items']);
 
         // Filter by date
@@ -169,6 +172,34 @@ class TransactionController extends Controller
     }
 
     /**
+     * Get transaction summary (today, week, month).
+     *
+     * GET /api/v1/pos/transactions/summary
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $baseQuery = Transaction::where('company_id', $user->company_id)
+            ->sales()
+            ->where('status', 'completed');
+
+        $todayQuery = (clone $baseQuery)->whereDate('created_at', today());
+        $weekQuery = (clone $baseQuery)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        $monthQuery = (clone $baseQuery)->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+
+        return response()->json([
+            'data' => [
+                'today_total' => (float) $todayQuery->sum('total'),
+                'today_count' => $todayQuery->count(),
+                'week_total' => (float) $weekQuery->sum('total'),
+                'week_count' => $weekQuery->count(),
+                'month_total' => (float) $monthQuery->sum('total'),
+                'month_count' => $monthQuery->count(),
+            ],
+        ]);
+    }
+
+    /**
      * Format transaction for API response.
      */
     protected function formatTransaction(Transaction $transaction, bool $detailed = false): array
@@ -176,6 +207,7 @@ class TransactionController extends Controller
         $data = [
             'id' => $transaction->id,
             'transaction_number' => $transaction->transaction_number,
+            'type' => $transaction->type ?? 'sale',
             'status' => $transaction->status,
             'total' => (float) $transaction->total,
             'payment_method' => $transaction->payment_method,
