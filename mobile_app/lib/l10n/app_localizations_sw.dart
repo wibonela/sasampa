@@ -762,4 +762,53 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get failedToComplete =>
       'Imeshindwa kukamilisha. Tafadhali jaribu tena.';
+
+  @override
+  String get customizeDashboard => 'Binafsisha Dashibodi';
+
+  @override
+  String get customizeDashboardDesc =>
+      'Mpangilio, vijisehemu na ukurasa wa kuanzia';
+
+  @override
+  String get dashboardLayout => 'Mpangilio wa Dashibodi';
+
+  @override
+  String get layoutClassic => 'Kawaida';
+
+  @override
+  String get layoutAnalytics => 'Uchambuzi';
+
+  @override
+  String get layoutCompact => 'Fupi';
+
+  @override
+  String get dashboardWidgets => 'Vijisehemu vya Dashibodi';
+
+  @override
+  String get defaultLandingPage => 'Ukurasa wa Kuanzia';
+
+  @override
+  String get resetToDefault => 'Rudisha Mipangilio';
+
+  @override
+  String get todayStatsWidget => 'Takwimu za Leo';
+
+  @override
+  String get quickActionsWidget => 'Vitendo vya Haraka';
+
+  @override
+  String get lowStockAlertWidget => 'Tahadhari ya Bidhaa';
+
+  @override
+  String get recentTransactionsWidget => 'Miamala ya Karibuni';
+
+  @override
+  String get weeklySummaryWidget => 'Muhtasari wa Wiki';
+
+  @override
+  String get topProductsWidget => 'Bidhaa Bora';
+
+  @override
+  String get dragToReorder => 'Buruta kupanga upya';
 }

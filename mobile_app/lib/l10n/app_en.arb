@@ -249,5 +249,21 @@
   "addressOptional": "Address (optional)",
   "allSet": "You're All Set!",
   "allSetSubtitle": "Your account has been set up successfully. You can now start using Sasampa POS to manage your business.",
-  "failedToComplete": "Failed to complete setup. Please try again."
+  "failedToComplete": "Failed to complete setup. Please try again.",
+  "customizeDashboard": "Customize Dashboard",
+  "customizeDashboardDesc": "Layout, widgets & landing page",
+  "dashboardLayout": "Dashboard Layout",
+  "layoutClassic": "Classic",
+  "layoutAnalytics": "Analytics",
+  "layoutCompact": "Compact",
+  "dashboardWidgets": "Dashboard Widgets",
+  "defaultLandingPage": "Default Landing Page",
+  "resetToDefault": "Reset to Default",
+  "todayStatsWidget": "Today's Statistics",
+  "quickActionsWidget": "Quick Actions",
+  "lowStockAlertWidget": "Low Stock Alert",
+  "recentTransactionsWidget": "Recent Transactions",
+  "weeklySummaryWidget": "Weekly Summary",
+  "topProductsWidget": "Top Products",
+  "dragToReorder": "Drag to reorder"
 }

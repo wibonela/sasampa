@@ -1597,6 +1597,102 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Imeshindwa kukamilisha. Tafadhali jaribu tena.'**
   String get failedToComplete;
+
+  /// No description provided for @customizeDashboard.
+  ///
+  /// In sw, this message translates to:
+  /// **'Binafsisha Dashibodi'**
+  String get customizeDashboard;
+
+  /// No description provided for @customizeDashboardDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mpangilio, vijisehemu na ukurasa wa kuanzia'**
+  String get customizeDashboardDesc;
+
+  /// No description provided for @dashboardLayout.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mpangilio wa Dashibodi'**
+  String get dashboardLayout;
+
+  /// No description provided for @layoutClassic.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kawaida'**
+  String get layoutClassic;
+
+  /// No description provided for @layoutAnalytics.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchambuzi'**
+  String get layoutAnalytics;
+
+  /// No description provided for @layoutCompact.
+  ///
+  /// In sw, this message translates to:
+  /// **'Fupi'**
+  String get layoutCompact;
+
+  /// No description provided for @dashboardWidgets.
+  ///
+  /// In sw, this message translates to:
+  /// **'Vijisehemu vya Dashibodi'**
+  String get dashboardWidgets;
+
+  /// No description provided for @defaultLandingPage.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ukurasa wa Kuanzia'**
+  String get defaultLandingPage;
+
+  /// No description provided for @resetToDefault.
+  ///
+  /// In sw, this message translates to:
+  /// **'Rudisha Mipangilio'**
+  String get resetToDefault;
+
+  /// No description provided for @todayStatsWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Takwimu za Leo'**
+  String get todayStatsWidget;
+
+  /// No description provided for @quickActionsWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Vitendo vya Haraka'**
+  String get quickActionsWidget;
+
+  /// No description provided for @lowStockAlertWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tahadhari ya Bidhaa'**
+  String get lowStockAlertWidget;
+
+  /// No description provided for @recentTransactionsWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Miamala ya Karibuni'**
+  String get recentTransactionsWidget;
+
+  /// No description provided for @weeklySummaryWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Muhtasari wa Wiki'**
+  String get weeklySummaryWidget;
+
+  /// No description provided for @topProductsWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Bidhaa Bora'**
+  String get topProductsWidget;
+
+  /// No description provided for @dragToReorder.
+  ///
+  /// In sw, this message translates to:
+  /// **'Buruta kupanga upya'**
+  String get dragToReorder;
 }
 
 class _AppLocalizationsDelegate

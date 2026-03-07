@@ -6,6 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../data/dashboard_preferences.dart';
+import 'widgets/today_stats_widget.dart';
+import 'widgets/quick_actions_widget.dart';
+import 'widgets/low_stock_widget.dart';
+import 'widgets/weekly_summary_widget.dart';
+import 'widgets/top_products_widget.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -24,7 +30,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data after frame to avoid Riverpod errors
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDashboard();
     });
@@ -62,10 +67,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
+  Widget _buildWidgetForId(DashboardWidgetId id) {
+    switch (id) {
+      case DashboardWidgetId.todayStats:
+        return TodayStatsWidget(dashboardData: _dashboardData);
+      case DashboardWidgetId.quickActions:
+        return const QuickActionsWidget();
+      case DashboardWidgetId.lowStockAlert:
+        return LowStockWidget(dashboardData: _dashboardData);
+      case DashboardWidgetId.recentTransactions:
+        return _buildRecentTransactions();
+      case DashboardWidgetId.weeklySummary:
+        return WeeklySummaryWidget(dashboardData: _dashboardData);
+      case DashboardWidgetId.topProducts:
+        return TopProductsWidget(dashboardData: _dashboardData);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
+    final prefsState = ref.watch(dashboardPrefsProvider);
+    final prefs = prefsState.prefs;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
@@ -74,7 +98,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onRefresh: _loadDashboard,
           child: CustomScrollView(
             slivers: [
-              // Header
+              // Header (always visible)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -133,173 +157,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                 )
               else ...[
-                // Today's Stats
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            title: AppLocalizations.of(context)?.todaySales ?? "Today's Sales",
-                            value: _currencyFormat.format(_dashboardData?['today']?['sales_total'] ?? 0),
-                            icon: Icons.trending_up,
-                            color: AppColors.success,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildStatCard(
-                            title: AppLocalizations.of(context)?.transactions ?? 'Transactions',
-                            value: '${_dashboardData?['today']?['transactions_count'] ?? 0}',
-                            icon: Icons.receipt_long,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Dynamic widgets based on preferences
+                for (final widgetId in prefs.widgetOrder)
+                  if (!prefs.hiddenWidgets.contains(widgetId)) ...[
+                    SliverToBoxAdapter(child: _buildWidgetForId(widgetId)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  ],
 
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                // Quick Actions
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)?.quickActions ?? 'Quick Actions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.add_shopping_cart,
-                                label: AppLocalizations.of(context)?.pos ?? 'New Sale',
-                                color: AppColors.primary,
-                                onTap: () => context.go('/pos'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.history,
-                                label: AppLocalizations.of(context)?.transactions ?? 'History',
-                                color: AppColors.accent,
-                                onTap: () => context.go('/transactions'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-                // Low Stock Alert
-                if ((_dashboardData?['alerts']?['low_stock_count'] ?? 0) > 0)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.warning.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.warning.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.warning_amber_rounded,
-                                color: AppColors.warning,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context)?.lowStock ?? 'Low Stock Alert',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_dashboardData?['alerts']?['low_stock_count']} products need restocking',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-                // Recent Transactions
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)?.recentTransactions ?? 'Recent Transactions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => context.go('/transactions'),
-                          child: Text(AppLocalizations.of(context)?.all ?? 'See All'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final transactions = _dashboardData?['recent_transactions'] as List? ?? [];
-                      if (index >= transactions.length) return null;
-                      final tx = transactions[index];
-                      return _buildTransactionItem(tx);
-                    },
-                    childCount: (_dashboardData?['recent_transactions'] as List?)?.length ?? 0,
-                  ),
-                ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                const SliverToBoxAdapter(child: SizedBox(height: 84)),
               ],
             ],
           ),
@@ -308,92 +173,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildRecentTransactions() {
+    final transactions = _dashboardData?['recent_transactions'] as List? ?? [];
+    if (transactions.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+              Text(
+                AppLocalizations.of(context)?.recentTransactions ?? 'Recent Transactions',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
-                child: Icon(icon, color: color, size: 20),
+              ),
+              TextButton(
+                onPressed: () => context.go('/transactions'),
+                child: Text(AppLocalizations.of(context)?.all ?? 'See All'),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
+        ...transactions.map((tx) => _buildTransactionItem(tx as Map<String, dynamic>)),
+      ],
     );
   }
 
