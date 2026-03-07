@@ -13,6 +13,7 @@ import '../../features/transactions/presentation/transactions_screen.dart';
 import '../../features/transactions/presentation/transaction_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/settings/presentation/store_settings_screen.dart';
+import '../../features/settings/presentation/dashboard_customization_screen.dart';
 import '../../features/expenses/presentation/expenses_screen.dart';
 import '../../features/expenses/presentation/add_expense_screen.dart';
 import '../../features/expenses/presentation/expense_summary_screen.dart';
@@ -23,8 +24,11 @@ import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../shared/widgets/webview_screen.dart';
 
+bool _hasRedirectedToDefaultTab = false;
+
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
+  final dashboardPrefsState = ref.watch(dashboardPrefsProvider);
 
   return GoRouter(
     initialLocation: '/login',
@@ -44,8 +48,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Not logged in - allow login and register routes only
+      // Not logged in - reset redirect flag and allow login/register only
       if (!isLoggedIn && !isPublicRoute) {
+        _hasRedirectedToDefaultTab = false;
         return '/login';
       }
 
@@ -54,12 +59,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (!authState.canUseMobile) {
           return '/mobile-access';
         }
+        // Check default tab redirect
+        if (!_hasRedirectedToDefaultTab && dashboardPrefsState.isLoaded) {
+          _hasRedirectedToDefaultTab = true;
+          final tabIndex = dashboardPrefsState.prefs.defaultTabIndex;
+          if (tabIndex != 0) {
+            const tabRoutes = ['/', '/pos', '/transactions', '/menu', '/settings'];
+            return tabRoutes[tabIndex];
+          }
+        }
         return '/';
       }
 
       // Logged in but no mobile access - allow onboarding routes
       if (isLoggedIn && !authState.canUseMobile && !isMobileAccessRoute && !isOnboardingRoute) {
         return '/mobile-access';
+      }
+
+      // Default tab redirect on first navigation to home
+      if (isLoggedIn && location == '/' && !_hasRedirectedToDefaultTab && dashboardPrefsState.isLoaded) {
+        _hasRedirectedToDefaultTab = true;
+        final tabIndex = dashboardPrefsState.prefs.defaultTabIndex;
+        if (tabIndex != 0) {
+          const tabRoutes = ['/', '/pos', '/transactions', '/menu', '/settings'];
+          return tabRoutes[tabIndex];
+        }
       }
 
       return null;
@@ -146,6 +170,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/store-settings',
         builder: (context, state) => const StoreSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard-customization',
+        builder: (context, state) => const DashboardCustomizationScreen(),
       ),
       GoRoute(
         path: '/expenses/add',

@@ -146,8 +146,9 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
   Future<void> _initializeApp() async {
     if (!mounted) return;
 
-    // Load locale preference
+    // Load locale and dashboard preferences
     await ref.read(localeProvider.notifier).loadLocale();
+    await ref.read(dashboardPrefsProvider.notifier).loadPreferences();
 
     try {
       // Check if user is already logged in (with timeout)

@@ -249,5 +249,21 @@
   "addressOptional": "Anwani (hiari)",
   "allSet": "Uko Tayari!",
   "allSetSubtitle": "Akaunti yako imeanzishwa vizuri. Sasa unaweza kuanza kutumia Sasampa POS kusimamia biashara yako.",
-  "failedToComplete": "Imeshindwa kukamilisha. Tafadhali jaribu tena."
+  "failedToComplete": "Imeshindwa kukamilisha. Tafadhali jaribu tena.",
+  "customizeDashboard": "Binafsisha Dashibodi",
+  "customizeDashboardDesc": "Mpangilio, vijisehemu na ukurasa wa kuanzia",
+  "dashboardLayout": "Mpangilio wa Dashibodi",
+  "layoutClassic": "Kawaida",
+  "layoutAnalytics": "Uchambuzi",
+  "layoutCompact": "Fupi",
+  "dashboardWidgets": "Vijisehemu vya Dashibodi",
+  "defaultLandingPage": "Ukurasa wa Kuanzia",
+  "resetToDefault": "Rudisha Mipangilio",
+  "todayStatsWidget": "Takwimu za Leo",
+  "quickActionsWidget": "Vitendo vya Haraka",
+  "lowStockAlertWidget": "Tahadhari ya Bidhaa",
+  "recentTransactionsWidget": "Miamala ya Karibuni",
+  "weeklySummaryWidget": "Muhtasari wa Wiki",
+  "topProductsWidget": "Bidhaa Bora",
+  "dragToReorder": "Buruta kupanga upya"
 }
