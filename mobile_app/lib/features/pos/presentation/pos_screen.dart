@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../shared/models/product.dart';
+import 'barcode_scanner_screen.dart';
 import 'checkout_sheet.dart';
 
 class POSScreen extends ConsumerStatefulWidget {
@@ -97,8 +98,24 @@ class _POSScreenState extends ConsumerState<POSScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
-            onPressed: () {
-              // TODO: Implement barcode scanner
+            onPressed: () async {
+              final barcode = await Navigator.push<String>(
+                context,
+                MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+              );
+              if (barcode != null && mounted) {
+                final product = await ref.read(productsProvider.notifier).scanBarcode(barcode);
+                if (product != null) {
+                  _addToCart(product);
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Product not found for barcode: $barcode'),
+                      backgroundColor: AppColors.warning,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],

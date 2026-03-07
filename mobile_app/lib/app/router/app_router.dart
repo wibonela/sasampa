@@ -2,6 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/verify_email_screen.dart';
+import '../../features/auth/presentation/business_details_screen.dart';
+import '../../features/auth/presentation/onboarding_complete_screen.dart';
 import '../../features/mobile_access/presentation/mobile_access_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/pos/presentation/pos_screen.dart';
@@ -25,32 +29,34 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.isAuthenticated;
       final isInitialized = authState.isInitialized;
-      final isLoginRoute = state.matchedLocation == '/login';
-      final isMobileAccessRoute = state.matchedLocation == '/mobile-access';
+      final location = state.matchedLocation;
+      final isLoginRoute = location == '/login';
+      final isRegisterRoute = location == '/register';
+      final isOnboardingRoute = location == '/verify-email' ||
+          location == '/business-details' ||
+          location == '/onboarding-complete';
+      final isMobileAccessRoute = location == '/mobile-access';
+      final isPublicRoute = isLoginRoute || isRegisterRoute;
 
-      // Wait for auth check to complete before redirecting
-      // This prevents the race condition where router redirects to login
-      // before the auth check has finished loading cached credentials
       if (!isInitialized) {
-        // Stay on current route until auth is initialized
         return null;
       }
 
-      // Not logged in - go to login
-      if (!isLoggedIn && !isLoginRoute) {
+      // Not logged in - allow login and register routes only
+      if (!isLoggedIn && !isPublicRoute) {
         return '/login';
       }
 
-      // Logged in but on login page - check mobile access
-      if (isLoggedIn && isLoginRoute) {
+      // Logged in but on login/register page - check mobile access
+      if (isLoggedIn && isPublicRoute) {
         if (!authState.canUseMobile) {
           return '/mobile-access';
         }
         return '/';
       }
 
-      // Logged in but no mobile access - go to mobile access screen
-      if (isLoggedIn && !authState.canUseMobile && !isMobileAccessRoute) {
+      // Logged in but no mobile access - allow onboarding routes
+      if (isLoggedIn && !authState.canUseMobile && !isMobileAccessRoute && !isOnboardingRoute) {
         return '/mobile-access';
       }
 
@@ -60,6 +66,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => const VerifyEmailScreen(),
+      ),
+      GoRoute(
+        path: '/business-details',
+        builder: (context, state) => const BusinessDetailsScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding-complete',
+        builder: (context, state) => const OnboardingCompleteScreen(),
       ),
       GoRoute(
         path: '/mobile-access',
