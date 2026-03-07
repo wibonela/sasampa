@@ -299,11 +299,8 @@
     <nav class="nav" id="nav">
         <div class="nav-container">
             <a href="/" class="logo">
-                <div class="logo-mark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <path d="M9 9h6M9 15h6M9 12h6"/>
-                    </svg>
+                <div class="logo-mark" style="background: linear-gradient(135deg, #FF2D20, #E53E3E);">
+                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><rect x="7" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="7" y="17" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="17" width="8" height="8" rx="2" fill="#fff"/></svg>
                 </div>
                 Sasampa
             </a>
@@ -926,11 +923,8 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-brand">
-                <div class="footer-logo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <path d="M9 9h6M9 15h6M9 12h6"/>
-                    </svg>
+                <div class="footer-logo" style="background: linear-gradient(135deg, #FF2D20, #E53E3E);">
+                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;"><rect x="7" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="7" y="17" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="17" width="8" height="8" rx="2" fill="#fff"/></svg>
                 </div>
                 <span class="footer-name">Sasampa</span>
             </div>
