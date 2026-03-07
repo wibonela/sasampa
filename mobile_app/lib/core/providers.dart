@@ -11,6 +11,7 @@ import '../shared/models/user.dart';
 import '../shared/models/product.dart';
 import '../shared/models/cart.dart';
 import '../main.dart' show globalStorage;
+import '../features/dashboard/data/dashboard_preferences.dart';
 
 // Storage - uses the global instance initialized in main.dart
 final secureStorageProvider = Provider<SecureStorage>((ref) {
@@ -533,4 +534,88 @@ class LocaleNotifier extends StateNotifier<Locale> {
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   final storage = ref.watch(secureStorageProvider);
   return LocaleNotifier(storage);
+});
+
+// Dashboard Preferences State
+class DashboardPrefsState {
+  final DashboardPreferences prefs;
+  final bool isLoaded;
+
+  const DashboardPrefsState({
+    this.prefs = const DashboardPreferences(),
+    this.isLoaded = false,
+  });
+
+  DashboardPrefsState copyWith({
+    DashboardPreferences? prefs,
+    bool? isLoaded,
+  }) {
+    return DashboardPrefsState(
+      prefs: prefs ?? this.prefs,
+      isLoaded: isLoaded ?? this.isLoaded,
+    );
+  }
+}
+
+class DashboardPrefsNotifier extends StateNotifier<DashboardPrefsState> {
+  final SecureStorage _storage;
+  static const _key = 'dashboard_prefs';
+
+  DashboardPrefsNotifier(this._storage) : super(const DashboardPrefsState());
+
+  Future<void> loadPreferences() async {
+    final json = await _storage.getString(_key);
+    if (json != null && json.isNotEmpty) {
+      try {
+        final prefs = DashboardPreferences.deserialize(json);
+        state = DashboardPrefsState(prefs: prefs, isLoaded: true);
+      } catch (_) {
+        state = const DashboardPrefsState(isLoaded: true);
+      }
+    } else {
+      state = const DashboardPrefsState(isLoaded: true);
+    }
+  }
+
+  Future<void> updatePreferences(DashboardPreferences prefs) async {
+    state = state.copyWith(prefs: prefs);
+    await _storage.saveString(_key, prefs.serialize());
+  }
+
+  Future<void> applyPreset(DashboardLayout layout) async {
+    final DashboardPreferences prefs;
+    switch (layout) {
+      case DashboardLayout.classic:
+        prefs = DashboardPreferences.classic().copyWith(defaultTabIndex: state.prefs.defaultTabIndex);
+      case DashboardLayout.analytics:
+        prefs = DashboardPreferences.analytics().copyWith(defaultTabIndex: state.prefs.defaultTabIndex);
+      case DashboardLayout.compact:
+        prefs = DashboardPreferences.compact().copyWith(defaultTabIndex: state.prefs.defaultTabIndex);
+    }
+    await updatePreferences(prefs);
+  }
+
+  Future<void> toggleWidget(DashboardWidgetId widgetId) async {
+    final hidden = Set<DashboardWidgetId>.from(state.prefs.hiddenWidgets);
+    if (hidden.contains(widgetId)) {
+      hidden.remove(widgetId);
+    } else {
+      hidden.add(widgetId);
+    }
+    await updatePreferences(state.prefs.copyWith(hiddenWidgets: hidden));
+  }
+
+  Future<void> reorderWidgets(List<DashboardWidgetId> newOrder) async {
+    await updatePreferences(state.prefs.copyWith(widgetOrder: newOrder));
+  }
+
+  Future<void> setDefaultTab(int index) async {
+    await updatePreferences(state.prefs.copyWith(defaultTabIndex: index));
+  }
+}
+
+final dashboardPrefsProvider =
+    StateNotifierProvider<DashboardPrefsNotifier, DashboardPrefsState>((ref) {
+  final storage = ref.watch(secureStorageProvider);
+  return DashboardPrefsNotifier(storage);
 });

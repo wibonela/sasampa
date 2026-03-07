@@ -171,6 +171,26 @@ class SecureStorage {
     }
   }
 
+  // Generic String
+  Future<void> saveString(String key, String value) async {
+    if (!await _ensureInitialized()) return;
+    try {
+      await _prefs!.setString(key, value);
+    } catch (e) {
+      print('SecureStorage: Failed to save $key - $e');
+    }
+  }
+
+  Future<String?> getString(String key) async {
+    if (!await _ensureInitialized()) return null;
+    try {
+      return _prefs!.getString(key);
+    } catch (e) {
+      print('SecureStorage: Failed to get $key - $e');
+      return null;
+    }
+  }
+
   // Locale
   Future<void> saveLocale(String code) async {
     if (!await _ensureInitialized()) return;

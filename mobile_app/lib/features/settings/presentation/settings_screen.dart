@@ -548,6 +548,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             child: Column(
               children: [
+                _buildSettingItem(
+                  icon: Icons.dashboard_customize_outlined,
+                  title: l10n.customizeDashboard,
+                  subtitle: l10n.customizeDashboardDesc,
+                  onTap: () => context.push('/dashboard-customization'),
+                ),
+                const Divider(height: 1, indent: 56),
                 _buildLanguageSwitcher(),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(

@@ -761,4 +761,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToComplete => 'Failed to complete setup. Please try again.';
+
+  @override
+  String get customizeDashboard => 'Customize Dashboard';
+
+  @override
+  String get customizeDashboardDesc => 'Layout, widgets & landing page';
+
+  @override
+  String get dashboardLayout => 'Dashboard Layout';
+
+  @override
+  String get layoutClassic => 'Classic';
+
+  @override
+  String get layoutAnalytics => 'Analytics';
+
+  @override
+  String get layoutCompact => 'Compact';
+
+  @override
+  String get dashboardWidgets => 'Dashboard Widgets';
+
+  @override
+  String get defaultLandingPage => 'Default Landing Page';
+
+  @override
+  String get resetToDefault => 'Reset to Default';
+
+  @override
+  String get todayStatsWidget => 'Today\'s Statistics';
+
+  @override
+  String get quickActionsWidget => 'Quick Actions';
+
+  @override
+  String get lowStockAlertWidget => 'Low Stock Alert';
+
+  @override
+  String get recentTransactionsWidget => 'Recent Transactions';
+
+  @override
+  String get weeklySummaryWidget => 'Weekly Summary';
+
+  @override
+  String get topProductsWidget => 'Top Products';
+
+  @override
+  String get dragToReorder => 'Drag to reorder';
 }
