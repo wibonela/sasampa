@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -19,20 +20,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isLoggingOut = false;
 
   Future<void> _logout() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(l10n.logout),
+        content: Text(l10n.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Logout'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
@@ -389,13 +391,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
         centerTitle: true,
       ),
       body: ListView(
@@ -450,9 +453,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Business Section
-          const Text(
-            'Business',
-            style: TextStyle(
+          Text(
+            l10n.business,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
@@ -468,22 +471,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _buildSettingItem(
                   icon: Icons.store_outlined,
-                  title: 'Store Settings',
-                  subtitle: 'Name, address, receipt settings',
+                  title: l10n.storeSettings,
+                  subtitle: l10n.businessDetails,
                   onTap: () => context.push('/store-settings'),
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.wallet_outlined,
-                  title: 'Expenses (Matumizi)',
-                  subtitle: 'Track operational costs',
+                  title: l10n.expenses,
+                  subtitle: l10n.trackCosts,
                   onTap: () => context.push('/expenses'),
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.inventory_2_outlined,
-                  title: 'Inventory',
-                  subtitle: 'Stock levels & adjustments',
+                  title: l10n.inventory,
+                  subtitle: l10n.stockLevels,
                   onTap: () => context.push('/inventory'),
                 ),
               ],
@@ -493,9 +496,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Account Section
-          const Text(
-            'Account',
-            style: TextStyle(
+          Text(
+            l10n.account,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
@@ -511,15 +514,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _buildSettingItem(
                   icon: Icons.lock_outline,
-                  title: 'Change PIN',
-                  subtitle: 'Update your login PIN',
+                  title: l10n.changePin,
+                  subtitle: 'PIN',
                   onTap: _changePin,
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.key_outlined,
-                  title: 'Change Password',
-                  subtitle: 'Update your password',
+                  title: l10n.changePassword,
+                  subtitle: l10n.password,
                   onTap: _changePassword,
                 ),
               ],
@@ -529,9 +532,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // App Section
-          const Text(
-            'App',
-            style: TextStyle(
+          Text(
+            l10n.app,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
@@ -545,17 +548,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             child: Column(
               children: [
+                _buildLanguageSwitcher(),
+                const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.print_outlined,
-                  title: 'Printer Setup',
-                  subtitle: 'Configure receipt printer',
+                  title: l10n.printerSetup,
+                  subtitle: l10n.receipt,
                   onTap: _showPrinterSetup,
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  subtitle: 'Manage push notifications',
+                  title: l10n.notifications,
+                  subtitle: l10n.notifications,
                   onTap: _showNotificationSettings,
                 ),
               ],
@@ -565,9 +570,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Support Section
-          const Text(
-            'Support',
-            style: TextStyle(
+          Text(
+            l10n.support,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
@@ -583,8 +588,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 _buildSettingItem(
                   icon: Icons.help_outline,
-                  title: 'Help & Support',
-                  subtitle: 'Get help with the app',
+                  title: l10n.helpSupport,
+                  subtitle: l10n.needHelp,
                   onTap: () {
                     showDialog(
                       context: context,
@@ -613,8 +618,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(
                   icon: Icons.info_outline,
-                  title: 'About',
-                  subtitle: 'App version and info',
+                  title: l10n.about,
+                  subtitle: '${l10n.version} & ${l10n.about}',
                   onTap: () {
                     showDialog(
                       context: context,
@@ -671,12 +676,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         valueColor: AlwaysStoppedAnimation(AppColors.error),
                       ),
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 8),
-                        Text('Logout'),
+                        const Icon(Icons.logout),
+                        const SizedBox(width: 8),
+                        Text(l10n.logout),
                       ],
                     ),
             ),
@@ -684,6 +689,79 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageSwitcher() {
+    final locale = ref.watch(localeProvider);
+    final isSwahili = locale.languageCode == 'sw';
+
+    return ListTile(
+      onTap: () {
+        final newLocale = isSwahili ? const Locale('en') : const Locale('sw');
+        ref.read(localeProvider.notifier).setLocale(newLocale);
+      },
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Icon(Icons.language, color: AppColors.primary, size: 20),
+      ),
+      title: const Text('Lugha / Language', style: TextStyle(fontWeight: FontWeight.w500)),
+      subtitle: Text(
+        isSwahili ? 'Kiswahili' : 'English',
+        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+      ),
+      trailing: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () => ref.read(localeProvider.notifier).setLocale(const Locale('sw')),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSwahili ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'SW',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSwahili ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => ref.read(localeProvider.notifier).setLocale(const Locale('en')),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: !isSwahili ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'EN',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: !isSwahili ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../app/theme/colors.dart';
 
 class MainScaffold extends StatelessWidget {
@@ -15,6 +16,7 @@ class MainScaffold extends StatelessWidget {
     if (location == '/menu') return 3;
     if (location.startsWith('/expenses')) return 3;
     if (location.startsWith('/inventory')) return 3;
+    if (location.startsWith('/orders')) return 3;
     if (location == '/settings') return 4;
     return 0;
   }
@@ -50,31 +52,31 @@ class MainScaffold extends StatelessWidget {
                 break;
             }
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: AppLocalizations.of(context)?.home ?? 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.point_of_sale_outlined),
-              activeIcon: Icon(Icons.point_of_sale),
-              label: 'POS',
+              icon: const Icon(Icons.point_of_sale_outlined),
+              activeIcon: const Icon(Icons.point_of_sale),
+              label: AppLocalizations.of(context)?.pos ?? 'POS',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.receipt_long_outlined),
-              activeIcon: Icon(Icons.receipt_long),
-              label: 'Sales',
+              icon: const Icon(Icons.receipt_long_outlined),
+              activeIcon: const Icon(Icons.receipt_long),
+              label: AppLocalizations.of(context)?.sales ?? 'Sales',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.apps_outlined),
-              activeIcon: Icon(Icons.apps),
-              label: 'Menu',
+              icon: const Icon(Icons.apps_outlined),
+              activeIcon: const Icon(Icons.apps),
+              label: AppLocalizations.of(context)?.menu ?? 'Menu',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: const Icon(Icons.settings_outlined),
+              activeIcon: const Icon(Icons.settings),
+              label: AppLocalizations.of(context)?.settings ?? 'Settings',
             ),
           ],
         ),

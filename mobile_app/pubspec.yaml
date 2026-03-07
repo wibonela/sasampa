@@ -1,13 +1,15 @@
 name: sasampa_pos
 description: "Sasampa POS - Premium Point of Sale Mobile App"
 publish_to: 'none'
-version: 1.1.0+8
+version: 1.2.0+9
 
 environment:
   sdk: ^3.10.4
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
 
   # UI
@@ -33,7 +35,7 @@ dependencies:
   path: ^1.9.0
 
   # Utilities
-  intl: ^0.19.0
+  intl: ^0.20.2
   uuid: ^4.4.0
   equatable: ^2.0.5
   json_annotation: ^4.9.0
@@ -69,6 +71,7 @@ dev_dependencies:
   go_router_builder: ^2.6.1
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:

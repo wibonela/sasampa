@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../shared/models/product.dart';
@@ -46,8 +47,8 @@ class _POSScreenState extends ConsumerState<POSScreen> {
   void _addToCart(Product product) {
     if (!product.isInStock) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Product is out of stock'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.productOutOfStock),
           backgroundColor: AppColors.error,
         ),
       );
@@ -58,7 +59,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name} added to cart'),
+        content: Text('${product.name} ${AppLocalizations.of(context)!.addedToCart}'),
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
       ),
@@ -69,8 +70,8 @@ class _POSScreenState extends ConsumerState<POSScreen> {
     final cart = ref.read(cartProvider);
     if (cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cart is empty'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.cartEmpty),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -89,11 +90,12 @@ class _POSScreenState extends ConsumerState<POSScreen> {
   Widget build(BuildContext context) {
     final productsState = ref.watch(productsProvider);
     final cart = ref.watch(cartProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Point of Sale'),
+        title: Text(l10n.pointOfSale),
         centerTitle: true,
         actions: [
           IconButton(
@@ -110,7 +112,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                 } else if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Product not found for barcode: $barcode'),
+                      content: Text('${l10n.productNotFoundBarcode}: $barcode'),
                       backgroundColor: AppColors.warning,
                     ),
                   );
@@ -132,7 +134,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                 ref.read(productsProvider.notifier).setSearchQuery(value);
               },
               decoration: InputDecoration(
-                hintText: 'Search products...',
+                hintText: l10n.searchProducts,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -159,7 +161,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return _buildCategoryChip(
-                      label: 'All',
+                      label: l10n.all,
                       isSelected: productsState.selectedCategoryId == null,
                       onTap: () => ref.read(productsProvider.notifier).setCategory(null),
                     );
@@ -189,8 +191,8 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                             const SizedBox(height: 16),
                             Text(
                               productsState.searchQuery.isNotEmpty
-                                  ? 'No products found'
-                                  : 'No products available',
+                                  ? l10n.noProductsFound
+                                  : l10n.noProductsAvailable,
                               style: const TextStyle(color: AppColors.textSecondary),
                             ),
                           ],
@@ -344,9 +346,9 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                             color: AppColors.error,
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'Out of Stock',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.outOfStock,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -365,7 +367,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'Low: ${product.stock}',
+                            '${AppLocalizations.of(context)!.lowStock}: ${product.stock}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,

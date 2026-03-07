@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -125,7 +126,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _loadDashboard,
-                          child: const Text('Retry'),
+                          child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
                         ),
                       ],
                     ),
@@ -140,7 +141,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       children: [
                         Expanded(
                           child: _buildStatCard(
-                            title: "Today's Sales",
+                            title: AppLocalizations.of(context)?.todaySales ?? "Today's Sales",
                             value: _currencyFormat.format(_dashboardData?['today']?['sales_total'] ?? 0),
                             icon: Icons.trending_up,
                             color: AppColors.success,
@@ -149,7 +150,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatCard(
-                            title: 'Transactions',
+                            title: AppLocalizations.of(context)?.transactions ?? 'Transactions',
                             value: '${_dashboardData?['today']?['transactions_count'] ?? 0}',
                             icon: Icons.receipt_long,
                             color: AppColors.primary,
@@ -169,8 +170,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Quick Actions',
+                        Text(
+                          AppLocalizations.of(context)?.quickActions ?? 'Quick Actions',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -183,7 +184,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             Expanded(
                               child: _buildActionButton(
                                 icon: Icons.add_shopping_cart,
-                                label: 'New Sale',
+                                label: AppLocalizations.of(context)?.pos ?? 'New Sale',
                                 color: AppColors.primary,
                                 onTap: () => context.go('/pos'),
                               ),
@@ -192,7 +193,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             Expanded(
                               child: _buildActionButton(
                                 icon: Icons.history,
-                                label: 'History',
+                                label: AppLocalizations.of(context)?.transactions ?? 'History',
                                 color: AppColors.accent,
                                 onTap: () => context.go('/transactions'),
                               ),
@@ -238,7 +239,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    'Low Stock Alert',
+                                    AppLocalizations.of(context)?.lowStock ?? 'Low Stock Alert',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
@@ -269,8 +270,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Recent Transactions',
+                        Text(
+                          AppLocalizations.of(context)?.recentTransactions ?? 'Recent Transactions',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -279,7 +280,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                         TextButton(
                           onPressed: () => context.go('/transactions'),
-                          child: const Text('See All'),
+                          child: Text(AppLocalizations.of(context)?.all ?? 'See All'),
                         ),
                       ],
                     ),

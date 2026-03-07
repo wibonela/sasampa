@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -60,9 +61,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     try {
       final api = ref.read(apiClientProvider);
       await api.resendVerification();
-      setState(() => _message = 'Verification email sent!');
+      if (mounted) setState(() => _message = AppLocalizations.of(context)!.verificationEmailSent);
     } catch (_) {
-      setState(() => _message = 'Failed to send. Please try again.');
+      if (mounted) setState(() => _message = AppLocalizations.of(context)!.failedToSend);
     } finally {
       setState(() => _isResending = false);
     }
@@ -70,6 +71,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -94,9 +96,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
               const SizedBox(height: 24),
 
-              const Text(
-                'Verify Your Email',
-                style: TextStyle(
+              Text(
+                l10n.verifyEmail,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -105,10 +107,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
               const SizedBox(height: 12),
 
-              const Text(
-                'We\'ve sent a verification link to your email address. Please check your inbox and click the link to continue.',
+              Text(
+                l10n.verifyEmailSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                   height: 1.4,
@@ -144,7 +146,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.refresh),
-                  label: Text(_isResending ? 'Sending...' : 'Resend Verification Email'),
+                  label: Text(_isResending ? l10n.sending : l10n.resendVerificationEmail),
                 ),
               ),
 
@@ -155,24 +157,24 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isChecking ? null : _checkStatus,
-                  child: const Text('I\'ve Verified My Email'),
+                  child: Text(l10n.iveVerifiedEmail),
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Waiting for verification...',
-                    style: TextStyle(
+                    l10n.waitingForVerification,
+                    style: const TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 13,
                     ),

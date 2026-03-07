@@ -1,12 +1,13 @@
 class Transaction {
   final int id;
   final String transactionNumber;
+  final String type;
   final String status;
   final double subtotal;
   final double taxAmount;
   final double discountAmount;
   final double total;
-  final String paymentMethod;
+  final String? paymentMethod;
   final double amountPaid;
   final double changeGiven;
   final String? customerName;
@@ -18,16 +19,18 @@ class Transaction {
   final String? branchName;
   final String createdAt;
   final String? createdAtHuman;
+  final String? validUntil;
 
   Transaction({
     required this.id,
     required this.transactionNumber,
+    this.type = 'sale',
     required this.status,
     required this.subtotal,
     required this.taxAmount,
     required this.discountAmount,
     required this.total,
-    required this.paymentMethod,
+    this.paymentMethod,
     required this.amountPaid,
     required this.changeGiven,
     this.customerName,
@@ -39,12 +42,14 @@ class Transaction {
     this.branchName,
     required this.createdAt,
     this.createdAtHuman,
+    this.validUntil,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json['id'],
       transactionNumber: json['transaction_number'],
+      type: json['type'] ?? 'sale',
       status: json['status'],
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       taxAmount: (json['tax_amount'] ?? 0).toDouble(),
@@ -64,11 +69,15 @@ class Transaction {
       branchName: json['branch'] is Map ? json['branch']['name'] : json['branch'],
       createdAt: json['created_at'],
       createdAtHuman: json['created_at_human'],
+      validUntil: json['valid_until'],
     );
   }
 
+  bool get isOrder => type == 'order';
   bool get isCompleted => status == 'completed';
   bool get isVoided => status == 'voided';
+  bool get isPending => status == 'pending';
+  bool get isCancelled => status == 'cancelled';
 
   String get paymentMethodLabel {
     switch (paymentMethod) {
@@ -81,7 +90,7 @@ class Transaction {
       case 'bank_transfer':
         return 'Bank Transfer';
       default:
-        return paymentMethod;
+        return paymentMethod ?? '-';
     }
   }
 

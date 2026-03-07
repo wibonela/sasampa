@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -36,8 +37,8 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to complete setup. Please try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToComplete),
             backgroundColor: AppColors.error,
           ),
         );
@@ -47,6 +48,7 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -71,9 +73,9 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
 
               const SizedBox(height: 32),
 
-              const Text(
-                'You\'re All Set!',
-                style: TextStyle(
+              Text(
+                l10n.allSet,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -82,10 +84,10 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
 
               const SizedBox(height: 12),
 
-              const Text(
-                'Your account has been set up successfully. You can now start using Sasampa POS to manage your business.',
+              Text(
+                l10n.allSetSubtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                   height: 1.4,
@@ -108,9 +110,9 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
                             valueColor: AlwaysStoppedAnimation(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Get Started',
-                          style: TextStyle(fontSize: 18),
+                      : Text(
+                          l10n.getStarted,
+                          style: const TextStyle(fontSize: 18),
                         ),
                 ),
               ),

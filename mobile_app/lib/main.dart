@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/theme.dart';
 import 'app/theme/colors.dart';
@@ -144,6 +146,9 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
   Future<void> _initializeApp() async {
     if (!mounted) return;
 
+    // Load locale preference
+    await ref.read(localeProvider.notifier).loadLocale();
+
     try {
       // Check if user is already logged in (with timeout)
       await ref.read(authProvider.notifier).checkAuth().timeout(
@@ -167,11 +172,25 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
+
+    const localizationsDelegates = [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+
+    const supportedLocales = [Locale('sw'), Locale('en')];
+
     // Show error screen if critical error
     if (_hasError) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: ErrorScreen(
           message: _errorMessage ?? 'An error occurred',
           onRetry: () {
@@ -190,6 +209,9 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: const SplashScreen(),
       );
     }
@@ -201,6 +223,9 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
       title: 'Sasampa POS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      locale: locale,
+      localizationsDelegates: localizationsDelegates,
+      supportedLocales: supportedLocales,
       routerConfig: router,
     );
   }

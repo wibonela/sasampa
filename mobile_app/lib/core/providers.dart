@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' hide Category;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'network/api_client.dart';
@@ -508,4 +509,28 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
 final productsProvider = StateNotifierProvider<ProductsNotifier, ProductsState>((ref) {
   final api = ref.watch(apiClientProvider);
   return ProductsNotifier(api);
+});
+
+// Locale State
+class LocaleNotifier extends StateNotifier<Locale> {
+  final SecureStorage _storage;
+
+  LocaleNotifier(this._storage) : super(const Locale('sw'));
+
+  Future<void> loadLocale() async {
+    final code = await _storage.getLocale();
+    if (code != null) {
+      state = Locale(code);
+    }
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    state = locale;
+    await _storage.saveLocale(locale.languageCode);
+  }
+}
+
+final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
+  final storage = ref.watch(secureStorageProvider);
+  return LocaleNotifier(storage);
 });

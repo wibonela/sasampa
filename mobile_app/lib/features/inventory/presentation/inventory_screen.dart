@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/error_utils.dart';
@@ -138,211 +139,215 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Adjust Stock',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        final reasons = [
+          ('Stock In', l10n.reasonStockIn),
+          ('Stock Out', l10n.reasonStockOut),
+          ('Damaged', l10n.reasonDamaged),
+          ('Lost', l10n.reasonLost),
+          ('Returned', l10n.reasonReturned),
+          ('Correction', l10n.reasonCorrection),
+          ('Other', l10n.reasonOther),
+        ];
+        return StatefulBuilder(
+          builder: (context, setModalState) => Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.adjustStock,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                product['product_name']?.toString() ?? product['name']?.toString() ?? 'Unknown Product',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                'Current Stock: ${product['quantity'] ?? product['stock'] ?? 0}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
+                const SizedBox(height: 8),
+                Text(
+                  product['product_name']?.toString() ?? product['name']?.toString() ?? l10n.unknownProduct,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                Text(
+                  '${l10n.currentStock}: ${product['quantity'] ?? product['stock'] ?? 0}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-              // Adjustment Type
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setModalState(() => adjustmentType = 'add'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: adjustmentType == 'add'
-                              ? AppColors.success.withValues(alpha: 0.1)
-                              : AppColors.gray6,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                // Adjustment Type
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() => adjustmentType = 'add'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
                             color: adjustmentType == 'add'
-                                ? AppColors.success
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.add_circle_outline,
+                                ? AppColors.success.withValues(alpha: 0.1)
+                                : AppColors.gray6,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
                               color: adjustmentType == 'add'
                                   ? AppColors.success
-                                  : AppColors.gray3,
+                                  : Colors.transparent,
+                              width: 2,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Add Stock',
-                              style: TextStyle(
-                                fontWeight: adjustmentType == 'add'
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.add_circle_outline,
                                 color: adjustmentType == 'add'
                                     ? AppColors.success
-                                    : AppColors.textPrimary,
+                                    : AppColors.gray3,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () =>
-                          setModalState(() => adjustmentType = 'subtract'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: adjustmentType == 'subtract'
-                              ? AppColors.error.withValues(alpha: 0.1)
-                              : AppColors.gray6,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: adjustmentType == 'subtract'
-                                ? AppColors.error
-                                : Colors.transparent,
-                            width: 2,
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.addStock,
+                                style: TextStyle(
+                                  fontWeight: adjustmentType == 'add'
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                  color: adjustmentType == 'add'
+                                      ? AppColors.success
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.remove_circle_outline,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () =>
+                            setModalState(() => adjustmentType = 'subtract'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: adjustmentType == 'subtract'
+                                ? AppColors.error.withValues(alpha: 0.1)
+                                : AppColors.gray6,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
                               color: adjustmentType == 'subtract'
                                   ? AppColors.error
-                                  : AppColors.gray3,
+                                  : Colors.transparent,
+                              width: 2,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Remove Stock',
-                              style: TextStyle(
-                                fontWeight: adjustmentType == 'subtract'
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.remove_circle_outline,
                                 color: adjustmentType == 'subtract'
                                     ? AppColors.error
-                                    : AppColors.textPrimary,
+                                    : AppColors.gray3,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.removeStock,
+                                style: TextStyle(
+                                  fontWeight: adjustmentType == 'subtract'
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                  color: adjustmentType == 'subtract'
+                                      ? AppColors.error
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Quantity
-              TextField(
-                controller: quantityController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Quantity',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-              // Reason
-              DropdownButtonFormField<String>(
-                value: reason,
-                decoration: InputDecoration(
-                  labelText: 'Reason',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                items: [
-                  'Stock In',
-                  'Stock Out',
-                  'Damaged',
-                  'Lost',
-                  'Returned',
-                  'Correction',
-                  'Other',
-                ].map((r) {
-                  return DropdownMenuItem(value: r, child: Text(r));
-                }).toList(),
-                onChanged: (v) => setModalState(() => reason = v),
-              ),
-              const SizedBox(height: 24),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (quantityController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Enter quantity')),
-                      );
-                      return;
-                    }
-                    Navigator.pop(context, true);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: adjustmentType == 'add'
-                        ? AppColors.success
-                        : AppColors.error,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
+                // Quantity
+                TextField(
+                  controller: quantityController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.quantity,
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Save Adjustment'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+
+                // Reason
+                DropdownButtonFormField<String>(
+                  value: reason,
+                  decoration: InputDecoration(
+                    labelText: l10n.voidReason,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  items: reasons.map((r) {
+                    return DropdownMenuItem(value: r.$1, child: Text(r.$2));
+                  }).toList(),
+                  onChanged: (v) => setModalState(() => reason = v),
+                ),
+                const SizedBox(height: 24),
+
+                // Save Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (quantityController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.enterQuantity)),
+                        );
+                        return;
+                      }
+                      Navigator.pop(context, true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: adjustmentType == 'add'
+                          ? AppColors.success
+                          : AppColors.error,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(l10n.saveAdjustment),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     if (result == true && quantityController.text.isNotEmpty) {
@@ -359,9 +364,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
         );
 
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Stock adjusted successfully'),
+            SnackBar(
+              content: Text(l10n.stockAdjusted),
               backgroundColor: AppColors.success,
             ),
           );
@@ -382,17 +388,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Inventory'),
+        title: Text(l10n.inventory),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'All (${_summary?['total_products'] ?? 0})'),
-            Tab(text: 'Low Stock (${_summary?['low_stock_count'] ?? 0})'),
-            Tab(text: 'Out (${_summary?['out_of_stock_count'] ?? 0})'),
+            Tab(text: '${l10n.all} (${_summary?['total_products'] ?? 0})'),
+            Tab(text: '${l10n.lowStock} (${_summary?['low_stock_count'] ?? 0})'),
+            Tab(text: '${l10n.outOfStock} (${_summary?['out_of_stock_count'] ?? 0})'),
           ],
         ),
       ),
@@ -406,7 +413,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
               children: [
                 Expanded(
                   child: _buildStatCard(
-                    'Total Value',
+                    l10n.totalValue,
                     'TZS ${_currencyFormat.format(_summary?['total_value'] ?? 0)}',
                     Icons.inventory_2_outlined,
                   ),
@@ -414,7 +421,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildStatCard(
-                    'Total Items',
+                    l10n.totalItems,
                     '${_summary?['total_stock'] ?? 0}',
                     Icons.numbers,
                   ),
@@ -429,7 +436,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search products...',
+                hintText: l10n.searchProducts,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -474,10 +481,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
                                 const SizedBox(height: 16),
                                 Text(
                                   _tabController.index == 1
-                                      ? 'No low stock items'
+                                      ? l10n.noLowStockItems
                                       : _tabController.index == 2
-                                          ? 'No out of stock items'
-                                          : 'No products found',
+                                          ? l10n.noOutOfStockItems
+                                          : l10n.noProductsFound,
                                   style: const TextStyle(
                                     color: AppColors.textSecondary,
                                     fontSize: 16,
@@ -546,11 +553,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
   }
 
   Widget _buildProductItem(Map<String, dynamic> product) {
+    final l10n = AppLocalizations.of(context)!;
     // Handle both inventory API (quantity, product_name) and products API (stock, name)
     final stock = product['quantity'] ?? product['stock'] ?? 0;
     final isLowStock = product['is_low_stock'] ?? false;
     final isOutOfStock = (product['is_out_of_stock'] ?? false) || stock <= 0;
-    final name = product['product_name']?.toString() ?? product['name']?.toString() ?? 'Unknown Product';
+    final name = product['product_name']?.toString() ?? product['name']?.toString() ?? l10n.unknownProduct;
     final sku = product['sku']?.toString() ?? 'N/A';
     final imageUrl = product['image_url']?.toString();
     final sellingPrice = product['selling_price'] ?? 0;
@@ -632,10 +640,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen>
             const SizedBox(height: 4),
             Text(
               isOutOfStock
-                  ? 'Out of Stock'
+                  ? l10n.outOfStock
                   : isLowStock
-                      ? 'Low Stock'
-                      : 'In Stock',
+                      ? l10n.lowStock
+                      : l10n.inStock,
               style: TextStyle(
                 fontSize: 11,
                 color: stockColor,

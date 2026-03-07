@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\InventoryController;
 use App\Http\Controllers\Api\V1\MobileAccessController;
 use App\Http\Controllers\Api\V1\OnboardingApiController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\POSController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
@@ -111,9 +112,19 @@ Route::prefix('v1')->group(function () {
                 Route::get('/transactions', [TransactionController::class, 'index']);
                 Route::get('/transactions/today', [TransactionController::class, 'today']);
                 Route::get('/transactions/mine', [TransactionController::class, 'mine']);
+                Route::get('/transactions/summary', [TransactionController::class, 'summary']);
                 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
                 Route::get('/transactions/{id}/receipt', [POSController::class, 'receipt']);
                 Route::post('/transactions/{id}/void', [POSController::class, 'voidTransaction']);
+
+                // Orders
+                Route::get('/orders', [OrderController::class, 'index']);
+                Route::post('/orders', [OrderController::class, 'store']);
+                Route::get('/orders/{id}', [OrderController::class, 'show']);
+                Route::put('/orders/{id}', [OrderController::class, 'update']);
+                Route::post('/orders/{id}/convert', [OrderController::class, 'convertToSale']);
+                Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
+                Route::get('/orders/{id}/proforma', [OrderController::class, 'proforma']);
             });
 
             /*
