@@ -238,7 +238,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     AppLocalizations.of(context)?.lowStock ?? 'Low Stock Alert',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,

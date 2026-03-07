@@ -48,7 +48,7 @@ class MenuScreen extends ConsumerWidget {
           _MenuItem(
             icon: Icons.point_of_sale_outlined,
             title: l10n.pointOfSale,
-            subtitle: l10n.processSales,
+            subtitle: l10n.pos,
             route: '/pos',
             isNative: true,
           ),
