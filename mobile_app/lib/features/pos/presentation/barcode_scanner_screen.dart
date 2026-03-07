@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Scan Barcode'),
+        title: Text(AppLocalizations.of(context)!.scanBarcode),
         actions: [
           IconButton(
             icon: ValueListenableBuilder(
@@ -78,8 +79,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             bottom: 100,
             left: 0,
             right: 0,
-            child: const Text(
-              'Point camera at a barcode',
+            child: Text(
+              AppLocalizations.of(context)!.pointCameraAtBarcode,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,

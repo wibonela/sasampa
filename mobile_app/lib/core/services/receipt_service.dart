@@ -382,6 +382,284 @@ class ReceiptService {
     return pdf.save();
   }
 
+  /// Generate proforma invoice PDF from API data (A4 format)
+  static Future<Uint8List> generateProformaInvoicePdf(Map<String, dynamic> proformaData) async {
+    final pdf = pw.Document();
+
+    final company = proformaData['company'] as Map<String, dynamic>? ?? {};
+    final order = proformaData['order'] as Map<String, dynamic>? ?? {};
+    final customer = proformaData['customer'] as Map<String, dynamic>? ?? {};
+    final items = proformaData['items'] as List? ?? [];
+    final totals = proformaData['totals'] as Map<String, dynamic>? ?? {};
+    final notes = proformaData['notes'] as String?;
+
+    // Try to load company logo
+    pw.ImageProvider? logoImage;
+    final logoUrl = company['logo'] as String?;
+    if (logoUrl != null && logoUrl.isNotEmpty) {
+      try {
+        final response = await http.get(Uri.parse(logoUrl));
+        if (response.statusCode == 200) {
+          logoImage = pw.MemoryImage(response.bodyBytes);
+        }
+      } catch (_) {}
+    }
+
+    final accentColor = PdfColor.fromHex('#2563EB');
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  // Company info (left)
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      if (logoImage != null)
+                        pw.Container(
+                          width: 60,
+                          height: 60,
+                          margin: const pw.EdgeInsets.only(bottom: 8),
+                          child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                        ),
+                      pw.Text(
+                        company['name'] ?? 'Company',
+                        style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                      ),
+                      if (company['address'] != null)
+                        pw.Text(company['address'], style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      if (company['phone'] != null)
+                        pw.Text('Tel: ${company['phone']}', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      if (company['email'] != null)
+                        pw.Text(company['email'], style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                    ],
+                  ),
+                  // Proforma title (right)
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'ANKARA YA PROFORMA',
+                        style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: accentColor),
+                      ),
+                      pw.Text(
+                        'PROFORMA INVOICE',
+                        style: pw.TextStyle(fontSize: 10, color: accentColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 20),
+
+              // Document info bar
+              pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('#F3F4F6'),
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Proforma No: ${order['number'] ?? ''}', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                    pw.Text('Tarehe: ${order['date'] ?? ''}', style: const pw.TextStyle(fontSize: 10)),
+                    if (order['valid_until'] != null)
+                      pw.Text('Inaisha: ${order['valid_until']}', style: const pw.TextStyle(fontSize: 10)),
+                  ],
+                ),
+              ),
+
+              pw.SizedBox(height: 16),
+
+              // Customer box
+              pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey400),
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Kwa:', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey700)),
+                    pw.SizedBox(height: 4),
+                    pw.Text(customer['name'] ?? '', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                    if (customer['phone'] != null)
+                      pw.Text('Tel: ${customer['phone']}', style: const pw.TextStyle(fontSize: 10)),
+                    if (customer['tin'] != null)
+                      pw.Text('TIN: ${customer['tin']}', style: const pw.TextStyle(fontSize: 10)),
+                  ],
+                ),
+              ),
+
+              pw.SizedBox(height: 20),
+
+              // Items table
+              pw.Table(
+                border: pw.TableBorder.all(color: PdfColors.grey300),
+                columnWidths: {
+                  0: const pw.FixedColumnWidth(30),
+                  1: const pw.FlexColumnWidth(4),
+                  2: const pw.FlexColumnWidth(1.2),
+                  3: const pw.FlexColumnWidth(1.5),
+                  4: const pw.FlexColumnWidth(1.5),
+                },
+                children: [
+                  // Header
+                  pw.TableRow(
+                    decoration: pw.BoxDecoration(color: accentColor),
+                    children: [
+                      _proformaCell('#', isHeader: true),
+                      _proformaCell('Bidhaa', isHeader: true),
+                      _proformaCell('Idadi', isHeader: true, align: pw.TextAlign.center),
+                      _proformaCell('Bei', isHeader: true, align: pw.TextAlign.right),
+                      _proformaCell('Jumla', isHeader: true, align: pw.TextAlign.right),
+                    ],
+                  ),
+                  // Items
+                  ...List.generate(items.length, (index) {
+                    final item = items[index];
+                    final isEven = index % 2 == 0;
+                    return pw.TableRow(
+                      decoration: isEven ? pw.BoxDecoration(color: PdfColor.fromHex('#F9FAFB')) : null,
+                      children: [
+                        _proformaCell('${index + 1}'),
+                        _proformaCell(item['name'] ?? ''),
+                        _proformaCell('${item['quantity']}', align: pw.TextAlign.center),
+                        _proformaCell('TZS ${_currencyFormat.format((item['unit_price'] ?? 0).toDouble())}', align: pw.TextAlign.right),
+                        _proformaCell('TZS ${_currencyFormat.format((item['subtotal'] ?? 0).toDouble())}', align: pw.TextAlign.right),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+
+              pw.SizedBox(height: 16),
+
+              // Totals
+              pw.Align(
+                alignment: pw.Alignment.centerRight,
+                child: pw.Container(
+                  width: 200,
+                  child: pw.Column(
+                    children: [
+                      _proformaTotalRow('Jumla Ndogo:', 'TZS ${_currencyFormat.format((totals['subtotal'] ?? 0).toDouble())}'),
+                      if ((totals['tax'] ?? 0) > 0)
+                        _proformaTotalRow('Kodi:', 'TZS ${_currencyFormat.format((totals['tax'] ?? 0).toDouble())}'),
+                      if ((totals['discount'] ?? 0) > 0)
+                        _proformaTotalRow('Punguzo:', '-TZS ${_currencyFormat.format((totals['discount'] ?? 0).toDouble())}'),
+                      pw.Divider(thickness: 1),
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(vertical: 4),
+                        child: pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text('JUMLA:', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                            pw.Text(
+                              'TZS ${_currencyFormat.format((totals['total'] ?? 0).toDouble())}',
+                              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: accentColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              if (notes != null && notes.isNotEmpty) ...[
+                pw.SizedBox(height: 20),
+                pw.Text('Maelezo:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                pw.Text(notes, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+              ],
+
+              pw.Spacer(),
+
+              // Footer
+              pw.Divider(thickness: 0.5, color: PdfColors.grey400),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                'Hii ni ankara ya proforma na si risiti. Malipo yanahitajika kuthibitisha oda hii.',
+                style: pw.TextStyle(fontSize: 9, fontStyle: pw.FontStyle.italic, color: PdfColors.grey600),
+                textAlign: pw.TextAlign.center,
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                'Powered by Sasampa POS | sasampa.com',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+                textAlign: pw.TextAlign.center,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  static pw.Widget _proformaCell(String text, {bool isHeader = false, pw.TextAlign align = pw.TextAlign.left}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: isHeader ? 10 : 9,
+          fontWeight: isHeader ? pw.FontWeight.bold : null,
+          color: isHeader ? PdfColors.white : PdfColors.black,
+        ),
+        textAlign: align,
+      ),
+    );
+  }
+
+  static pw.Widget _proformaTotalRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(label, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+          pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
+        ],
+      ),
+    );
+  }
+
+  /// Share proforma invoice as PDF
+  static Future<void> shareProformaFromApi(Map<String, dynamic> proformaData) async {
+    final pdfData = await generateProformaInvoicePdf(proformaData);
+    final orderNumber = proformaData['order']?['number'] ?? 'proforma';
+
+    await Printing.sharePdf(
+      bytes: pdfData,
+      filename: 'Proforma_$orderNumber.pdf',
+    );
+  }
+
+  /// Print proforma invoice
+  static Future<void> printProformaFromApi(Map<String, dynamic> proformaData) async {
+    final pdfData = await generateProformaInvoicePdf(proformaData);
+    final orderNumber = proformaData['order']?['number'] ?? 'proforma';
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfData,
+      name: 'Proforma_$orderNumber',
+    );
+  }
+
   static pw.Widget _buildInfoRow(String label, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 1),

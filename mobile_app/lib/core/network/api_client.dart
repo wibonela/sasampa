@@ -249,6 +249,88 @@ class ApiClient {
     return _dio.get('/pos/transactions/$transactionId/receipt');
   }
 
+  // Transaction Summary
+  Future<Response> getTransactionSummary() {
+    return _dio.get('/pos/transactions/summary');
+  }
+
+  // Orders
+  Future<Response> createOrder({
+    required List<Map<String, dynamic>> items,
+    required String customerName,
+    String? customerPhone,
+    String? customerTin,
+    double? discountAmount,
+    String? notes,
+    int? validDays,
+  }) {
+    return _dio.post('/pos/orders', data: {
+      'items': items,
+      'customer_name': customerName,
+      if (customerPhone != null) 'customer_phone': customerPhone,
+      if (customerTin != null) 'customer_tin': customerTin,
+      if (discountAmount != null) 'discount_amount': discountAmount,
+      if (notes != null) 'notes': notes,
+      if (validDays != null) 'valid_days': validDays,
+    });
+  }
+
+  Future<Response> getOrders({
+    String? status,
+    String? search,
+    int page = 1,
+    int perPage = 20,
+  }) {
+    return _dio.get('/pos/orders', queryParameters: {
+      if (status != null) 'status': status,
+      if (search != null) 'search': search,
+      'page': page,
+      'per_page': perPage,
+    });
+  }
+
+  Future<Response> getOrder(int id) {
+    return _dio.get('/pos/orders/$id');
+  }
+
+  Future<Response> updateOrder(int id, {
+    required List<Map<String, dynamic>> items,
+    required String customerName,
+    String? customerPhone,
+    String? customerTin,
+    double? discountAmount,
+    String? notes,
+  }) {
+    return _dio.put('/pos/orders/$id', data: {
+      'items': items,
+      'customer_name': customerName,
+      if (customerPhone != null) 'customer_phone': customerPhone,
+      if (customerTin != null) 'customer_tin': customerTin,
+      if (discountAmount != null) 'discount_amount': discountAmount,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  Future<Response> convertOrderToSale(int id, {
+    required String paymentMethod,
+    required double amountPaid,
+  }) {
+    return _dio.post('/pos/orders/$id/convert', data: {
+      'payment_method': paymentMethod,
+      'amount_paid': amountPaid,
+    });
+  }
+
+  Future<Response> cancelOrder(int id, {String? reason}) {
+    return _dio.post('/pos/orders/$id/cancel', data: {
+      if (reason != null) 'reason': reason,
+    });
+  }
+
+  Future<Response> getProformaReceipt(int id) {
+    return _dio.get('/pos/orders/$id/proforma');
+  }
+
   // Transactions
   Future<Response> getTransactions({
     String? status,

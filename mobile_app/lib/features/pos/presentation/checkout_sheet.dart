@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/services/receipt_service.dart';
@@ -42,6 +43,110 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     _amountPaidController.dispose();
     _tinController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveAsOrder() async {
+    final cart = ref.read(cartProvider);
+    final customerName = _customerNameController.text.trim();
+    final l10n = AppLocalizations.of(context);
+
+    if (customerName.isEmpty) {
+      setState(() {
+        _showCustomerInfo = true;
+        _error = l10n?.customerNameRequired ?? 'Customer name is required for orders';
+      });
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+      _error = null;
+    });
+
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.createOrder(
+        items: cart.toCheckoutItems(),
+        customerName: customerName,
+        customerPhone: _customerPhoneController.text.trim().isNotEmpty
+            ? _customerPhoneController.text.trim()
+            : null,
+        customerTin: _tinController.text.trim().isNotEmpty
+            ? _tinController.text.trim()
+            : null,
+        discountAmount: cart.discountAmount > 0 ? cart.discountAmount : null,
+      );
+
+      final data = response.data;
+
+      // Clear cart
+      ref.read(cartProvider.notifier).clearCart();
+
+      if (mounted) {
+        final showProforma = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64, height: 64,
+                    decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                    child: const Icon(Icons.check, color: Colors.white, size: 32),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n?.orderSaved ?? 'Order saved!', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text(data['data']?['transaction_number'] ?? '', style: const TextStyle(color: AppColors.textSecondary)),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(dialogContext, false),
+                          child: Text(l10n?.close ?? 'Close'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(dialogContext, true),
+                          child: Text(l10n?.shareProforma ?? 'Share Proforma'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        if (showProforma == true && mounted) {
+          try {
+            final orderId = data['data']?['id'];
+            if (orderId != null) {
+              final api = ref.read(apiClientProvider);
+              final proformaResponse = await api.getProformaReceipt(orderId);
+              await ReceiptService.shareProformaFromApi(proformaResponse.data['data']);
+            }
+          } catch (_) {}
+        }
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _error = extractErrorMessage(e, 'Failed to save order.');
+        _isProcessing = false;
+      });
+    }
   }
 
   Future<void> _processCheckout() async {
@@ -112,6 +217,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   }
 
   Widget _buildReceiptDialog(BuildContext dialogContext, Map<String, dynamic> transaction) {
+    final l10n = AppLocalizations.of(dialogContext)!;
     final items = transaction['items'] as List? ?? [];
     final authState = ref.read(authProvider);
     final company = authState.user?.company;
@@ -172,12 +278,12 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                 const SizedBox(height: 8),
 
                 // ===== TRANSACTION INFO =====
-                _buildInfoRow('Receipt #:', transaction['transaction_number'] ?? ''),
-                _buildInfoRow('Date:', dateStr),
-                _buildInfoRow('Time:', timeStr),
-                _buildInfoRow('Cashier:', cashier?['name'] ?? authState.user?.name ?? ''),
+                _buildInfoRow('${l10n.receipt} #:', transaction['transaction_number'] ?? ''),
+                _buildInfoRow('${l10n.date}:', dateStr),
+                _buildInfoRow('${l10n.time}:', timeStr),
+                _buildInfoRow('${l10n.cashier}:', cashier?['name'] ?? authState.user?.name ?? ''),
                 if (transaction['customer_name'] != null)
-                  _buildInfoRow('Customer:', transaction['customer_name']),
+                  _buildInfoRow('${l10n.customer}:', transaction['customer_name']),
                 if (transaction['customer_tin'] != null)
                   _buildInfoRow('TIN:', transaction['customer_tin']),
 
@@ -187,10 +293,10 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 
                 // ===== ITEMS HEADER =====
                 Row(
-                  children: const [
-                    Expanded(flex: 5, child: Text('Item', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                    Expanded(flex: 2, child: Text('Qty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
-                    Expanded(flex: 3, child: Text('Amount', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.right)),
+                  children: [
+                    Expanded(flex: 5, child: Text(l10n.item, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                    Expanded(flex: 2, child: Text(l10n.quantity, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                    Expanded(flex: 3, child: Text(l10n.amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.right)),
                   ],
                 ),
                 _buildDashedDivider(),
@@ -244,14 +350,14 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                 const SizedBox(height: 8),
 
                 // ===== TOTALS =====
-                _buildTotalRow('Subtotal:', 'TZS ${NumberFormat('#,###').format((transaction['subtotal'] ?? 0).toDouble())}'),
+                _buildTotalRow('${l10n.subtotal}:', 'TZS ${NumberFormat('#,###').format((transaction['subtotal'] ?? 0).toDouble())}'),
                 if ((transaction['tax_amount'] ?? 0) > 0)
-                  _buildTotalRow('VAT:', 'TZS ${NumberFormat('#,###').format((transaction['tax_amount'] ?? 0).toDouble())}'),
+                  _buildTotalRow('${l10n.vat}:', 'TZS ${NumberFormat('#,###').format((transaction['tax_amount'] ?? 0).toDouble())}'),
                 if ((transaction['discount_amount'] ?? 0) > 0)
-                  _buildTotalRow('Discount:', '-TZS ${NumberFormat('#,###').format((transaction['discount_amount'] ?? 0).toDouble())}'),
+                  _buildTotalRow('${l10n.discount}:', '-TZS ${NumberFormat('#,###').format((transaction['discount_amount'] ?? 0).toDouble())}'),
                 const SizedBox(height: 4),
                 _buildTotalRow(
-                  'TOTAL:',
+                  '${l10n.total}:',
                   'TZS ${NumberFormat('#,###').format((transaction['total'] ?? 0).toDouble())}',
                   isBold: true,
                   fontSize: 14,
@@ -262,25 +368,25 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                 const SizedBox(height: 8),
 
                 // ===== PAYMENT =====
-                _buildInfoRow('Payment:', _paymentMethodLabel(transaction['payment_method'] ?? 'cash')),
-                _buildInfoRow('Amount Paid:', 'TZS ${NumberFormat('#,###').format((transaction['amount_paid'] ?? 0).toDouble())}'),
+                _buildInfoRow('${l10n.payment}:', _paymentMethodLabel(transaction['payment_method'] ?? 'cash', l10n)),
+                _buildInfoRow('${l10n.amountPaid}:', 'TZS ${NumberFormat('#,###').format((transaction['amount_paid'] ?? 0).toDouble())}'),
                 if ((transaction['change_given'] ?? 0) > 0)
-                  _buildInfoRow('Change:', 'TZS ${NumberFormat('#,###').format((transaction['change_given'] ?? 0).toDouble())}', isBold: true),
+                  _buildInfoRow('${l10n.change}:', 'TZS ${NumberFormat('#,###').format((transaction['change_given'] ?? 0).toDouble())}', isBold: true),
 
                 const SizedBox(height: 8),
                 _buildDashedDivider(),
                 const SizedBox(height: 16),
 
                 // ===== FOOTER =====
-                const Text(
-                  'Thank you for your purchase!',
-                  style: TextStyle(fontSize: 12),
+                Text(
+                  l10n.thankYou,
+                  style: const TextStyle(fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Karibu tena / Welcome again',
-                  style: TextStyle(fontSize: 12),
+                Text(
+                  l10n.welcomeAgain,
+                  style: const TextStyle(fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
@@ -298,9 +404,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Powered by Sasampa POS | sasampa.com',
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                Text(
+                  l10n.poweredBy,
+                  style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
                   textAlign: TextAlign.center,
                 ),
 
@@ -320,7 +426,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                           );
                         },
                         icon: const Icon(Icons.print, size: 18),
-                        label: const Text('Print'),
+                        label: Text(l10n.print),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -335,7 +441,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                           );
                         },
                         icon: const Icon(Icons.share, size: 18),
-                        label: const Text('Share'),
+                        label: Text(l10n.share),
                       ),
                     ),
                   ],
@@ -345,7 +451,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(dialogContext),
-                    child: const Text('Close'),
+                    child: Text(l10n.close),
                   ),
                 ),
               ],
@@ -426,34 +532,35 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     );
   }
 
-  String _paymentMethodLabel(String method) {
+  String _paymentMethodLabel(String method, AppLocalizations l10n) {
     return switch (method) {
-      'cash' => 'Cash',
-      'card' => 'Card',
-      'mobile' => 'Mobile Money',
-      'bank_transfer' => 'Bank Transfer',
+      'cash' => l10n.cash,
+      'card' => l10n.card,
+      'mobile' => l10n.mobileMoney,
+      'bank_transfer' => l10n.bankTransfer,
       _ => method,
     };
   }
 
   void _showQuantityDialog(int productId, int currentQuantity) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: '$currentQuantity');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Enter Quantity'),
+        title: Text(l10n.enterQuantity),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Quantity',
+          decoration: InputDecoration(
+            labelText: l10n.quantity,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -463,7 +570,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
               }
               Navigator.pop(context);
             },
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -471,6 +578,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   }
 
   Widget _buildSuccessDialog(BuildContext dialogContext, Map<String, dynamic> transaction) {
+    final l10n = AppLocalizations.of(dialogContext)!;
     final change = (transaction['change_given'] ?? 0).toDouble();
 
     return Dialog(
@@ -490,9 +598,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
               child: const Icon(Icons.check, color: Colors.white, size: 32),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Sale Complete!',
-              style: TextStyle(
+            Text(
+              l10n.saleComplete,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -514,7 +622,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total'),
+                      Text(l10n.total),
                       Text(
                         _currencyFormat.format((transaction['total'] ?? 0).toDouble()),
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -526,9 +634,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Change',
-                          style: TextStyle(
+                        Text(
+                          l10n.change,
+                          style: const TextStyle(
                             color: AppColors.success,
                             fontWeight: FontWeight.w600,
                           ),
@@ -555,7 +663,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     height: 48,
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(dialogContext, false),
-                      child: const Text('Close'),
+                      child: Text(l10n.close),
                     ),
                   ),
                 ),
@@ -565,7 +673,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(dialogContext, true),
-                      child: const Text('View Receipt'),
+                      child: Text(l10n.viewReceipt),
                     ),
                   ),
                 ),
@@ -579,6 +687,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cart = ref.watch(cartProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -609,10 +718,10 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Checkout',
-                    style: TextStyle(
+                    l10n.checkout,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -731,7 +840,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Subtotal'),
+                            Text(l10n.subtotal),
                             Text(_currencyFormat.format(cart.subtotal)),
                           ],
                         ),
@@ -739,7 +848,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Tax'),
+                            Text(l10n.tax),
                             Text(_currencyFormat.format(cart.taxAmount)),
                           ],
                         ),
@@ -748,7 +857,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Discount', style: TextStyle(color: AppColors.success)),
+                              Text(l10n.discount, style: const TextStyle(color: AppColors.success)),
                               Text(
                                 '-${_currencyFormat.format(cart.discountAmount)}',
                                 style: const TextStyle(color: AppColors.success),
@@ -760,9 +869,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Total',
-                              style: TextStyle(
+                            Text(
+                              l10n.total,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                               ),
@@ -784,9 +893,9 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   const SizedBox(height: 24),
 
                   // Payment Method
-                  const Text(
-                    'Payment Method',
-                    style: TextStyle(
+                  Text(
+                    l10n.paymentMethod,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -795,10 +904,10 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   Wrap(
                     spacing: 8,
                     children: [
-                      _buildPaymentChip('cash', 'Cash', Icons.payments),
-                      _buildPaymentChip('card', 'Card', Icons.credit_card),
-                      _buildPaymentChip('mobile', 'Mobile Money', Icons.phone_android),
-                      _buildPaymentChip('bank_transfer', 'Bank Transfer', Icons.account_balance),
+                      _buildPaymentChip('cash', l10n.cash, Icons.payments),
+                      _buildPaymentChip('card', l10n.card, Icons.credit_card),
+                      _buildPaymentChip('mobile', l10n.mobileMoney, Icons.phone_android),
+                      _buildPaymentChip('bank_transfer', l10n.bankTransfer, Icons.account_balance),
                     ],
                   ),
 
@@ -808,8 +917,8 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                   TextField(
                     controller: _amountPaidController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount Paid',
+                    decoration: InputDecoration(
+                      labelText: l10n.amountPaid,
                       prefixText: 'TZS ',
                     ),
                   ),
@@ -828,7 +937,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          _showCustomerInfo ? 'Hide Customer Info' : 'Add Customer Info (optional)',
+                          _showCustomerInfo ? l10n.hideCustomerInfo : l10n.addCustomerInfo,
                           style: const TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
@@ -842,27 +951,27 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: _customerNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Customer Name',
-                        prefixIcon: Icon(Icons.person_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n.customerName,
+                        prefixIcon: const Icon(Icons.person_outline),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _customerPhoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone Number',
-                        prefixIcon: Icon(Icons.phone_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.phoneNumber,
+                        prefixIcon: const Icon(Icons.phone_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _tinController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'TIN Number',
-                        prefixIcon: Icon(Icons.badge_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n.tinNumber,
+                        prefixIcon: const Icon(Icons.badge_outlined),
                       ),
                     ),
                   ],
@@ -898,7 +1007,23 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                                 valueColor: AlwaysStoppedAnimation(Colors.white),
                               ),
                             )
-                          : Text('Complete Sale - ${_currencyFormat.format(cart.total)}'),
+                          : Text('${l10n.completeSale} - ${_currencyFormat.format(cart.total)}'),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Save as Order Button
+                  SizedBox(
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _isProcessing ? null : _saveAsOrder,
+                      icon: const Icon(Icons.assignment_outlined),
+                      label: Text(l10n.saveAsOrder),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
                     ),
                   ),
 

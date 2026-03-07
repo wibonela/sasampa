@@ -7,6 +7,7 @@ class SecureStorage {
   static const String _deviceIdKey = 'device_id';
   static const String _lastSyncKey = 'last_sync';
   static const String _rememberEmailKey = 'remember_email';
+  static const String _localeKey = 'app_locale';
 
   SharedPreferences? _prefs;
   bool _initialized = false;
@@ -167,6 +168,26 @@ class SecureStorage {
       await _prefs!.remove(_rememberEmailKey);
     } catch (e) {
       print('SecureStorage: Failed to clear email - $e');
+    }
+  }
+
+  // Locale
+  Future<void> saveLocale(String code) async {
+    if (!await _ensureInitialized()) return;
+    try {
+      await _prefs!.setString(_localeKey, code);
+    } catch (e) {
+      print('SecureStorage: Failed to save locale - $e');
+    }
+  }
+
+  Future<String?> getLocale() async {
+    if (!await _ensureInitialized()) return null;
+    try {
+      return _prefs!.getString(_localeKey);
+    } catch (e) {
+      print('SecureStorage: Failed to get locale - $e');
+      return null;
     }
   }
 

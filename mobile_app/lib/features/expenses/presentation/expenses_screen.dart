@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../core/utils/error_utils.dart';
@@ -30,12 +31,12 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     _loadData();
   }
 
-  String get _dateFilterLabel => switch (_dateFilter) {
-    'today' => "Today's Expenses",
-    'week' => "This Week's Expenses",
-    'month' => "This Month's Expenses",
-    'custom' => 'Custom Range',
-    _ => 'Expenses',
+  String _getDateFilterLabel(AppLocalizations l10n) => switch (_dateFilter) {
+    'today' => l10n.todayExpenses,
+    'week' => l10n.thisWeekExpenses,
+    'month' => l10n.thisMonthExpenses,
+    'custom' => l10n.customRange,
+    _ => l10n.expenses,
   };
 
   (String?, String?) get _dateRange {
@@ -118,20 +119,21 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
   }
 
   Future<void> _deleteExpense(int id) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Expense'),
-        content: const Text('Are you sure you want to delete this expense?'),
+        title: Text(l10n.deleteExpense),
+        content: Text(l10n.deleteExpenseConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -145,8 +147,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expense deleted'),
+          SnackBar(
+            content: Text(l10n.expenseDeleted),
             backgroundColor: AppColors.success,
           ),
         );
@@ -165,16 +167,17 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Matumizi (Expenses)'),
+        title: Text(l10n.expenses),
         centerTitle: true,
         actions: [
           IconButton(
             onPressed: () => context.push('/expenses/summary'),
             icon: const Icon(Icons.pie_chart_outline),
-            tooltip: 'Summary',
+            tooltip: l10n.summary,
           ),
         ],
       ),
@@ -192,7 +195,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                         children: [
                           Expanded(
                             child: _buildSummaryCard(
-                              'Today\'s Expenses',
+                              l10n.todayExpenses,
                               'TZS ${_currencyFormat.format(_summary['total_amount'] ?? 0)}',
                               Icons.wallet_outlined,
                               AppColors.error,
@@ -201,7 +204,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildSummaryCard(
-                              'Records',
+                              l10n.records,
                               '${_summary['total_count'] ?? 0}',
                               Icons.receipt_long_outlined,
                               AppColors.primary,
@@ -220,15 +223,15 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
-                          _buildDateChip('Today', 'today'),
-                          _buildDateChip('This Week', 'week'),
-                          _buildDateChip('This Month', 'month'),
+                          _buildDateChip(l10n.today, 'today'),
+                          _buildDateChip(l10n.thisWeek, 'week'),
+                          _buildDateChip(l10n.thisMonth, 'month'),
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: FilterChip(
                               label: Text(_dateFilter == 'custom' && _customRange != null
                                   ? '${DateFormat('dd/MM').format(_customRange!.start)} - ${DateFormat('dd/MM').format(_customRange!.end)}'
-                                  : 'Custom'),
+                                  : l10n.customRange),
                               selected: _dateFilter == 'custom',
                               onSelected: (_) => _pickCustomRange(),
                             ),
@@ -254,7 +257,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 8),
                                 child: FilterChip(
-                                  label: const Text('All'),
+                                  label: Text(l10n.all),
                                   selected: _selectedCategoryId == null,
                                   onSelected: (_) {
                                     setState(() => _selectedCategoryId = null);
@@ -287,7 +290,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        _dateFilterLabel,
+                        _getDateFilterLabel(l10n),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -313,8 +316,8 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                     color: AppColors.gray4,
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
-                                    'No expenses recorded today',
+                                  Text(
+                                    l10n.noExpensesRecorded,
                                     style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 16,
@@ -324,7 +327,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   ElevatedButton.icon(
                                     onPressed: () => context.push('/expenses/add'),
                                     icon: const Icon(Icons.add),
-                                    label: const Text('Add Expense'),
+                                    label: Text(l10n.addExpense),
                                   ),
                                 ],
                               ),
@@ -353,7 +356,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
           }
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
+        label: Text(l10n.addExpense),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),

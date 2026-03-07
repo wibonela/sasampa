@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -52,7 +53,7 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = 'Failed to save details. Please try again.';
+        _error = AppLocalizations.of(context)!.failedToProcess;
         _isLoading = false;
       });
     }
@@ -60,6 +61,7 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -88,10 +90,10 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
 
                 const SizedBox(height: 24),
 
-                const Text(
-                  'Business Details',
+                Text(
+                  l10n.businessDetails,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -100,10 +102,10 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
 
                 const SizedBox(height: 8),
 
-                const Text(
-                  'Tell us about your business',
+                Text(
+                  l10n.businessDetailsSubtitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: AppColors.textSecondary,
                   ),
@@ -115,10 +117,10 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
                 TextFormField(
                   controller: _companyNameController,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Business Name',
+                  decoration: InputDecoration(
+                    labelText: l10n.companyName,
                     hintText: 'Enter your business name',
-                    prefixIcon: Icon(Icons.business_outlined),
+                    prefixIcon: const Icon(Icons.business_outlined),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -135,10 +137,10 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number (optional)',
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneOptional,
                     hintText: '+255 xxx xxx xxx',
-                    prefixIcon: Icon(Icons.phone_outlined),
+                    prefixIcon: const Icon(Icons.phone_outlined),
                   ),
                 ),
 
@@ -149,10 +151,9 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
                   controller: _addressController,
                   textInputAction: TextInputAction.done,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Address (optional)',
-                    hintText: 'Business address',
-                    prefixIcon: Icon(Icons.location_on_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.addressOptional,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
                   onFieldSubmitted: (_) => _saveDetails(),
                 ),
@@ -187,7 +188,7 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
                               valueColor: AlwaysStoppedAnimation(Colors.white),
                             ),
                           )
-                        : const Text('Continue'),
+                        : Text(l10n.continueBtn),
                   ),
                 ),
               ],
