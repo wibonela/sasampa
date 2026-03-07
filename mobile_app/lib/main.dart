@@ -238,24 +238,16 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Logo/Icon
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(
-                Icons.point_of_sale,
-                size: 50,
-                color: Colors.white,
-              ),
+            // Official Sasampa 4-box logo — clean, no background
+            Image.asset(
+              'assets/icons/sasampa_logo.png',
+              width: 120,
+              height: 120,
             ),
             const SizedBox(height: 24),
             const Text(
@@ -264,14 +256,6 @@ class SplashScreen extends StatelessWidget {
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Point of Sale',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 48),
