@@ -55,7 +55,7 @@
 
                         <div class="mb-3">
                             <label class="form-label text-secondary">Reason for Request</label>
-                            <div class="p-3 rounded" style="background: var(--apple-gray-6);">
+                            <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                 {{ $userLimitRequest->reason ?: 'No reason provided' }}
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                         @if($userLimitRequest->admin_notes)
                             <div class="mt-3">
                                 <label class="form-label text-secondary">Admin Notes</label>
-                                <div class="p-3 rounded" style="background: var(--apple-gray-6);">
+                                <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     {{ $userLimitRequest->admin_notes }}
                                 </div>
                             </div>
@@ -186,7 +186,7 @@
                     <div class="card">
                         <div class="card-body text-center py-4">
                             @if($userLimitRequest->status === 'approved')
-                                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(40, 167, 69, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                <div style="width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
                                     <i class="bi bi-check-lg" style="color: var(--bs-success); font-size: 32px;"></i>
                                 </div>
                                 <h5 class="mt-3">Request Approved</h5>
@@ -194,7 +194,7 @@
                                     Company limit updated to {{ $userLimitRequest->company->user_limit }} users
                                 </p>
                             @else
-                                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220, 53, 69, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                <div style="width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
                                     <i class="bi bi-x-lg" style="color: var(--bs-danger); font-size: 32px;"></i>
                                 </div>
                                 <h5 class="mt-3">Request Rejected</h5>

@@ -222,7 +222,7 @@
                     <div class="card-body p-0" style="max-height: 350px; overflow-y: auto;">
                         @forelse($recentActivities as $activity)
                             <div class="d-flex align-items-center px-3 py-3 border-bottom" style="border-color: var(--apple-border) !important;">
-                                <div class="me-3" style="width: 36px; height: 36px; border-radius: 10px; background: {{ $activity['type'] === 'transaction' ? 'rgba(52, 199, 89, 0.1)' : ($activity['type'] === 'company_registered' ? 'rgba(0, 122, 255, 0.1)' : 'rgba(255, 149, 0, 0.1)') }}; display: flex; align-items: center; justify-content: center;">
+                                <div class="me-3" style="width: 36px; height: 36px; border-radius: 10px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                     <i class="bi {{ $activity['icon'] }}" style="color: {{ $activity['type'] === 'transaction' ? 'var(--apple-green)' : ($activity['type'] === 'company_registered' ? 'var(--apple-blue)' : 'var(--apple-orange)') }}; font-size: 16px;"></i>
                                 </div>
                                 <div class="flex-grow-1 min-width-0">

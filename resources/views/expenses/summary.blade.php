@@ -37,7 +37,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255, 59, 48, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-wallet2" style="font-size: 24px; color: var(--apple-red);"></i>
                         </div>
                         <h3 class="mb-1">TZS {{ number_format($totalExpenses->total ?? 0) }}</h3>
@@ -48,7 +48,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(0, 122, 255, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-receipt" style="font-size: 24px; color: var(--apple-blue);"></i>
                         </div>
                         <h3 class="mb-1">{{ number_format($totalExpenses->count ?? 0) }}</h3>
@@ -59,7 +59,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255, 149, 0, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-calculator" style="font-size: 24px; color: var(--apple-orange);"></i>
                         </div>
                         <h3 class="mb-1">TZS {{ number_format(($totalExpenses->total ?? 0) / max(1, $totalExpenses->count ?? 1)) }}</h3>
@@ -80,7 +80,7 @@
                         @forelse($byCategory as $item)
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="d-flex align-items-center gap-2">
-                                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255, 149, 0, 0.1); display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 32px; height: 32px; border-radius: 8px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                         <i class="bi bi-folder" style="color: var(--apple-orange);"></i>
                                     </div>
                                     <span>{{ $item->category_name }}</span>

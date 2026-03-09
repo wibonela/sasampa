@@ -62,7 +62,7 @@
             <div class="col-6 col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-graph-up-arrow" style="font-size: 20px; color: var(--apple-blue);"></i>
                         </div>
                         <h4 class="mb-1">TZS {{ number_format($totalSales) }}</h4>
@@ -73,7 +73,7 @@
             <div class="col-6 col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(52, 199, 89, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-receipt" style="font-size: 20px; color: var(--apple-green);"></i>
                         </div>
                         <h4 class="mb-1">{{ $totalTransactions }}</h4>
@@ -84,7 +84,7 @@
             <div class="col-6 col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(175, 82, 222, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-people" style="font-size: 20px; color: #AF52DE;"></i>
                         </div>
                         <h4 class="mb-1">{{ $staffData->count() }}</h4>

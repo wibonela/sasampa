@@ -88,7 +88,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                                     <i class="bi bi-person" style="color: var(--apple-blue);"></i>
                                                 </div>
                                                 <div>

@@ -14,7 +14,7 @@
                 <a href="{{ route('admin.user-limit-requests.index', ['status' => 'pending']) }}" class="card text-decoration-none {{ $status === 'pending' ? 'border-warning' : '' }}">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 193, 7, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-clock" style="color: var(--bs-warning); font-size: 24px;"></i>
                             </div>
                             <div>
@@ -29,7 +29,7 @@
                 <a href="{{ route('admin.user-limit-requests.index', ['status' => 'approved']) }}" class="card text-decoration-none {{ $status === 'approved' ? 'border-success' : '' }}">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(40, 167, 69, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-check-circle" style="color: var(--bs-success); font-size: 24px;"></i>
                             </div>
                             <div>
@@ -44,7 +44,7 @@
                 <a href="{{ route('admin.user-limit-requests.index', ['status' => 'rejected']) }}" class="card text-decoration-none {{ $status === 'rejected' ? 'border-danger' : '' }}">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(220, 53, 69, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-x-circle" style="color: var(--bs-danger); font-size: 24px;"></i>
                             </div>
                             <div>
@@ -101,7 +101,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                             <i class="bi bi-building" style="color: var(--apple-blue); font-size: 18px;"></i>
                                         </div>
                                         <div>

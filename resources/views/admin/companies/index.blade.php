@@ -21,7 +21,7 @@
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                    <div class="stat-icon" style="background: #fff; border: 1px solid var(--apple-border); color: #8b5cf6;">
                         <i class="bi bi-gear"></i>
                     </div>
                     <div class="stat-value">{{ $stats['pending_setup'] }}</div>

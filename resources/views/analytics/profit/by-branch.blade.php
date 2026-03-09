@@ -86,7 +86,7 @@
                 <div class="card h-100" style="border-left: 4px solid var(--apple-green);">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(52, 199, 89, 0.15); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 56px; height: 56px; border-radius: 14px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-trophy-fill text-success" style="font-size: 24px;"></i>
                             </div>
                             <div>
@@ -104,7 +104,7 @@
                 <div class="card h-100" style="border-left: 4px solid var(--apple-red);">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255, 59, 48, 0.15); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 56px; height: 56px; border-radius: 14px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 24px;"></i>
                             </div>
                             <div>
@@ -138,7 +138,7 @@
                         </div>
                         <div class="card-body">
                             <!-- Profit/Loss Highlight -->
-                            <div class="text-center py-3 mb-3 rounded" style="background: {{ $data['profit'] >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }};">
+                            <div class="text-center py-3 mb-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                 <div class="small text-secondary">{{ $data['profit'] >= 0 ? 'Profit' : 'Loss' }}</div>
                                 <h3 class="mb-0 {{ $data['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     TZS {{ number_format(abs($data['profit'])) }}
@@ -151,25 +151,25 @@
                             <!-- Metrics -->
                             <div class="row g-2 text-center">
                                 <div class="col-6">
-                                    <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                    <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                         <div class="small text-secondary">Sales</div>
                                         <div class="fw-bold text-primary">{{ number_format($data['sales'] / 1000) }}K</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                    <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                         <div class="small text-secondary">Expenses</div>
                                         <div class="fw-bold text-danger">{{ number_format($data['expenses'] / 1000) }}K</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                    <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                         <div class="small text-secondary">Transactions</div>
                                         <div class="fw-bold">{{ number_format($data['transactions']) }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                    <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                         <div class="small text-secondary">Avg Sale</div>
                                         <div class="fw-bold">{{ number_format($data['avg_transaction']) }}</div>
                                     </div>
@@ -177,7 +177,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="{{ route('analytics.profit', ['branch' => $data['branch']->id, 'period' => $period]) }}" class="btn btn-sm btn-outline-primary w-100">
+                            <a href="{{ route('analytics.profit', ['branch' => $data['branch']->id, 'period' => $period]) }}" class="btn btn-sm btn-outline-secondary w-100">
                                 <i class="bi bi-eye me-1"></i>View Details
                             </a>
                         </div>

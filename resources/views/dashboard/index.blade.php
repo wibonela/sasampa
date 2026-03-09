@@ -15,16 +15,16 @@
                     </p>
                 @endif
             </div>
-            <div style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--apple-gray-4); display: flex; align-items: center; justify-content: center; background: #fff;">
-                <span style="font-size: 20px; font-weight: 600; color: var(--apple-blue);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            <div style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; background: #fff;">
+                <span style="font-size: 20px; font-weight: 600; color: var(--apple-text);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             </div>
         </div>
 
         {{-- Today Stats --}}
         <div class="row g-3 mb-4">
             <div class="col-6">
-                <div style="background: var(--apple-gray-6); border-radius: 16px; padding: 16px;">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(52, 199, 89, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <div style="background: #fff; border: 1px solid var(--apple-border); border-radius: 12px; padding: 16px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                         <i class="bi bi-graph-up" style="font-size: 16px; color: var(--apple-green);"></i>
                     </div>
                     <div style="font-size: 22px; font-weight: 700; color: var(--apple-text);">TZS {{ number_format($todaySales) }}</div>
@@ -32,8 +32,8 @@
                 </div>
             </div>
             <div class="col-6">
-                <div style="background: var(--apple-gray-6); border-radius: 16px; padding: 16px;">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(0, 122, 255, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <div style="background: #fff; border: 1px solid var(--apple-border); border-radius: 12px; padding: 16px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                         <i class="bi bi-receipt" style="font-size: 16px; color: var(--apple-blue);"></i>
                     </div>
                     <div style="font-size: 22px; font-weight: 700; color: var(--apple-text);">{{ $todayTransactions }}</div>
@@ -45,18 +45,18 @@
         {{-- Quick Actions --}}
         <h3 style="font-size: 20px; font-weight: 700; color: var(--apple-text); margin: 0 0 12px;">Quick Actions</h3>
         <div class="d-flex gap-3 mb-4">
-            <a href="{{ route('pos.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--apple-blue); color: #fff; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
+            <a href="{{ route('pos.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: #1a1a1a; color: #fff; border-radius: 10px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
                 <i class="bi bi-cart3" style="font-size: 20px;"></i>
                 New Sale
             </a>
-            <a href="{{ route('transactions.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
+            <a href="{{ route('transactions.index') }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: #fff; color: var(--apple-text); border: 1px solid var(--apple-border); border-radius: 10px; padding: 16px; font-size: 16px; font-weight: 600; text-decoration: none;">
                 <i class="bi bi-clock-history" style="font-size: 20px;"></i>
                 History
             </a>
         </div>
 
         {{-- Today's Profit (compact) --}}
-        <div style="background: {{ $todayNetProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }}; border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+        <div style="background: #fff; border: 1px solid var(--apple-border); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <div style="font-size: 13px; color: var(--apple-text-secondary);">Today's {{ $todayNetProfit >= 0 ? 'Profit' : 'Loss' }}</div>
@@ -64,7 +64,7 @@
                         TZS {{ number_format(abs($todayNetProfit)) }}
                     </div>
                 </div>
-                <a href="{{ route('analytics.profit') }}" style="font-size: 13px; color: var(--apple-blue); text-decoration: none;">
+                <a href="{{ route('analytics.profit') }}" style="font-size: 13px; color: var(--apple-text-secondary); text-decoration: none;">
                     Details <i class="bi bi-chevron-right" style="font-size: 11px;"></i>
                 </a>
             </div>
@@ -73,12 +73,12 @@
         {{-- Recent Transactions --}}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 style="font-size: 20px; font-weight: 700; color: var(--apple-text); margin: 0;">Recent Transactions</h3>
-            <a href="{{ route('transactions.index') }}" style="font-size: 15px; color: var(--apple-blue); text-decoration: none; font-weight: 500;">See All</a>
+            <a href="{{ route('transactions.index') }}" style="font-size: 15px; color: var(--apple-text-secondary); text-decoration: none; font-weight: 500;">See All</a>
         </div>
 
         @forelse($recentTransactions->take(5) as $transaction)
-            <a href="{{ route('transactions.show', $transaction->id) }}" style="display: flex; align-items: center; gap: 12px; background: var(--apple-gray-6); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; text-decoration: none;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(52, 199, 89, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <a href="{{ route('transactions.show', $transaction->id) }}" style="display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--apple-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     @if($transaction->status === 'completed')
                         <i class="bi bi-check-circle-fill" style="font-size: 20px; color: var(--apple-green);"></i>
                     @elseif($transaction->status === 'pending')
@@ -96,15 +96,15 @@
                 </div>
             </a>
         @empty
-            <div style="text-align: center; padding: 32px 16px; background: var(--apple-gray-6); border-radius: 14px;">
-                <i class="bi bi-receipt" style="font-size: 32px; color: var(--apple-gray-3);"></i>
+            <div style="text-align: center; padding: 32px 16px; background: #fff; border: 1px solid var(--apple-border); border-radius: 10px;">
+                <i class="bi bi-receipt" style="font-size: 32px; color: var(--apple-text-secondary);"></i>
                 <p style="font-size: 14px; color: var(--apple-text-secondary); margin: 8px 0 0;">No transactions yet</p>
             </div>
         @endforelse
 
         @if($lowStockCount > 0)
-            <a href="{{ route('inventory.index') }}" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 59, 48, 0.08); border-radius: 14px; padding: 14px 16px; margin-top: 16px; text-decoration: none;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); display: flex; align-items: center; justify-content: center;">
+            <a href="{{ route('inventory.index') }}" style="display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--apple-border); border-radius: 10px; padding: 14px 16px; margin-top: 16px; text-decoration: none;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-exclamation-triangle-fill" style="font-size: 18px; color: var(--apple-red);"></i>
                 </div>
                 <div style="flex: 1;">
@@ -126,17 +126,17 @@
                 <h1 class="page-title">Dashboard</h1>
                 <p class="page-subtitle">Welcome back, {{ auth()->user()->name }}</p>
             </div>
-            <a href="{{ route('analytics.profit') }}" class="btn btn-outline-primary">
+            <a href="{{ route('analytics.profit') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-graph-up me-1"></i>Full Analytics
             </a>
         </div>
 
         <!-- Today's Profit Highlight -->
-        <div class="card mb-4 {{ $todayNetProfit >= 0 ? 'border-success' : 'border-danger' }}" style="border-width: 2px;">
+        <div class="card mb-4" style="border: 1px solid var(--apple-border);">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center py-3">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: {{ $todayNetProfit >= 0 ? 'rgba(52, 199, 89, 0.15)' : 'rgba(255, 59, 48, 0.15)' }}; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px;">
                             <i class="bi {{ $todayNetProfit >= 0 ? 'bi-trophy' : 'bi-exclamation-triangle' }}" style="font-size: 28px; color: {{ $todayNetProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};"></i>
                         </div>
                         <h2 class="mb-0 {{ $todayNetProfit >= 0 ? 'text-success' : 'text-danger' }}">
@@ -147,31 +147,31 @@
                     <div class="col-md-9">
                         <div class="row g-3 text-center">
                             <div class="col-4 col-md-3">
-                                <div class="p-2 rounded" style="background: rgba(0, 122, 255, 0.1);">
+                                <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     <div class="small text-secondary">Sales</div>
-                                    <h5 class="mb-0 text-primary">{{ number_format($todaySales / 1000) }}K</h5>
+                                    <h5 class="mb-0">{{ number_format($todaySales / 1000) }}K</h5>
                                 </div>
                             </div>
                             <div class="col-4 col-md-2">
-                                <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     <div class="small text-secondary">Txns</div>
                                     <h5 class="mb-0">{{ $todayTransactions }}</h5>
                                 </div>
                             </div>
                             <div class="col-4 col-md-3">
-                                <div class="p-2 rounded" style="background: rgba(52, 199, 89, 0.1);">
+                                <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     <div class="small text-secondary">Gross</div>
                                     <h5 class="mb-0 {{ $todayGrossProfit >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($todayGrossProfit / 1000) }}K</h5>
                                 </div>
                             </div>
                             <div class="col-6 col-md-2">
-                                <div class="p-2 rounded" style="background: rgba(255, 59, 48, 0.1);">
+                                <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     <div class="small text-secondary">Expenses</div>
                                     <h5 class="mb-0 text-danger">{{ number_format($todayExpenses / 1000) }}K</h5>
                                 </div>
                             </div>
                             <div class="col-6 col-md-2">
-                                <div class="p-2 rounded" style="background: var(--apple-gray-6);">
+                                <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                     <div class="small text-secondary">vs Yesterday</div>
                                     <h5 class="mb-0 {{ $salesGrowth >= 0 ? 'text-success' : 'text-danger' }}">
                                         <i class="bi {{ $salesGrowth >= 0 ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
@@ -246,7 +246,7 @@
                 <div class="row g-3 text-center align-items-center">
                     <div class="col-6 col-md-2">
                         <div class="text-secondary small">Revenue</div>
-                        <h5 class="text-primary mb-0">TZS {{ number_format($monthSales) }}</h5>
+                        <h5 class="mb-0">TZS {{ number_format($monthSales) }}</h5>
                     </div>
                     <div class="col-auto d-none d-md-block">
                         <i class="bi bi-arrow-right text-secondary"></i>
@@ -266,7 +266,7 @@
                         <i class="bi bi-arrow-right text-secondary"></i>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="p-3 rounded" style="background: {{ $monthNetProfit >= 0 ? 'rgba(52, 199, 89, 0.15)' : 'rgba(255, 59, 48, 0.15)' }};">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="text-secondary small">Net Profit</div>
                             <h4 class="{{ $monthNetProfit >= 0 ? 'text-success' : 'text-danger' }} mb-0">TZS {{ number_format($monthNetProfit) }}</h4>
                         </div>
@@ -284,17 +284,17 @@
                     <div class="card-body">
                         <div class="row g-2">
                             <div class="col-6">
-                                <a href="{{ route('pos.index') }}" class="btn btn-primary w-100">
+                                <a href="{{ route('pos.index') }}" class="btn btn-dark w-100">
                                     <i class="bi bi-cart3 me-1"></i>Open POS
                                 </a>
                             </div>
                             <div class="col-6">
-                                <a href="{{ route('expenses.create') }}" class="btn btn-outline-danger w-100">
+                                <a href="{{ route('expenses.create') }}" class="btn btn-outline-secondary w-100">
                                     <i class="bi bi-wallet2 me-1"></i>Add Expense
                                 </a>
                             </div>
                             <div class="col-6">
-                                <a href="{{ route('products.create') }}" class="btn btn-outline-primary w-100">
+                                <a href="{{ route('products.create') }}" class="btn btn-outline-secondary w-100">
                                     <i class="bi bi-plus-circle me-1"></i>Add Product
                                 </a>
                             </div>
@@ -317,7 +317,7 @@
                                     <div style="font-weight: 500;">{{ $product->product_name }}</div>
                                     <small class="text-secondary">{{ $product->qty_sold }} sold</small>
                                 </div>
-                                <span class="text-primary fw-bold">{{ number_format($product->revenue) }}</span>
+                                <span class="fw-bold">{{ number_format($product->revenue) }}</span>
                             </div>
                         @empty
                             <div class="text-center text-secondary py-4">
@@ -334,7 +334,7 @@
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Recent Transactions</span>
-                        <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                        <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-outline-secondary">View All</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
@@ -351,7 +351,7 @@
                                 @forelse($recentTransactions as $transaction)
                                     <tr>
                                         <td>
-                                            <a href="{{ route('transactions.show', $transaction->id) }}" style="text-decoration: none; color: var(--apple-blue);">
+                                            <a href="{{ route('transactions.show', $transaction->id) }}" style="text-decoration: none; color: var(--apple-text); font-weight: 500;">
                                                 {{ $transaction->transaction_number }}
                                             </a>
                                         </td>
