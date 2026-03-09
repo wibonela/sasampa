@@ -48,7 +48,7 @@ class Expense extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function getTotalAttribute(): float
+    public function getLineTotalAttribute(): float
     {
         return $this->amount * $this->quantity;
     }
