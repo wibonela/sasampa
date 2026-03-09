@@ -3,7 +3,7 @@
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
-                <h1 class="page-title">Matumizi (Expenses)</h1>
+                <h1 class="page-title">{{ __('Expenses') }}</h1>
                 <p class="page-subtitle">Track operational costs and raw materials</p>
             </div>
             <div class="d-flex gap-2">
@@ -119,7 +119,7 @@
                                     @endif
                                 </td>
                                 <td>TZS {{ number_format($expense->amount) }}</td>
-                                <td style="font-weight: 600;">TZS {{ number_format($expense->total) }}</td>
+                                <td style="font-weight: 600;">TZS {{ number_format($expense->line_total) }}</td>
                                 <td>
                                     <span class="badge bg-{{ $expense->payment_method == 'cash' ? 'success' : ($expense->payment_method == 'mobile' ? 'info' : 'primary') }}">
                                         {{ $expense->payment_method_label }}
