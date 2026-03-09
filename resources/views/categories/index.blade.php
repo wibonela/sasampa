@@ -29,7 +29,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                             <i class="bi bi-tag" style="color: var(--apple-blue);"></i>
                                         </div>
                                         <span style="font-weight: 500;">{{ $category->name }}</span>

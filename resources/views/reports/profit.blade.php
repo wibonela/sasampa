@@ -51,7 +51,7 @@
             <div class="col-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-graph-up-arrow" style="font-size: 20px; color: var(--apple-blue);"></i>
                         </div>
                         <h4 class="mb-1">TZS {{ number_format($totalSales) }}</h4>
@@ -63,7 +63,7 @@
             <div class="col-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 59, 48, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-wallet2" style="font-size: 20px; color: var(--apple-red);"></i>
                         </div>
                         <h4 class="mb-1">TZS {{ number_format($totalExpenses) }}</h4>
@@ -75,7 +75,7 @@
             <div class="col-6 col-md-3">
                 <div class="card h-100 {{ $netProfit >= 0 ? 'border-success' : 'border-danger' }}">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: {{ $netProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }}; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi {{ $netProfit >= 0 ? 'bi-arrow-up-circle' : 'bi-arrow-down-circle' }}" style="font-size: 20px; color: {{ $netProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};"></i>
                         </div>
                         <h4 class="mb-1 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">TZS {{ number_format($netProfit) }}</h4>
@@ -86,7 +86,7 @@
             <div class="col-6 col-md-3">
                 <div class="card h-100">
                     <div class="card-body text-center py-4">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 149, 0, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-percent" style="font-size: 20px; color: var(--apple-orange);"></i>
                         </div>
                         <h4 class="mb-1 {{ $profitMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($profitMargin, 1) }}%</h4>
@@ -158,7 +158,7 @@
                         @forelse($expensesByCategory as $category)
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="d-flex align-items-center gap-2">
-                                    <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(255, 149, 0, 0.1); display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 28px; height: 28px; border-radius: 6px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                         <i class="bi bi-folder" style="font-size: 12px; color: var(--apple-orange);"></i>
                                     </div>
                                     <span class="small">{{ $category->category_name }}</span>
@@ -193,7 +193,7 @@
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <div class="d-inline-block text-start p-3 rounded" style="background: {{ $netProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }};">
+                        <div class="d-inline-block text-start p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <small class="text-secondary d-block">Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}</small>
                             <h3 class="mb-0 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">TZS {{ number_format(abs($netProfit)) }}</h3>
                         </div>

@@ -22,7 +22,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-people" style="color: var(--apple-blue); font-size: 24px;"></i>
                         </div>
                         <div>
@@ -65,7 +65,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                             <i class="bi bi-person" style="color: var(--apple-blue); font-size: 18px;"></i>
                                         </div>
                                         <div>
