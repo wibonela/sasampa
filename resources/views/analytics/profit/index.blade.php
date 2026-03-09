@@ -7,7 +7,7 @@
                 <p class="page-subtitle">Revenue, Cost of Goods, Expenses & Profit Analysis</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('analytics.profit.branches') }}" class="btn btn-outline-primary">
+                <a href="{{ route('analytics.profit.branches') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-building me-1"></i>By Branch
                 </a>
                 <a href="{{ route('analytics.profit.trends') }}" class="btn btn-outline-secondary">
@@ -70,7 +70,7 @@
                 <div class="row g-3 text-center">
                     <!-- Revenue -->
                     <div class="col-6 col-md-2">
-                        <div class="p-3 rounded" style="background: rgba(0, 122, 255, 0.1);">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="small text-secondary">Revenue</div>
                             <h5 class="mb-0 text-primary">{{ number_format($totalRevenue / 1000) }}K</h5>
                             @if($revenueGrowth != 0)
@@ -86,7 +86,7 @@
                     </div>
                     <!-- COGS -->
                     <div class="col-6 col-md-2">
-                        <div class="p-3 rounded" style="background: rgba(255, 149, 0, 0.1);">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="small text-secondary">Cost of Goods</div>
                             <h5 class="mb-0 text-warning">{{ number_format($cogs / 1000) }}K</h5>
                             <small class="text-secondary">Product costs</small>
@@ -97,7 +97,7 @@
                     </div>
                     <!-- Gross Profit -->
                     <div class="col-6 col-md-2">
-                        <div class="p-3 rounded" style="background: {{ $grossProfit >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)' }};">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="small text-secondary">Gross Profit</div>
                             <h5 class="mb-0 {{ $grossProfit >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($grossProfit / 1000) }}K</h5>
                             <small class="{{ $grossMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($grossMargin, 1) }}% margin</small>
@@ -108,7 +108,7 @@
                     </div>
                     <!-- Operating Expenses -->
                     <div class="col-6 col-md-2">
-                        <div class="p-3 rounded" style="background: rgba(255, 59, 48, 0.1);">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="small text-secondary">Expenses</div>
                             <h5 class="mb-0 text-danger">{{ number_format($operatingExpenses / 1000) }}K</h5>
                             <small class="text-secondary">Operating costs</small>
@@ -119,7 +119,7 @@
                     </div>
                     <!-- Net Profit -->
                     <div class="col-12 col-md-2">
-                        <div class="p-3 rounded" style="background: {{ $netProfit >= 0 ? 'rgba(52, 199, 89, 0.2)' : 'rgba(255, 59, 48, 0.2)' }}; border: 2px solid {{ $netProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};">
+                        <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <div class="small text-secondary">Net Profit</div>
                             <h4 class="mb-0 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($netProfit / 1000) }}K</h4>
                             <small class="{{ $netMargin >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format($netMargin, 1) }}% margin</small>
@@ -135,7 +135,7 @@
             <div class="col-12 col-md-4">
                 <div class="card h-100 {{ $netProfit >= 0 ? 'border-success' : 'border-danger' }}" style="border-width: 2px;">
                     <div class="card-body text-center py-4">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: {{ $netProfit >= 0 ? 'rgba(52, 199, 89, 0.15)' : 'rgba(255, 59, 48, 0.15)' }}; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi {{ $netProfit >= 0 ? 'bi-trophy' : 'bi-exclamation-triangle' }}" style="font-size: 28px; color: {{ $netProfit >= 0 ? 'var(--apple-green)' : 'var(--apple-red)' }};"></i>
                         </div>
                         <h2 class="mb-1 {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">
@@ -160,7 +160,7 @@
                 <div class="card h-100">
                     <div class="card-body py-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-graph-up-arrow" style="font-size: 20px; color: var(--apple-blue);"></i>
                             </div>
                             <div class="flex-grow-1">
@@ -187,7 +187,7 @@
                 <div class="card h-100">
                     <div class="card-body py-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(52, 199, 89, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-cash-stack" style="font-size: 20px; color: var(--apple-green);"></i>
                             </div>
                             <div class="flex-grow-1">
@@ -319,7 +319,7 @@
                     </div>
                     <div class="card-body">
                         @if($performanceData['best_day'])
-                        <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded" style="background: rgba(52, 199, 89, 0.1);">
+                        <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <i class="bi bi-arrow-up-circle-fill text-success" style="font-size: 24px;"></i>
                             <div>
                                 <div class="small text-secondary">Best Day</div>
@@ -329,7 +329,7 @@
                         </div>
                         @endif
                         @if($performanceData['worst_day'])
-                        <div class="d-flex align-items-center gap-3 p-2 rounded" style="background: rgba(255, 59, 48, 0.1);">
+                        <div class="d-flex align-items-center gap-3 p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                             <i class="bi bi-arrow-down-circle-fill text-danger" style="font-size: 24px;"></i>
                             <div>
                                 <div class="small text-secondary">Worst Day</div>
@@ -349,7 +349,7 @@
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Branch Comparison</h5>
-                <a href="{{ route('analytics.profit.branches') }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                <a href="{{ route('analytics.profit.branches') }}" class="btn btn-sm btn-outline-secondary">View Details</a>
             </div>
             <div class="table-responsive">
                 <table class="table mb-0">
@@ -397,7 +397,7 @@
                             };
                         @endphp
                         <div class="col-6 col-md-3">
-                            <div class="d-flex align-items-center gap-2 p-3 rounded" style="background: var(--apple-gray-6);">
+                            <div class="d-flex align-items-center gap-2 p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
                                 <i class="bi {{ $label[1] }} text-{{ $label[2] }}" style="font-size: 24px;"></i>
                                 <div>
                                     <div class="small text-secondary">{{ $label[0] }}</div>

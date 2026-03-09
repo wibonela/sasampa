@@ -9,7 +9,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(0, 122, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-person" style="color: var(--apple-blue); font-size: 24px;"></i>
                         </div>
                         <div>

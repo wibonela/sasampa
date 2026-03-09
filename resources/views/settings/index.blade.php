@@ -83,9 +83,9 @@
                                     @if($settings['store_logo'])
                                         <img src="{{ Storage::url($settings['store_logo']) }}"
                                              alt="Store Logo"
-                                             style="max-width: 120px; max-height: 120px; border-radius: 12px; object-fit: contain; background: var(--apple-gray-6); padding: 8px;">
+                                             style="max-width: 120px; max-height: 120px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--apple-border); padding: 8px;">
                                     @else
-                                        <div style="width: 120px; height: 120px; border-radius: 12px; background: var(--apple-gray-6); display: flex; align-items: center; justify-content: center;">
+                                        <div style="width: 120px; height: 120px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: flex; align-items: center; justify-content: center;">
                                             <i class="bi bi-image text-secondary" style="font-size: 40px;"></i>
                                         </div>
                                     @endif

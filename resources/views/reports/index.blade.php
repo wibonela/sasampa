@@ -10,7 +10,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-5">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(0, 122, 255, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi bi-graph-up" style="font-size: 28px; color: var(--apple-blue);"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Sales Report</h5>
@@ -24,7 +24,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-5">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(52, 199, 89, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi bi-box-seam" style="font-size: 28px; color: var(--apple-green);"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Product Performance</h5>
@@ -38,7 +38,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-5">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(255, 149, 0, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi bi-clipboard-data" style="font-size: 28px; color: var(--apple-orange);"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Inventory Report</h5>
@@ -52,7 +52,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-5">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(175, 82, 222, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi bi-calculator" style="font-size: 28px; color: #AF52DE;"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Profit Report</h5>
@@ -67,7 +67,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center py-5">
-                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(88, 86, 214, 0.1); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <div style="width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                             <i class="bi bi-people" style="font-size: 28px; color: #5856D6;"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Staff Sales Report</h5>
