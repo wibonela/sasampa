@@ -57,7 +57,7 @@ class ExpenseController extends Controller
                     'description' => $expense->description,
                     'amount' => (float) $expense->amount,
                     'quantity' => (float) $expense->quantity,
-                    'total' => (float) $expense->total,
+                    'total' => (float) $expense->line_total,
                     'unit' => $expense->unit,
                     'expense_date' => $expense->expense_date->format('Y-m-d'),
                     'expense_date_human' => $expense->expense_date->format('d M Y'),
@@ -97,10 +97,10 @@ class ExpenseController extends Controller
             ->get();
 
         $summary = [
-            'total_amount' => $expenses->sum('total'),
+            'total_amount' => $expenses->sum('line_total'),
             'total_count' => $expenses->count(),
-            'by_category' => $expenses->groupBy('category.name')->map->sum('total'),
-            'by_payment_method' => $expenses->groupBy('payment_method')->map->sum('total'),
+            'by_category' => $expenses->groupBy('category.name')->map->sum('line_total'),
+            'by_payment_method' => $expenses->groupBy('payment_method')->map->sum('line_total'),
         ];
 
         return response()->json([
@@ -110,7 +110,7 @@ class ExpenseController extends Controller
                     'description' => $expense->description,
                     'amount' => (float) $expense->amount,
                     'quantity' => (float) $expense->quantity,
-                    'total' => (float) $expense->total,
+                    'total' => (float) $expense->line_total,
                     'unit' => $expense->unit,
                     'expense_date' => $expense->expense_date->format('Y-m-d'),
                     'payment_method' => $expense->payment_method,
@@ -180,7 +180,7 @@ class ExpenseController extends Controller
                 'description' => $expense->description,
                 'amount' => (float) $expense->amount,
                 'quantity' => (float) $expense->quantity,
-                'total' => (float) $expense->total,
+                'total' => (float) $expense->line_total,
                 'unit' => $expense->unit,
                 'expense_date' => $expense->expense_date->format('Y-m-d'),
                 'payment_method' => $expense->payment_method,
@@ -207,7 +207,7 @@ class ExpenseController extends Controller
                 'description' => $expense->description,
                 'amount' => (float) $expense->amount,
                 'quantity' => (float) $expense->quantity,
-                'total' => (float) $expense->total,
+                'total' => (float) $expense->line_total,
                 'unit' => $expense->unit,
                 'expense_date' => $expense->expense_date->format('Y-m-d'),
                 'expense_date_human' => $expense->expense_date->format('d M Y'),
@@ -263,7 +263,7 @@ class ExpenseController extends Controller
                 'description' => $expense->description,
                 'amount' => (float) $expense->amount,
                 'quantity' => (float) $expense->quantity,
-                'total' => (float) $expense->total,
+                'total' => (float) $expense->line_total,
                 'unit' => $expense->unit,
                 'expense_date' => $expense->expense_date->format('Y-m-d'),
                 'payment_method' => $expense->payment_method,

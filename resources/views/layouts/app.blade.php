@@ -212,7 +212,7 @@
                 </div>
 
                 <div class="nav-section">
-                    <p class="nav-section-title">Matumizi (Expenses)</p>
+                    <p class="nav-section-title">{{ __('Expenses') }}</p>
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('expenses.*') && !request()->routeIs('expenses.summary') ? 'active' : '' }}" href="{{ route('expenses.index') }}">

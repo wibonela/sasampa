@@ -111,7 +111,7 @@
                         <div class="p-3 rounded" style="background: rgba(255, 59, 48, 0.1);">
                             <div class="small text-secondary">Expenses</div>
                             <h5 class="mb-0 text-danger">{{ number_format($operatingExpenses / 1000) }}K</h5>
-                            <small class="text-secondary">Matumizi</small>
+                            <small class="text-secondary">Operating costs</small>
                         </div>
                     </div>
                     <div class="col-auto d-none d-md-flex align-items-center">
