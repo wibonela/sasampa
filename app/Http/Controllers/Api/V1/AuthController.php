@@ -351,13 +351,6 @@ class AuthController extends Controller
             ];
         }
 
-        // Company owners always have mobile access
-        if ($user->isCompanyOwner()) {
-            return [
-                'status' => 'approved',
-                'can_use_mobile' => true,
-            ];
-        }
 
         if (!$user->company) {
             return [
