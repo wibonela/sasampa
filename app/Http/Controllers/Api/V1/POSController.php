@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\CustomerCreditTransaction;
 use App\Models\Setting;
 use App\Models\Product;
 use App\Models\StockAdjustment;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Models\WhatsappReceiptLog;
+use App\Services\EfdmsService;
+use App\Services\WhatsappReceiptService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +30,9 @@ class POSController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'payment_method' => 'required|in:cash,card,mobile,bank_transfer',
+            'payment_method' => 'required|in:cash,card,mobile,bank_transfer,credit',
             'amount_paid' => 'required|numeric|min:0',
+            'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
             'customer_tin' => 'nullable|string|max:50',
@@ -52,14 +58,16 @@ class POSController extends Controller
                     }
 
                     $itemSubtotal = $product->selling_price * $quantity;
-                    $itemTax = $itemSubtotal * ($product->tax_rate / 100);
+                    $effectiveTaxRate = $product->effective_tax_rate;
+                    $itemTax = $itemSubtotal * ($effectiveTaxRate / 100);
 
                     $items[] = [
                         'product' => $product,
                         'quantity' => $quantity,
                         'unit_price' => $product->selling_price,
                         'cost_price' => $product->cost_price ?? 0,
-                        'tax_rate' => $product->tax_rate,
+                        'tax_rate' => $effectiveTaxRate,
+                        'tax_category' => $product->tax_category ?? 'standard',
                         'tax_amount' => $itemTax,
                         'subtotal' => $itemSubtotal + $itemTax,
                     ];
@@ -73,26 +81,52 @@ class POSController extends Controller
                 $amountPaid = $validated['amount_paid'];
                 $changeGiven = max(0, $amountPaid - $total);
 
-                // Note: No payment validation - user can accept any amount
-                // (allows flexibility for verbal discounts, negotiations, etc.)
+                $user = $request->user();
+
+                // Resolve customer info
+                $customerId = $validated['customer_id'] ?? null;
+                $customerName = $validated['customer_name'] ?? null;
+                $customerPhone = $validated['customer_phone'] ?? null;
+                $customerTin = $validated['customer_tin'] ?? null;
+
+                $customer = null;
+                if ($customerId) {
+                    $customer = Customer::findOrFail($customerId);
+                    $customerName = $customerName ?: $customer->name;
+                    $customerPhone = $customerPhone ?: $customer->phone;
+                    $customerTin = $customerTin ?: $customer->tin;
+                }
+
+                // Credit payment validation
+                if ($validated['payment_method'] === 'credit') {
+                    if (!$customer) {
+                        throw new \Exception('A customer must be selected for credit sales.');
+                    }
+                    if ($customer->credit_limit <= 0) {
+                        throw new \Exception('This customer has no credit limit.');
+                    }
+                    if ($customer->available_credit < $total) {
+                        throw new \Exception("Insufficient credit. Available: " . number_format($customer->available_credit, 2));
+                    }
+                }
 
                 // Create transaction
-                $user = $request->user();
                 $transaction = Transaction::create([
                     'company_id' => $user->company_id,
                     'branch_id' => $user->currentBranch()?->id,
+                    'customer_id' => $customerId,
                     'transaction_number' => Transaction::generateTransactionNumber(),
                     'user_id' => $user->id,
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'customer_tin' => $validated['customer_tin'] ?? null,
+                    'customer_name' => $customerName,
+                    'customer_phone' => $customerPhone,
+                    'customer_tin' => $customerTin,
                     'subtotal' => $subtotal,
                     'tax_amount' => $taxAmount,
                     'discount_amount' => $discountAmount,
                     'total' => $total,
                     'payment_method' => $validated['payment_method'],
-                    'amount_paid' => $amountPaid,
-                    'change_given' => $changeGiven,
+                    'amount_paid' => $validated['payment_method'] === 'credit' ? 0 : $amountPaid,
+                    'change_given' => $validated['payment_method'] === 'credit' ? 0 : $changeGiven,
                     'status' => 'completed',
                     'notes' => $validated['notes'] ?? null,
                 ]);
@@ -108,6 +142,7 @@ class POSController extends Controller
                         'cost_price' => $item['cost_price'],
                         'tax_rate' => $item['tax_rate'],
                         'tax_amount' => $item['tax_amount'],
+                        'tax_category' => $item['tax_category'],
                         'subtotal' => $item['subtotal'],
                     ]);
 
@@ -132,15 +167,86 @@ class POSController extends Controller
                     }
                 }
 
+                // Handle credit sale — update customer balance
+                if ($validated['payment_method'] === 'credit' && $customer) {
+                    $customer = Customer::lockForUpdate()->findOrFail($customer->id);
+                    $balanceBefore = (float) $customer->current_balance;
+                    $balanceAfter = $balanceBefore + $total;
+
+                    CustomerCreditTransaction::create([
+                        'customer_id' => $customer->id,
+                        'transaction_id' => $transaction->id,
+                        'type' => 'sale_on_credit',
+                        'amount' => $total,
+                        'balance_before' => $balanceBefore,
+                        'balance_after' => $balanceAfter,
+                        'notes' => 'Credit sale: ' . $transaction->transaction_number,
+                        'user_id' => $user->id,
+                    ]);
+
+                    $customer->update(['current_balance' => $balanceAfter]);
+                }
+
                 return $transaction;
             });
 
             $transaction->load('items.product');
 
+            // Attempt EFDMS fiscal signing after DB commit
+            $fiscalData = null;
+            $company = $request->user()->company;
+            if ($company && $company->isEfdEnabled()) {
+                try {
+                    $efdmsService = app(EfdmsService::class);
+                    $result = $efdmsService->signReceipt($transaction);
+
+                    if ($result['success']) {
+                        $transaction->update([
+                            'fiscal_receipt_number' => $result['fiscal_receipt_number'],
+                            'fiscal_verification_code' => $result['fiscal_verification_code'],
+                            'fiscal_qr_code' => $result['fiscal_qr_code'],
+                            'fiscal_receipt_time' => $result['fiscal_receipt_time'],
+                            'fiscal_submitted' => true,
+                            'fiscal_submission_error' => null,
+                        ]);
+                        $transaction->refresh();
+                    } else {
+                        $transaction->update([
+                            'fiscal_submitted' => false,
+                            'fiscal_submission_error' => $result['message'],
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    $transaction->update([
+                        'fiscal_submitted' => false,
+                        'fiscal_submission_error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            // Auto-send WhatsApp receipt if enabled and mode is automatic
+            $whatsappStatus = null;
+            if (Setting::get('whatsapp_receipts_enabled', false)
+                && Setting::get('whatsapp_receipts_mode', 'prompted') === 'automatic'
+                && ($transaction->customer_phone || $transaction->customer?->phone)) {
+                try {
+                    $whatsappService = app(WhatsappReceiptService::class);
+                    $waResult = $whatsappService->sendReceipt($transaction);
+                    $whatsappStatus = $waResult['success'] ? 'pending' : 'failed';
+                } catch (\Exception $e) {
+                    // Non-blocking — don't fail the sale
+                }
+            }
+
+            $txData = $this->formatTransaction($transaction);
+            if ($whatsappStatus) {
+                $txData['whatsapp_receipt_status'] = $whatsappStatus;
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Sale completed successfully.',
-                'data' => $this->formatTransaction($transaction),
+                'data' => $txData,
                 'offline_id' => $validated['offline_id'] ?? null,
             ], 201);
         } catch (\Exception $e) {
@@ -266,7 +372,7 @@ class POSController extends Controller
      */
     protected function formatTransaction(Transaction $transaction): array
     {
-        return [
+        $data = [
             'id' => $transaction->id,
             'transaction_number' => $transaction->transaction_number,
             'status' => $transaction->status,
@@ -289,6 +395,7 @@ class POSController extends Controller
                 'unit_price' => (float) $item->unit_price,
                 'tax_rate' => (float) $item->tax_rate,
                 'tax_amount' => (float) $item->tax_amount,
+                'tax_category' => $item->tax_category ?? 'standard',
                 'subtotal' => (float) $item->subtotal,
             ])->toArray(),
             'cashier' => [
@@ -301,6 +408,29 @@ class POSController extends Controller
             ] : null,
             'created_at' => $transaction->created_at->toIso8601String(),
         ];
+
+        // Include fiscal data if present
+        if ($transaction->fiscal_receipt_number) {
+            $data['fiscal'] = [
+                'receipt_number' => $transaction->fiscal_receipt_number,
+                'verification_code' => $transaction->fiscal_verification_code,
+                'qr_code' => $transaction->fiscal_qr_code,
+                'receipt_time' => $transaction->fiscal_receipt_time?->toIso8601String(),
+                'submitted' => (bool) $transaction->fiscal_submitted,
+            ];
+        }
+
+        // Include WhatsApp receipt status if any
+        $waLog = WhatsappReceiptLog::withoutGlobalScope('company')
+            ->where('transaction_id', $transaction->id)
+            ->latest()
+            ->first();
+
+        if ($waLog) {
+            $data['whatsapp_receipt_status'] = $waLog->status;
+        }
+
+        return $data;
     }
 
     /**
@@ -317,6 +447,8 @@ class POSController extends Controller
                 'phone' => $company?->phone,
                 'email' => $company?->email,
                 'logo' => $this->getCompanyLogo($company),
+                'tin' => $company?->tin,
+                'vrn' => $company?->vrn,
             ],
             'branch' => $transaction->branch ? [
                 'name' => $transaction->branch->name,
@@ -354,6 +486,12 @@ class POSController extends Controller
                 'amount_paid' => (float) $transaction->amount_paid,
                 'change' => (float) $transaction->change_given,
             ],
+            'fiscal' => $transaction->fiscal_receipt_number ? [
+                'receipt_number' => $transaction->fiscal_receipt_number,
+                'verification_code' => $transaction->fiscal_verification_code,
+                'qr_code' => $transaction->fiscal_qr_code,
+                'receipt_time' => $transaction->fiscal_receipt_time?->toIso8601String(),
+            ] : null,
             'footer' => [
                 'message' => 'Thank you for your purchase!',
             ],

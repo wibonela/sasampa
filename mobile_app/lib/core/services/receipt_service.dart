@@ -1,9 +1,14 @@
 import 'dart:typed_data';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'bluetooth_printer_service.dart';
+import 'escpos_commands.dart';
+import 'printer_preferences.dart';
+import 'printer_providers.dart';
 
 class ReceiptService {
   static final _currencyFormat = NumberFormat('#,###');
@@ -74,6 +79,20 @@ class ReceiptService {
               if (company['phone'] != null)
                 pw.Text(
                   'Tel: ${company['phone']}',
+                  style: const pw.TextStyle(fontSize: 8),
+                  textAlign: pw.TextAlign.center,
+                ),
+
+              // TIN / VRN
+              if (company['tin'] != null && (company['tin'] as String).isNotEmpty)
+                pw.Text(
+                  'TIN: ${company['tin']}',
+                  style: const pw.TextStyle(fontSize: 8),
+                  textAlign: pw.TextAlign.center,
+                ),
+              if (company['vrn'] != null && (company['vrn'] as String).isNotEmpty)
+                pw.Text(
+                  'VRN: ${company['vrn']}',
                   style: const pw.TextStyle(fontSize: 8),
                   textAlign: pw.TextAlign.center,
                 ),
@@ -179,6 +198,33 @@ class ReceiptService {
               _buildInfoRow('Amount Paid:', 'TZS ${_currencyFormat.format((payment['amount_paid'] ?? 0).toDouble())}'),
               if ((payment['change'] ?? 0) > 0)
                 _buildInfoRow('Change:', 'TZS ${_currencyFormat.format((payment['change'] ?? 0).toDouble())}'),
+
+              pw.SizedBox(height: 8),
+              pw.Divider(thickness: 0.5),
+              pw.SizedBox(height: 16),
+
+              // Fiscal Data Section
+              if (receiptData['fiscal'] != null) ...[
+                pw.SizedBox(height: 4),
+                pw.Divider(thickness: 0.5),
+                pw.SizedBox(height: 4),
+                pw.Text('FISCAL RECEIPT', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 2),
+                _buildInfoRow('Fiscal #:', (receiptData['fiscal'] as Map)['receipt_number'] ?? ''),
+                _buildInfoRow('Verify:', (receiptData['fiscal'] as Map)['verification_code'] ?? ''),
+                if ((receiptData['fiscal'] as Map)['qr_code'] != null &&
+                    ((receiptData['fiscal'] as Map)['qr_code'] as String).isNotEmpty)
+                  pw.Container(
+                    margin: const pw.EdgeInsets.only(top: 8),
+                    alignment: pw.Alignment.center,
+                    child: pw.BarcodeWidget(
+                      barcode: pw.Barcode.qrCode(),
+                      data: (receiptData['fiscal'] as Map)['qr_code'],
+                      width: 80,
+                      height: 80,
+                    ),
+                  ),
+              ],
 
               pw.SizedBox(height: 8),
               pw.Divider(thickness: 0.5),
@@ -739,5 +785,106 @@ class ReceiptService {
       bytes: pdfData,
       filename: 'Receipt_${transaction['transaction_number'] ?? 'receipt'}.pdf',
     );
+  }
+
+  /// Print receipt using the user's preferred method (AirPrint or Bluetooth)
+  static Future<bool> printWithPreferredMethod({
+    required Map<String, dynamic> receiptData,
+    required WidgetRef ref,
+  }) async {
+    final prefsState = ref.read(printerPrefsProvider);
+    final prefs = prefsState.prefs;
+
+    if (prefs.printerType == PrinterType.bluetooth) {
+      final btService = ref.read(bluetoothPrinterServiceProvider);
+      if (btService.isConnected) {
+        return bluetoothPrintReceipt(
+          receiptData: receiptData,
+          btService: btService,
+          paperSize: prefs.paperSize == 'mm58' ? PaperSize.mm58 : PaperSize.mm80,
+        );
+      }
+      // Fall through to AirPrint if not connected
+    }
+
+    // AirPrint fallback
+    await printReceiptFromApi(receiptData);
+    return true;
+  }
+
+  /// Print receipt via Bluetooth thermal printer using ESC/POS commands
+  static Future<bool> bluetoothPrintReceipt({
+    required Map<String, dynamic> receiptData,
+    required BluetoothPrinterService btService,
+    PaperSize paperSize = PaperSize.mm80,
+  }) async {
+    // Extract transaction data from the API receipt format
+    final transaction = receiptData['transaction'] as Map<String, dynamic>? ?? {};
+    final company = receiptData['company'] as Map<String, dynamic>? ?? {};
+    final customer = receiptData['customer'] as Map<String, dynamic>? ?? {};
+    final items = receiptData['items'] as List? ?? [];
+    final totals = receiptData['totals'] as Map<String, dynamic>? ?? {};
+    final payment = receiptData['payment'] as Map<String, dynamic>? ?? {};
+
+    final fiscal = receiptData['fiscal'] as Map<String, dynamic>?;
+
+    // Build a flat transaction map for EscPosCommands
+    final flatTransaction = <String, dynamic>{
+      'transaction_number': transaction['number'] ?? '',
+      'created_at': '${transaction['date'] ?? ''} ${transaction['time'] ?? ''}',
+      'cashier': transaction['cashier'],
+      'customer_name': customer['name'],
+      'customer_tin': customer['tin'],
+      'company_tin': company['tin'],
+      'company_vrn': company['vrn'],
+      'items': items.map((item) => {
+        'product_name': item['name'] ?? item['product_name'] ?? '',
+        'quantity': item['quantity'] ?? 0,
+        'unit_price': item['unit_price'] ?? 0,
+        'subtotal': item['subtotal'] ?? 0,
+      }).toList(),
+      'subtotal': totals['subtotal'] ?? 0,
+      'tax_amount': totals['tax'] ?? 0,
+      'discount_amount': totals['discount'] ?? 0,
+      'total': totals['total'] ?? 0,
+      'payment_method': payment['method'] ?? 'cash',
+      'amount_paid': payment['amount_paid'] ?? 0,
+      'change_given': payment['change'] ?? 0,
+      if (fiscal != null) ...{
+        'fiscal_receipt_number': fiscal['receipt_number'],
+        'fiscal_verification_code': fiscal['verification_code'],
+        'fiscal_qr_code': fiscal['qr_code'],
+      },
+    };
+
+    final bytes = EscPosCommands.buildReceiptBytes(
+      flatTransaction,
+      paperSize: paperSize,
+      companyName: company['name'] as String?,
+      companyPhone: company['phone'] as String?,
+      companyAddress: company['address'] as String?,
+    );
+
+    return btService.printBytes(bytes);
+  }
+
+  /// Print simple transaction receipt via Bluetooth (for checkout flow)
+  static Future<bool> bluetoothPrintSimpleReceipt({
+    required Map<String, dynamic> transaction,
+    required BluetoothPrinterService btService,
+    PaperSize paperSize = PaperSize.mm80,
+    String? companyName,
+    String? companyPhone,
+    String? companyAddress,
+  }) async {
+    final bytes = EscPosCommands.buildReceiptBytes(
+      transaction,
+      paperSize: paperSize,
+      companyName: companyName,
+      companyPhone: companyPhone,
+      companyAddress: companyAddress,
+    );
+
+    return btService.printBytes(bytes);
   }
 }

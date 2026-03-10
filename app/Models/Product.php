@@ -23,6 +23,7 @@ class Product extends Model
         'cost_price',
         'selling_price',
         'tax_rate',
+        'tax_category',
         'image_path',
         'is_active',
     ];
@@ -67,9 +68,17 @@ class Product extends Model
         return $this->inventory->quantity <= $this->inventory->low_stock_threshold;
     }
 
+    public function getEffectiveTaxRateAttribute(): float
+    {
+        if (in_array($this->tax_category, ['zero_rated', 'exempt'])) {
+            return 0;
+        }
+        return (float) $this->tax_rate;
+    }
+
     public function getPriceWithTaxAttribute(): float
     {
-        return $this->selling_price * (1 + $this->tax_rate / 100);
+        return $this->selling_price * (1 + $this->effective_tax_rate / 100);
     }
 
     public function scopeActive($query)

@@ -63,6 +63,9 @@ class Company {
   final String? logo;
   final String status;
   final bool branchesEnabled;
+  final String? tin;
+  final String? vrn;
+  final bool efdEnabled;
 
   Company({
     required this.id,
@@ -70,6 +73,9 @@ class Company {
     this.logo,
     required this.status,
     required this.branchesEnabled,
+    this.tin,
+    this.vrn,
+    this.efdEnabled = false,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) {
@@ -79,6 +85,9 @@ class Company {
       logo: json['logo'],
       status: json['status'],
       branchesEnabled: json['branches_enabled'] ?? false,
+      tin: json['tin'],
+      vrn: json['vrn'],
+      efdEnabled: json['efd_enabled'] ?? false,
     );
   }
 
@@ -89,6 +98,9 @@ class Company {
       'logo': logo,
       'status': status,
       'branches_enabled': branchesEnabled,
+      'tin': tin,
+      'vrn': vrn,
+      'efd_enabled': efdEnabled,
     };
   }
 

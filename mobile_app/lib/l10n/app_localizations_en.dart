@@ -1097,4 +1097,268 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get emailUpdatedVerificationSent =>
       'Email updated. New verification email sent!';
+
+  @override
+  String get customers => 'Customers';
+
+  @override
+  String get addCustomer => 'Add Customer';
+
+  @override
+  String get editCustomer => 'Edit Customer';
+
+  @override
+  String get customerDetails => 'Customer Details';
+
+  @override
+  String get selectCustomer => 'Select Customer';
+
+  @override
+  String get searchCustomers => 'Search customers...';
+
+  @override
+  String get noCustomers => 'No customers';
+
+  @override
+  String get manageCustomers => 'Manage customers & credit';
+
+  @override
+  String get customerCreated => 'Customer created';
+
+  @override
+  String get customerUpdated => 'Customer updated';
+
+  @override
+  String get creditLimit => 'Credit Limit';
+
+  @override
+  String get creditBalance => 'Credit Balance';
+
+  @override
+  String get availableCredit => 'Available Credit';
+
+  @override
+  String get credit => 'Credit';
+
+  @override
+  String get creditSale => 'Credit Sale';
+
+  @override
+  String get insufficientCredit => 'Insufficient credit';
+
+  @override
+  String get recordPayment => 'Record Payment';
+
+  @override
+  String get paymentRecorded => 'Payment recorded';
+
+  @override
+  String get creditHistory => 'Credit History';
+
+  @override
+  String get noCreditHistory => 'No credit history';
+
+  @override
+  String get purchaseHistory => 'Purchase History';
+
+  @override
+  String get bluetoothPrinter => 'Bluetooth Printer';
+
+  @override
+  String get scanForPrinters => 'Scan for Printers';
+
+  @override
+  String get scanning => 'Scanning...';
+
+  @override
+  String get noDevicesFound => 'No devices found';
+
+  @override
+  String get connectPrinter => 'Connect Printer';
+
+  @override
+  String get disconnectPrinter => 'Disconnect';
+
+  @override
+  String get connected => 'Connected';
+
+  @override
+  String get disconnected => 'Disconnected';
+
+  @override
+  String get savedPrinter => 'Saved Printer';
+
+  @override
+  String get paperSize => 'Paper Size';
+
+  @override
+  String get mm58 => '58mm';
+
+  @override
+  String get mm80 => '80mm';
+
+  @override
+  String get testPrint => 'Test Print';
+
+  @override
+  String get autoPrintAfterSale => 'Auto-print after sale';
+
+  @override
+  String get printerNotConnected => 'Printer not connected';
+
+  @override
+  String get connectionFailed => 'Connection failed';
+
+  @override
+  String get printerType => 'Printer Type';
+
+  @override
+  String get changePrinter => 'Change Printer';
+
+  @override
+  String get efdSettings => 'EFD Settings';
+
+  @override
+  String get traRegistration => 'TRA Registration';
+
+  @override
+  String get vrnNumber => 'VRN Number';
+
+  @override
+  String get efdSerialNumber => 'EFD Serial Number';
+
+  @override
+  String get registerDevice => 'Register Device';
+
+  @override
+  String get testConnection => 'Test Connection';
+
+  @override
+  String get efdEnabled => 'EFD Enabled';
+
+  @override
+  String get efdDisabled => 'EFD Disabled';
+
+  @override
+  String get efdEnvironment => 'Environment';
+
+  @override
+  String get sandbox => 'Sandbox';
+
+  @override
+  String get production => 'Production';
+
+  @override
+  String get fiscalReceipt => 'Fiscal Receipt';
+
+  @override
+  String get verificationCode => 'Verification Code';
+
+  @override
+  String get pendingSubmissions => 'Pending Submissions';
+
+  @override
+  String get retryFailed => 'Retry Failed';
+
+  @override
+  String get taxCategory => 'Tax Category';
+
+  @override
+  String get standardRate => 'Standard Rate (18%)';
+
+  @override
+  String get zeroRated => 'Zero Rated';
+
+  @override
+  String get exempt => 'Exempt';
+
+  @override
+  String get efdRegistered => 'EFD Registered';
+
+  @override
+  String get efdNotRegistered => 'EFD Not Registered';
+
+  @override
+  String get efdAllSubmitted => 'All receipts submitted';
+
+  @override
+  String get whatsappReceipts => 'WhatsApp Receipts';
+
+  @override
+  String get whatsappSettings => 'WhatsApp receipt delivery';
+
+  @override
+  String get deliveryMode => 'Delivery Mode';
+
+  @override
+  String get automatic => 'Automatic';
+
+  @override
+  String get automaticDesc => 'Send receipt automatically after every sale with a phone number';
+
+  @override
+  String get prompted => 'Prompted';
+
+  @override
+  String get promptedDesc => 'Cashier chooses to send after each sale';
+
+  @override
+  String get smsFallback => 'SMS Fallback';
+
+  @override
+  String get smsFallbackDesc => 'Send SMS if WhatsApp delivery fails';
+
+  @override
+  String get marketingFooter => 'Marketing Footer';
+
+  @override
+  String get marketingFooterHint => 'Custom message appended to receipts...';
+
+  @override
+  String get sendWhatsAppReceipt => 'Send WhatsApp Receipt';
+
+  @override
+  String get resendReceipt => 'Resend Receipt';
+
+  @override
+  String get receiptSent => 'Sent';
+
+  @override
+  String get receiptDelivered => 'Delivered';
+
+  @override
+  String get receiptFailed => 'Failed to send receipt';
+
+  @override
+  String get receiptPending => 'Sending...';
+
+  @override
+  String get receiptStatus => 'Receipt Status';
+
+  @override
+  String get sendingReceipt => 'Sending receipt...';
+
+  @override
+  String get enterCustomerPhone => 'Enter Customer Phone';
+
+  @override
+  String get whatsappReceiptSent => 'WhatsApp receipt sent!';
+
+  @override
+  String get testWhatsApp => 'Send Test Message';
+
+  @override
+  String get whatsappEnabled => 'WhatsApp receipts enabled';
+
+  @override
+  String get whatsappDisabled => 'WhatsApp receipts disabled';
+
+  @override
+  String get noPhoneNumber => 'No phone number';
+
+  @override
+  String get sentViaWhatsapp => 'Sent via WhatsApp';
+
+  @override
+  String get sentViaSms => 'Sent via SMS';
 }

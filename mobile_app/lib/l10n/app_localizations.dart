@@ -2257,6 +2257,534 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Barua pepe imebadilishwa. Barua pepe mpya ya uthibitisho imetumwa!'**
   String get emailUpdatedVerificationSent;
+
+  /// No description provided for @customers.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wateja'**
+  String get customers;
+
+  /// No description provided for @addCustomer.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ongeza Mteja'**
+  String get addCustomer;
+
+  /// No description provided for @editCustomer.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hariri Mteja'**
+  String get editCustomer;
+
+  /// No description provided for @customerDetails.
+  ///
+  /// In sw, this message translates to:
+  /// **'Taarifa za Mteja'**
+  String get customerDetails;
+
+  /// No description provided for @selectCustomer.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua Mteja'**
+  String get selectCustomer;
+
+  /// No description provided for @searchCustomers.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafuta wateja...'**
+  String get searchCustomers;
+
+  /// No description provided for @noCustomers.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna wateja'**
+  String get noCustomers;
+
+  /// No description provided for @manageCustomers.
+  ///
+  /// In sw, this message translates to:
+  /// **'Simamia wateja na mikopo'**
+  String get manageCustomers;
+
+  /// No description provided for @customerCreated.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mteja ameongezwa'**
+  String get customerCreated;
+
+  /// No description provided for @customerUpdated.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mteja amesasishwa'**
+  String get customerUpdated;
+
+  /// No description provided for @creditLimit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kikomo cha Mkopo'**
+  String get creditLimit;
+
+  /// No description provided for @creditBalance.
+  ///
+  /// In sw, this message translates to:
+  /// **'Deni la Mkopo'**
+  String get creditBalance;
+
+  /// No description provided for @availableCredit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mkopo Unapatikana'**
+  String get availableCredit;
+
+  /// No description provided for @credit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mkopo'**
+  String get credit;
+
+  /// No description provided for @creditSale.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mauzo ya Mkopo'**
+  String get creditSale;
+
+  /// No description provided for @insufficientCredit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mkopo hautoshi'**
+  String get insufficientCredit;
+
+  /// No description provided for @recordPayment.
+  ///
+  /// In sw, this message translates to:
+  /// **'Rekodi Malipo'**
+  String get recordPayment;
+
+  /// No description provided for @paymentRecorded.
+  ///
+  /// In sw, this message translates to:
+  /// **'Malipo yamerekodiwa'**
+  String get paymentRecorded;
+
+  /// No description provided for @creditHistory.
+  ///
+  /// In sw, this message translates to:
+  /// **'Historia ya Mkopo'**
+  String get creditHistory;
+
+  /// No description provided for @noCreditHistory.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna historia ya mkopo'**
+  String get noCreditHistory;
+
+  /// No description provided for @purchaseHistory.
+  ///
+  /// In sw, this message translates to:
+  /// **'Historia ya Manunuzi'**
+  String get purchaseHistory;
+
+  /// No description provided for @bluetoothPrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Printa ya Bluetooth'**
+  String get bluetoothPrinter;
+
+  /// No description provided for @scanForPrinters.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafuta Printa'**
+  String get scanForPrinters;
+
+  /// No description provided for @scanning.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inatafuta...'**
+  String get scanning;
+
+  /// No description provided for @noDevicesFound.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna vifaa vilivyopatikana'**
+  String get noDevicesFound;
+
+  /// No description provided for @connectPrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unganisha Printa'**
+  String get connectPrinter;
+
+  /// No description provided for @disconnectPrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tenganisha'**
+  String get disconnectPrinter;
+
+  /// No description provided for @connected.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeunganishwa'**
+  String get connected;
+
+  /// No description provided for @disconnected.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imetenganishwa'**
+  String get disconnected;
+
+  /// No description provided for @savedPrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Printa Iliyohifadhiwa'**
+  String get savedPrinter;
+
+  /// No description provided for @paperSize.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ukubwa wa Karatasi'**
+  String get paperSize;
+
+  /// No description provided for @mm58.
+  ///
+  /// In sw, this message translates to:
+  /// **'58mm'**
+  String get mm58;
+
+  /// No description provided for @mm80.
+  ///
+  /// In sw, this message translates to:
+  /// **'80mm'**
+  String get mm80;
+
+  /// No description provided for @testPrint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chapisha Jaribio'**
+  String get testPrint;
+
+  /// No description provided for @autoPrintAfterSale.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chapisha moja kwa moja baada ya mauzo'**
+  String get autoPrintAfterSale;
+
+  /// No description provided for @printerNotConnected.
+  ///
+  /// In sw, this message translates to:
+  /// **'Printa haijaunganishwa'**
+  String get printerNotConnected;
+
+  /// No description provided for @connectionFailed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeishindwa kuunganisha'**
+  String get connectionFailed;
+
+  /// No description provided for @printerType.
+  ///
+  /// In sw, this message translates to:
+  /// **'Aina ya Printa'**
+  String get printerType;
+
+  /// No description provided for @changePrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Badilisha Printa'**
+  String get changePrinter;
+
+  /// No description provided for @efdSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Settings'**
+  String get efdSettings;
+
+  /// No description provided for @traRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'TRA Registration'**
+  String get traRegistration;
+
+  /// No description provided for @vrnNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'VRN Number'**
+  String get vrnNumber;
+
+  /// No description provided for @efdSerialNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Serial Number'**
+  String get efdSerialNumber;
+
+  /// No description provided for @registerDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Device'**
+  String get registerDevice;
+
+  /// No description provided for @testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Connection'**
+  String get testConnection;
+
+  /// No description provided for @efdEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Enabled'**
+  String get efdEnabled;
+
+  /// No description provided for @efdDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Disabled'**
+  String get efdDisabled;
+
+  /// No description provided for @efdEnvironment.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment'**
+  String get efdEnvironment;
+
+  /// No description provided for @sandbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Sandbox'**
+  String get sandbox;
+
+  /// No description provided for @production.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get production;
+
+  /// No description provided for @fiscalReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiscal Receipt'**
+  String get fiscalReceipt;
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get verificationCode;
+
+  /// No description provided for @pendingSubmissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Submissions'**
+  String get pendingSubmissions;
+
+  /// No description provided for @retryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Failed'**
+  String get retryFailed;
+
+  /// No description provided for @taxCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Category'**
+  String get taxCategory;
+
+  /// No description provided for @standardRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Rate (18%)'**
+  String get standardRate;
+
+  /// No description provided for @zeroRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero Rated'**
+  String get zeroRated;
+
+  /// No description provided for @exempt.
+  ///
+  /// In en, this message translates to:
+  /// **'Exempt'**
+  String get exempt;
+
+  /// No description provided for @efdRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Registered'**
+  String get efdRegistered;
+
+  /// No description provided for @efdNotRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'EFD Not Registered'**
+  String get efdNotRegistered;
+
+  /// No description provided for @efdAllSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'All receipts submitted'**
+  String get efdAllSubmitted;
+
+  /// No description provided for @whatsappReceipts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti za WhatsApp'**
+  String get whatsappReceipts;
+
+  /// No description provided for @whatsappSettings.
+  ///
+  /// In sw, this message translates to:
+  /// **'Utoaji wa risiti kwa WhatsApp'**
+  String get whatsappSettings;
+
+  /// No description provided for @deliveryMode.
+  ///
+  /// In sw, this message translates to:
+  /// **'Njia ya Utoaji'**
+  String get deliveryMode;
+
+  /// No description provided for @automatic.
+  ///
+  /// In sw, this message translates to:
+  /// **'Otomatiki'**
+  String get automatic;
+
+  /// No description provided for @automaticDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma risiti moja kwa moja baada ya kila mauzo yenye nambari ya simu'**
+  String get automaticDesc;
+
+  /// No description provided for @prompted.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kwa Ruhusa'**
+  String get prompted;
+
+  /// No description provided for @promptedDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Karani anachagua kutuma baada ya kila mauzo'**
+  String get promptedDesc;
+
+  /// No description provided for @smsFallback.
+  ///
+  /// In sw, this message translates to:
+  /// **'SMS Mbadala'**
+  String get smsFallback;
+
+  /// No description provided for @smsFallbackDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma SMS ikiwa WhatsApp itashindwa'**
+  String get smsFallbackDesc;
+
+  /// No description provided for @marketingFooter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ujumbe wa Masoko'**
+  String get marketingFooter;
+
+  /// No description provided for @marketingFooterHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ujumbe maalum unaoongezwa kwenye risiti...'**
+  String get marketingFooterHint;
+
+  /// No description provided for @sendWhatsAppReceipt.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma Risiti kwa WhatsApp'**
+  String get sendWhatsAppReceipt;
+
+  /// No description provided for @resendReceipt.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma Tena Risiti'**
+  String get resendReceipt;
+
+  /// No description provided for @receiptSent.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imetumwa'**
+  String get receiptSent;
+
+  /// No description provided for @receiptDelivered.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imepokelewa'**
+  String get receiptDelivered;
+
+  /// No description provided for @receiptFailed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kutuma risiti'**
+  String get receiptFailed;
+
+  /// No description provided for @receiptPending.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inatuma...'**
+  String get receiptPending;
+
+  /// No description provided for @receiptStatus.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hali ya Risiti'**
+  String get receiptStatus;
+
+  /// No description provided for @sendingReceipt.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inatuma risiti...'**
+  String get sendingReceipt;
+
+  /// No description provided for @enterCustomerPhone.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka Nambari ya Simu ya Mteja'**
+  String get enterCustomerPhone;
+
+  /// No description provided for @whatsappReceiptSent.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti ya WhatsApp imetumwa!'**
+  String get whatsappReceiptSent;
+
+  /// No description provided for @testWhatsApp.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma Ujumbe wa Majaribio'**
+  String get testWhatsApp;
+
+  /// No description provided for @whatsappEnabled.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti za WhatsApp zimewashwa'**
+  String get whatsappEnabled;
+
+  /// No description provided for @whatsappDisabled.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti za WhatsApp zimezimwa'**
+  String get whatsappDisabled;
+
+  /// No description provided for @noPhoneNumber.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna nambari ya simu'**
+  String get noPhoneNumber;
+
+  /// No description provided for @sentViaWhatsapp.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imetumwa kwa WhatsApp'**
+  String get sentViaWhatsapp;
+
+  /// No description provided for @sentViaSms.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imetumwa kwa SMS'**
+  String get sentViaSms;
 }
 
 class _AppLocalizationsDelegate

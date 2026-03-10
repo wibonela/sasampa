@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\StockAdjustment;
 use App\Models\Transaction;
@@ -54,6 +55,7 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
             'customer_tin' => 'nullable|string|max:50',
@@ -94,15 +96,30 @@ class OrderController extends Controller
                 $validDays = $validated['valid_days'] ?? 7;
 
                 $user = $request->user();
+
+                // Resolve customer info
+                $customerId = $validated['customer_id'] ?? null;
+                $customerName = $validated['customer_name'];
+                $customerPhone = $validated['customer_phone'] ?? null;
+                $customerTin = $validated['customer_tin'] ?? null;
+
+                if ($customerId) {
+                    $customer = Customer::findOrFail($customerId);
+                    $customerName = $customerName ?: $customer->name;
+                    $customerPhone = $customerPhone ?: $customer->phone;
+                    $customerTin = $customerTin ?: $customer->tin;
+                }
+
                 $order = Transaction::create([
                     'company_id' => $user->company_id,
                     'branch_id' => $user->currentBranch()?->id,
+                    'customer_id' => $customerId,
                     'transaction_number' => Transaction::generateOrderNumber(),
                     'type' => 'order',
                     'user_id' => $user->id,
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'customer_tin' => $validated['customer_tin'] ?? null,
+                    'customer_name' => $customerName,
+                    'customer_phone' => $customerPhone,
+                    'customer_tin' => $customerTin,
                     'subtotal' => $subtotal,
                     'tax_amount' => $taxAmount,
                     'discount_amount' => $discountAmount,
@@ -184,6 +201,7 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
             'customer_tin' => 'nullable|string|max:50',
@@ -225,10 +243,24 @@ class OrderController extends Controller
                 $discountAmount = $validated['discount_amount'] ?? 0;
                 $total = $subtotal + $taxAmount - $discountAmount;
 
+                // Resolve customer info
+                $customerId = $validated['customer_id'] ?? null;
+                $customerName = $validated['customer_name'];
+                $customerPhone = $validated['customer_phone'] ?? null;
+                $customerTin = $validated['customer_tin'] ?? null;
+
+                if ($customerId) {
+                    $customer = Customer::findOrFail($customerId);
+                    $customerName = $customerName ?: $customer->name;
+                    $customerPhone = $customerPhone ?: $customer->phone;
+                    $customerTin = $customerTin ?: $customer->tin;
+                }
+
                 $order->update([
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'customer_tin' => $validated['customer_tin'] ?? null,
+                    'customer_id' => $customerId,
+                    'customer_name' => $customerName,
+                    'customer_phone' => $customerPhone,
+                    'customer_tin' => $customerTin,
                     'subtotal' => $subtotal,
                     'tax_amount' => $taxAmount,
                     'discount_amount' => $discountAmount,
