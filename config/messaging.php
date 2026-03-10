@@ -16,4 +16,11 @@ return [
         'sender_id' => env('PINDO_SENDER_ID', 'Sasampa'),
     ],
 
+    'meta' => [
+        'access_token' => env('META_WHATSAPP_TOKEN', ''),
+        'phone_number_id' => env('META_WHATSAPP_PHONE_ID', ''),
+        'business_account_id' => env('META_WHATSAPP_BUSINESS_ID', ''),
+        'api_version' => env('META_WHATSAPP_API_VERSION', 'v22.0'),
+    ],
+
 ];

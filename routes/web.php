@@ -98,8 +98,8 @@ Route::get('/guide', function () {
 
 // Legacy redirects to unified guide
 Route::get('/app-update-guide', fn() => redirect('/guide#android'))->name('app-update-guide');
-Route::get('/whatsapp-api-guide', fn() => redirect('/guide#whatsapp'));
-Route::get('/api-setup-guide', fn() => redirect('/guide#whatsapp'));
+Route::get('/whatsapp-api-guide', fn() => redirect('/guide#meta'));
+Route::get('/api-setup-guide', fn() => redirect('/guide#meta'));
 
 // Public Documentation
 Route::prefix('docs')->name('docs.')->group(function () {

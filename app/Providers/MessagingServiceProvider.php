@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Messaging\AfricasTalkingProvider;
 use App\Services\Messaging\MessagingProviderInterface;
+use App\Services\Messaging\MetaWhatsAppProvider;
 use App\Services\Messaging\PindoProvider;
 use App\Services\Messaging\StubProvider;
 use App\Services\WhatsappReceiptService;
@@ -15,6 +16,7 @@ class MessagingServiceProvider extends ServiceProvider
     {
         $this->app->singleton(MessagingProviderInterface::class, function () {
             return match (config('messaging.provider', 'stub')) {
+                'meta' => new MetaWhatsAppProvider(),
                 'africas_talking' => new AfricasTalkingProvider(),
                 'pindo' => new PindoProvider(),
                 default => new StubProvider(),
