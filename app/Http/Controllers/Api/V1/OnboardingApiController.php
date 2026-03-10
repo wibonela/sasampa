@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -127,6 +128,37 @@ class OnboardingApiController extends Controller
                 'phone' => $company->phone,
                 'address' => $company->address,
             ],
+        ]);
+    }
+
+    /**
+     * Verify email from mobile app deep link (no auth required, hash provides security)
+     */
+    public function verifyEmailFromApp(Request $request, int $id, string $hash): JsonResponse
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+
+        if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+            return response()->json(['error' => 'Invalid verification link.'], 403);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+
+            $company = $user->company;
+            if ($company && $company->needsOnboarding()) {
+                $company->update(['onboarding_step' => 3]);
+            }
+        }
+
+        return response()->json([
+            'verified' => true,
+            'message' => 'Email verified successfully.',
         ]);
     }
 
