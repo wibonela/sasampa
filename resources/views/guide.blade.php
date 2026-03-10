@@ -166,7 +166,7 @@
         <button class="cat-btn active" onclick="switchTab('home')"><span class="dot" style="background:#1a1a1a"></span> Home</button>
         <button class="cat-btn" onclick="switchTab('android')"><span class="dot" style="background:#3DDC84"></span> Android</button>
         <button class="cat-btn" onclick="switchTab('ios')"><span class="dot" style="background:#007AFF"></span> iOS</button>
-        <button class="cat-btn" onclick="switchTab('whatsapp')"><span class="dot" style="background:#25D366"></span> WhatsApp API</button>
+        <button class="cat-btn" onclick="switchTab('meta')"><span class="dot" style="background:#0084FF"></span> Meta Cloud API</button>
         <button class="cat-btn" onclick="switchTab('at')"><span class="dot" style="background:#F7941D"></span> Africa's Talking</button>
         <button class="cat-btn" onclick="switchTab('pindo')"><span class="dot" style="background:#6C63FF"></span> Pindo</button>
         <button class="cat-btn" onclick="switchTab('server')"><span class="dot" style="background:#263238"></span> Server Config</button>
@@ -194,22 +194,22 @@
         </div>
     </div>
 
-    <h3 style="font-size:14px; color:#999; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; margin-top:32px;">API & Messaging Setup</h3>
+    <h3 style="font-size:14px; color:#999; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; margin-top:32px;">WhatsApp API Setup</h3>
     <div class="guide-cards">
-        <div class="guide-card" onclick="switchTab('whatsapp')">
-            <div class="card-icon" style="background:#dcf8c6;">&#128172;</div>
-            <h3>WhatsApp Business API</h3>
-            <p>Facebook Business Manager, phone number setup, message templates.</p>
+        <div class="guide-card" onclick="switchTab('meta')" style="border-color:#0084FF; border-width:2px;">
+            <div class="card-icon" style="background:#e3f2fd;">&#128172;</div>
+            <h3>Meta WhatsApp Cloud API <span class="badge green" style="margin-left:4px;">Recommended</span></h3>
+            <p>Direct from Meta/Facebook. Free tier: 1,000 messages/month. No middleman needed.</p>
         </div>
         <div class="guide-card" onclick="switchTab('at')">
             <div class="card-icon" style="background:#fff3e0;">&#127758;</div>
             <h3>Africa's Talking</h3>
-            <p>Account creation, API keys, WhatsApp channel, sandbox testing.</p>
+            <p>Alternative provider. WhatsApp + SMS. Free sandbox for testing.</p>
         </div>
         <div class="guide-card" onclick="switchTab('pindo')">
             <div class="card-icon" style="background:#ede7f6;">&#128233;</div>
             <h3>Pindo</h3>
-            <p>Account setup, API token, sender ID, WhatsApp for East Africa.</p>
+            <p>Alternative provider. Great SMS rates for East Africa.</p>
         </div>
     </div>
 
@@ -381,137 +381,194 @@ version: 1.0.2+8</div>
     </div>
 </div>
 
-{{-- ======================== WHATSAPP API ======================== --}}
-<div id="tab-whatsapp" class="tab-content">
-    <div class="section-badge" style="background:#dcf8c6; color:#075e54;">&#128172; WhatsApp Business API</div>
-    <h1 class="section-title">WhatsApp Business API Setup</h1>
-    <p class="section-desc">WhatsApp Business API is accessed through providers like Africa's Talking or Pindo. Here's what you need.</p>
+{{-- ======================== META WHATSAPP CLOUD API ======================== --}}
+<div id="tab-meta" class="tab-content">
+    <div class="section-badge" style="background:#e3f2fd; color:#0d47a1;">&#128172; Meta WhatsApp Cloud API <span class="badge green" style="margin-left:4px;">Recommended</span></div>
+    <h1 class="section-title">Meta WhatsApp Cloud API Setup</h1>
+    <p class="section-desc">Use Meta's official WhatsApp Cloud API directly — no middleman. Free tier: 1,000 service conversations/month. This is what you see at developers.facebook.com.</p>
 
     <div class="step">
         <div class="step-header">
-            <div class="step-number whatsapp">1</div>
-            <div><div class="step-title">How WhatsApp Business API Works</div><div class="step-subtitle">Important background</div></div>
-        </div>
-        <div class="step-body">
-            <p><strong>WhatsApp Business API</strong> is NOT the same as WhatsApp Business App (green app on your phone):</p>
-            <ul>
-                <li><strong>WhatsApp Business App</strong> — free, manual, one phone</li>
-                <li><strong>WhatsApp Business API</strong> — paid per message, automated, works from servers</li>
-            </ul>
-            <p>You access the API through a <strong>Business Solution Provider (BSP)</strong> like Africa's Talking or Pindo.</p>
-            <div class="info-box info">
-                <strong>What You'll Need:</strong>
-                <ul style="margin-top:8px; padding-left:20px;">
-                    <li>A <strong>phone number</strong> not currently on any WhatsApp account</li>
-                    <li>A <strong>Facebook Business Manager</strong> account (free)</li>
-                    <li><strong>Business documents</strong> (TIN certificate, business license)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="step">
-        <div class="step-header">
-            <div class="step-number whatsapp">2</div>
-            <div><div class="step-title">Create Facebook Business Manager Account</div><div class="step-subtitle">Required by all WhatsApp API providers</div></div>
+            <div class="step-number" style="background:#0084FF; color:#fff;">1</div>
+            <div><div class="step-title">Create a Meta App</div><div class="step-subtitle">developers.facebook.com</div></div>
         </div>
         <div class="step-body">
             <ol>
-                <li>Go to <strong>business.facebook.com</strong></li>
-                <li>Click <strong>"Create Account"</strong></li>
-                <li>Fill in:</li>
+                <li>Go to <strong>developers.facebook.com/apps/creation/</strong></li>
+                <li>Select <strong>"Connect with customers through WhatsApp"</strong> (bottom option with WhatsApp icon)</li>
+                <li>Click <strong>"Next"</strong></li>
+                <li>Fill in the app details:</li>
             </ol>
-            <div class="copyable" onclick="copyText(this)"><span class="text">Business Name: Sasampa Technologies</span><span class="copy-icon">&#128203; Copy</span></div>
-            <div class="copyable" onclick="copyText(this)"><span class="text">Business Email: info@sasampa.com</span><span class="copy-icon">&#128203; Copy</span></div>
-            <ol start="4">
-                <li>Verify your email</li>
-                <li>Go to <strong>Business Settings</strong> &gt; <strong>Security Center</strong> &gt; <strong>Start Verification</strong></li>
-                <li>Upload business documents (TIN certificate or business license)</li>
-                <li>Wait for verification (1-3 business days)</li>
+            <div class="copyable" onclick="copyText(this)"><span class="text">App Name: Sasampa POS</span><span class="copy-icon">&#128203; Copy</span></div>
+            <div class="copyable" onclick="copyText(this)"><span class="text">App Contact Email: info@sasampa.com</span><span class="copy-icon">&#128203; Copy</span></div>
+            <ol start="5">
+                <li>Select your <strong>Business Portfolio</strong> (or create one if prompted)</li>
+                <li>Click <strong>"Create App"</strong></li>
             </ol>
-            <div class="info-box warning"><strong>Start this early!</strong> Verification takes a few days. You can use sandbox/test mode while waiting.</div>
+            <div class="info-box tip"><strong>No Business Portfolio yet?</strong> You'll be prompted to create one. Use "Sasampa Technologies" as the name. This is your Meta Business account.</div>
         </div>
     </div>
 
     <div class="step">
         <div class="step-header">
-            <div class="step-number whatsapp">3</div>
-            <div><div class="step-title">Get a Dedicated Phone Number</div><div class="step-subtitle">For WhatsApp Business API</div></div>
+            <div class="step-number" style="background:#0084FF; color:#fff;">2</div>
+            <div><div class="step-title">Get Your API Credentials</div><div class="step-subtitle">From the WhatsApp > API Setup page</div></div>
         </div>
         <div class="step-body">
-            <p>You need a number <strong>not registered</strong> on any WhatsApp account.</p>
-            <ul>
-                <li><strong>Buy a new SIM</strong> — Vodacom/Airtel/Tigo (~TZS 1,000)</li>
-                <li><strong>Use a business landline</strong> — WhatsApp verifies via voice call</li>
-                <li><strong>Transfer existing number</strong> — delete WhatsApp first, wait 24 hours</li>
-            </ul>
-            <div class="info-box tip"><strong>Tip:</strong> Buy a new SIM specifically for this. Choose a memorable number — customers will see it.</div>
+            <p>After creating the app, you'll be taken to the dashboard. Go to:</p>
+            <ol>
+                <li>Left sidebar: <strong>WhatsApp</strong> &gt; <strong>API Setup</strong></li>
+                <li>You'll see a <strong>test phone number</strong> already provided by Meta (free for testing)</li>
+                <li>Copy these 3 values — you'll need them for the server:</li>
+            </ol>
+
+            <div class="info-box info" style="margin: 16px 0;">
+                <strong>Find these on the API Setup page:</strong>
+                <ul style="margin-top:8px; padding-left:20px;">
+                    <li><strong>Temporary Access Token</strong> — shown at the top (expires in 24 hours, for testing only)</li>
+                    <li><strong>Phone Number ID</strong> — under "From" phone number, click the number to see the ID (looks like <code>123456789012345</code>)</li>
+                    <li><strong>WhatsApp Business Account ID</strong> — shown in the URL or under the phone number section</li>
+                </ul>
+            </div>
+
+            <h4>Test immediately with the temporary token (paste in Terminal):</h4>
+            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>curl -X POST "https://graph.facebook.com/v22.0/YOUR_PHONE_NUMBER_ID/messages" \
+  -H "Authorization: Bearer YOUR_TEMPORARY_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messaging_product": "whatsapp",
+    "to": "255712345678",
+    "type": "text",
+    "text": { "body": "Hello from Sasampa POS! This is a test message." }
+  }'</div>
+
+            <div class="info-box warning"><strong>Important:</strong> The temporary token expires in 24 hours. Step 4 below shows how to get a permanent token.</div>
         </div>
     </div>
 
     <div class="step">
         <div class="step-header">
-            <div class="step-number whatsapp">4</div>
-            <div><div class="step-title">Choose Provider & Complete Setup</div><div class="step-subtitle">Pick Africa's Talking or Pindo</div></div>
+            <div class="step-number" style="background:#0084FF; color:#fff;">3</div>
+            <div><div class="step-title">Add Your Business Phone Number</div><div class="step-subtitle">Replace Meta's test number with yours</div></div>
+        </div>
+        <div class="step-body">
+            <p>Meta gives you a test number to start, but you'll want your own business number:</p>
+            <ol>
+                <li>On the API Setup page, click <strong>"Add phone number"</strong></li>
+                <li>Fill in your business details:</li>
+            </ol>
+            <div class="copyable" onclick="copyText(this)"><span class="text">WhatsApp Business Profile Name: Sasampa POS</span><span class="copy-icon">&#128203; Copy</span></div>
+            <div class="copyable" onclick="copyText(this)"><span class="text">Category: Shopping and Retail</span><span class="copy-icon">&#128203; Copy</span></div>
+            <div class="copyable" onclick="copyText(this)"><span class="text">Business Description: Point of Sale system for businesses in Tanzania. Automated receipt delivery.</span><span class="copy-icon">&#128203; Copy</span></div>
+            <ol start="3">
+                <li>Enter your <strong>phone number</strong> (must NOT be registered on WhatsApp)</li>
+                <li>Choose verification method: <strong>SMS</strong> or <strong>Voice call</strong></li>
+                <li>Enter the verification code</li>
+                <li>Your number is now registered! Note the new <strong>Phone Number ID</strong></li>
+            </ol>
+            <div class="info-box tip"><strong>Tip:</strong> You can start testing with Meta's free test number first. Add your own number when ready for production.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number" style="background:#0084FF; color:#fff;">4</div>
+            <div><div class="step-title">Get a Permanent Access Token</div><div class="step-subtitle">System User token that doesn't expire</div></div>
+        </div>
+        <div class="step-body">
+            <p>The temporary token from Step 2 expires in 24 hours. For production, create a permanent System User token:</p>
+            <ol>
+                <li>Go to <strong>business.facebook.com</strong> &gt; <strong>Business Settings</strong></li>
+                <li>Left sidebar: <strong>Users</strong> &gt; <strong>System Users</strong></li>
+                <li>Click <strong>"Add"</strong> to create a new System User:</li>
+            </ol>
+            <div class="copyable" onclick="copyText(this)"><span class="text">System User Name: Sasampa API</span><span class="copy-icon">&#128203; Copy</span></div>
+            <div class="copyable" onclick="copyText(this)"><span class="text">Role: Admin</span><span class="copy-icon">&#128203; Copy</span></div>
+            <ol start="4">
+                <li>Click <strong>"Create System User"</strong></li>
+                <li>Now click <strong>"Add Assets"</strong> on the system user</li>
+                <li>Select <strong>"Apps"</strong> tab &gt; find <strong>"Sasampa POS"</strong> &gt; toggle <strong>"Full Control"</strong></li>
+                <li>Click <strong>"Save Changes"</strong></li>
+                <li>Back on the System User page, click <strong>"Generate New Token"</strong></li>
+                <li>Select the <strong>"Sasampa POS"</strong> app</li>
+                <li>Set token expiration to <strong>"Never"</strong></li>
+                <li>Select these permissions:</li>
+            </ol>
+
+            <div class="info-box info">
+                <strong>Required Permissions (check these boxes):</strong>
+                <ul style="margin-top:8px; padding-left:20px;">
+                    <li><code>whatsapp_business_management</code></li>
+                    <li><code>whatsapp_business_messaging</code></li>
+                </ul>
+            </div>
+
+            <ol start="12">
+                <li>Click <strong>"Generate Token"</strong></li>
+                <li><strong>COPY THE TOKEN IMMEDIATELY</strong> — it's shown only once!</li>
+            </ol>
+
+            <div class="info-box important"><strong>Save this token securely!</strong> This is your <code>META_WHATSAPP_TOKEN</code> for the .env file. It won't be shown again. If you lose it, you'll need to generate a new one.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number" style="background:#0084FF; color:#fff;">5</div>
+            <div><div class="step-title">Add a Test Number (For Sandbox Testing)</div><div class="step-subtitle">Whitelist numbers before verification</div></div>
+        </div>
+        <div class="step-body">
+            <p>Before your business is verified, you can only send messages to <strong>whitelisted test numbers</strong>:</p>
+            <ol>
+                <li>Go to <strong>WhatsApp</strong> &gt; <strong>API Setup</strong></li>
+                <li>Scroll to <strong>"To" field</strong> &gt; click <strong>"Manage phone number list"</strong></li>
+                <li>Click <strong>"Add phone number"</strong></li>
+                <li>Enter your personal number (or whoever will receive test messages)</li>
+                <li>Verify with the code sent to that number</li>
+            </ol>
+            <div class="info-box tip"><strong>After business verification:</strong> You can send to ANY WhatsApp number worldwide. Verification removes the test-number restriction.</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-header">
+            <div class="step-number" style="background:#0084FF; color:#fff;">6</div>
+            <div><div class="step-title">Pricing — Free Tier!</div><div class="step-subtitle">1,000 free service conversations per month</div></div>
         </div>
         <div class="step-body">
             <table class="compare-table">
-                <thead><tr><th>Feature</th><th>Africa's Talking</th><th>Pindo</th></tr></thead>
+                <thead><tr><th>Conversation Type</th><th>Cost</th><th>Description</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>WhatsApp + SMS</strong></td><td><span class="badge green">Yes</span></td><td><span class="badge green">Yes</span></td></tr>
-                    <tr><td><strong>TZ Coverage</strong></td><td><span class="badge green">Excellent</span></td><td><span class="badge green">Excellent</span></td></tr>
-                    <tr><td><strong>SMS Cost</strong></td><td>~TZS 25-40</td><td>~TZS 20-35</td></tr>
-                    <tr><td><strong>WhatsApp Cost</strong></td><td>~TZS 60-100</td><td>~TZS 50-80</td></tr>
-                    <tr><td><strong>Free Sandbox</strong></td><td><span class="badge green">Yes</span></td><td><span class="badge blue">Test credits</span></td></tr>
-                    <tr><td><strong>Best For</strong></td><td><span class="badge orange">Testing first</span></td><td><span class="badge blue">Production TZ</span></td></tr>
+                    <tr><td><strong>Service</strong></td><td><span class="badge green">1,000 FREE/month</span></td><td>Customer messages you within 24 hrs, you reply</td></tr>
+                    <tr><td><strong>Utility</strong></td><td>~TZS 30-50/msg</td><td>Receipts, order updates, payment confirmations</td></tr>
+                    <tr><td><strong>Marketing</strong></td><td>~TZS 80-120/msg</td><td>Promotions, offers</td></tr>
                 </tbody>
             </table>
-            <div class="info-box tip"><strong>Recommendation:</strong> Start with <a href="#" onclick="switchTab('at'); return false;" style="color:#F7941D; font-weight:600;">Africa's Talking</a> (free sandbox), switch to <a href="#" onclick="switchTab('pindo'); return false;" style="color:#6C63FF; font-weight:600;">Pindo</a> for production. Switch anytime by changing one line in <code>.env</code>.</div>
+            <div class="info-box tip"><strong>For receipts:</strong> When a customer initiates a conversation (e.g., they message your business first), your receipt reply is FREE (up to 1,000/month). Proactive receipts sent first are "Utility" conversations.</div>
+
+            <h4>Add a payment method:</h4>
+            <ol>
+                <li>Go to <strong>WhatsApp</strong> &gt; <strong>API Setup</strong> &gt; <strong>"Add payment method"</strong></li>
+                <li>Or go to <strong>business.facebook.com</strong> &gt; <strong>Billing</strong></li>
+                <li>Add a <strong>credit/debit card</strong> (Visa/Mastercard)</li>
+            </ol>
         </div>
     </div>
 
     <div class="step">
         <div class="step-header">
-            <div class="step-number whatsapp">5</div>
-            <div><div class="step-title">Message Templates (Required)</div><div class="step-subtitle">Pre-approved templates for business messages</div></div>
+            <div class="step-number" style="background:#0084FF; color:#fff;">&#10003;</div>
+            <div><div class="step-title">Your Credentials Summary</div><div class="step-subtitle">What to put in the .env file</div></div>
         </div>
         <div class="step-body">
-            <h4>English Receipt Template — submit to your provider:</h4>
-            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="comment"># Template Name:</span> <span class="value">receipt_notification</span>
-<span class="comment"># Category:</span> <span class="value">UTILITY</span>
-<span class="comment"># Language:</span> <span class="value">en</span>
+            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="comment"># Meta WhatsApp Cloud API (Direct from Meta)</span>
+<span class="comment"># Get from: developers.facebook.com > Your App > WhatsApp > API Setup</span>
 
-<span class="comment"># Body:</span>
-<span class="value">Thank you for your purchase at {{1}}!
-
-Receipt #{{2}}
-Date: {{3}}
-
-{{4}}
-
-Total: {{5}}
-Payment: {{6}}
-
-Powered by Sasampa POS</span></div>
-
-            <h4>Swahili Receipt Template:</h4>
-            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="comment"># Template Name:</span> <span class="value">risiti_arifa</span>
-<span class="comment"># Category:</span> <span class="value">UTILITY</span>
-<span class="comment"># Language:</span> <span class="value">sw</span>
-
-<span class="comment"># Body:</span>
-<span class="value">Asante kwa ununuzi wako kutoka {{1}}!
-
-Risiti #{{2}}
-Tarehe: {{3}}
-
-{{4}}
-
-Jumla: {{5}}
-Malipo: {{6}}
-
-Powered by Sasampa POS</span></div>
-            <div class="info-box info"><strong>Note:</strong> Template approval takes 24-48 hours. You can test with sandbox mode while waiting.</div>
+<span class="key">WHATSAPP_PROVIDER</span>=<span class="value">meta</span>
+<span class="key">META_WHATSAPP_TOKEN</span>=<span class="value">your-permanent-system-user-token</span>
+<span class="key">META_WHATSAPP_PHONE_ID</span>=<span class="value">your-phone-number-id</span>
+<span class="key">META_WHATSAPP_BUSINESS_ID</span>=<span class="value">your-whatsapp-business-account-id</span></div>
+            <p>Now go to <a href="#" onclick="switchTab('server'); return false;" style="color:#1a1a1a; font-weight:600;">Server Config</a> to add these to your server.</p>
         </div>
     </div>
 </div>
@@ -705,7 +762,18 @@ Powered by Sasampa POS</span></div>
             <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo nano .env</div>
             <p>Scroll to the bottom and add your provider config. Pick ONE:</p>
 
-            <h4>Option A: Africa's Talking</h4>
+            <h4>Option A: Meta WhatsApp Cloud API <span class="badge green">Recommended</span></h4>
+            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button># ========================================
+# WhatsApp & Messaging Configuration
+# ========================================
+WHATSAPP_PROVIDER=meta
+
+# Meta WhatsApp Cloud API (from developers.facebook.com)
+META_WHATSAPP_TOKEN=paste-your-permanent-token-here
+META_WHATSAPP_PHONE_ID=paste-your-phone-number-id-here
+META_WHATSAPP_BUSINESS_ID=paste-your-business-account-id-here</div>
+
+            <h4>Option B: Africa's Talking</h4>
             <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button># ========================================
 # WhatsApp & Messaging Configuration
 # ========================================
@@ -717,7 +785,7 @@ AT_USERNAME=paste-your-username-here
 AT_WHATSAPP_PRODUCT_ID=paste-your-whatsapp-product-id-here
 AT_SANDBOX=false</div>
 
-            <h4>Option B: Pindo</h4>
+            <h4>Option C: Pindo</h4>
             <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button># ========================================
 # WhatsApp & Messaging Configuration
 # ========================================
@@ -727,7 +795,7 @@ WHATSAPP_PROVIDER=pindo
 PINDO_API_TOKEN=paste-your-api-token-here
 PINDO_SENDER_ID=SASAMPA</div>
 
-            <h4>Option C: Testing Mode (no real messages)</h4>
+            <h4>Option D: Testing Mode (no real messages)</h4>
             <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button># Stub mode — messages logged but not sent
 WHATSAPP_PROVIDER=stub</div>
 
