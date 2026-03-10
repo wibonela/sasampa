@@ -23,7 +23,7 @@ class OnboardingApiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'password' => ['required', 'confirmed', Password::min(8)],
             'device_name' => 'required|string',
         ]);
