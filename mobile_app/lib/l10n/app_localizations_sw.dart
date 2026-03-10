@@ -1098,4 +1098,268 @@ class AppLocalizationsSw extends AppLocalizations {
   @override
   String get emailUpdatedVerificationSent =>
       'Barua pepe imebadilishwa. Barua pepe mpya ya uthibitisho imetumwa!';
+
+  @override
+  String get customers => 'Wateja';
+
+  @override
+  String get addCustomer => 'Ongeza Mteja';
+
+  @override
+  String get editCustomer => 'Hariri Mteja';
+
+  @override
+  String get customerDetails => 'Taarifa za Mteja';
+
+  @override
+  String get selectCustomer => 'Chagua Mteja';
+
+  @override
+  String get searchCustomers => 'Tafuta wateja...';
+
+  @override
+  String get noCustomers => 'Hakuna wateja';
+
+  @override
+  String get manageCustomers => 'Simamia wateja na mikopo';
+
+  @override
+  String get customerCreated => 'Mteja ameongezwa';
+
+  @override
+  String get customerUpdated => 'Mteja amesasishwa';
+
+  @override
+  String get creditLimit => 'Kikomo cha Mkopo';
+
+  @override
+  String get creditBalance => 'Deni la Mkopo';
+
+  @override
+  String get availableCredit => 'Mkopo Unapatikana';
+
+  @override
+  String get credit => 'Mkopo';
+
+  @override
+  String get creditSale => 'Mauzo ya Mkopo';
+
+  @override
+  String get insufficientCredit => 'Mkopo hautoshi';
+
+  @override
+  String get recordPayment => 'Rekodi Malipo';
+
+  @override
+  String get paymentRecorded => 'Malipo yamerekodiwa';
+
+  @override
+  String get creditHistory => 'Historia ya Mkopo';
+
+  @override
+  String get noCreditHistory => 'Hakuna historia ya mkopo';
+
+  @override
+  String get purchaseHistory => 'Historia ya Manunuzi';
+
+  @override
+  String get bluetoothPrinter => 'Printa ya Bluetooth';
+
+  @override
+  String get scanForPrinters => 'Tafuta Printa';
+
+  @override
+  String get scanning => 'Inatafuta...';
+
+  @override
+  String get noDevicesFound => 'Hakuna vifaa vilivyopatikana';
+
+  @override
+  String get connectPrinter => 'Unganisha Printa';
+
+  @override
+  String get disconnectPrinter => 'Tenganisha';
+
+  @override
+  String get connected => 'Imeunganishwa';
+
+  @override
+  String get disconnected => 'Imetenganishwa';
+
+  @override
+  String get savedPrinter => 'Printa Iliyohifadhiwa';
+
+  @override
+  String get paperSize => 'Ukubwa wa Karatasi';
+
+  @override
+  String get mm58 => '58mm';
+
+  @override
+  String get mm80 => '80mm';
+
+  @override
+  String get testPrint => 'Chapisha Jaribio';
+
+  @override
+  String get autoPrintAfterSale => 'Chapisha moja kwa moja baada ya mauzo';
+
+  @override
+  String get printerNotConnected => 'Printa haijaunganishwa';
+
+  @override
+  String get connectionFailed => 'Imeishindwa kuunganisha';
+
+  @override
+  String get printerType => 'Aina ya Printa';
+
+  @override
+  String get changePrinter => 'Badilisha Printa';
+
+  @override
+  String get efdSettings => 'Mipangilio ya EFD';
+
+  @override
+  String get traRegistration => 'Usajili wa TRA';
+
+  @override
+  String get vrnNumber => 'Namba ya VRN';
+
+  @override
+  String get efdSerialNumber => 'Namba ya Serial ya EFD';
+
+  @override
+  String get registerDevice => 'Sajili Kifaa';
+
+  @override
+  String get testConnection => 'Jaribu Muunganisho';
+
+  @override
+  String get efdEnabled => 'EFD Imewashwa';
+
+  @override
+  String get efdDisabled => 'EFD Imezimwa';
+
+  @override
+  String get efdEnvironment => 'Mazingira';
+
+  @override
+  String get sandbox => 'Majaribio';
+
+  @override
+  String get production => 'Uzalishaji';
+
+  @override
+  String get fiscalReceipt => 'Risiti ya Kodi';
+
+  @override
+  String get verificationCode => 'Nambari ya Uthibitisho';
+
+  @override
+  String get pendingSubmissions => 'Risiti Zinazosubiri';
+
+  @override
+  String get retryFailed => 'Jaribu Tena Zilizoshindwa';
+
+  @override
+  String get taxCategory => 'Aina ya Kodi';
+
+  @override
+  String get standardRate => 'Kiwango cha Kawaida (18%)';
+
+  @override
+  String get zeroRated => 'Kiwango Sifuri';
+
+  @override
+  String get exempt => 'Imesamehewa';
+
+  @override
+  String get efdRegistered => 'EFD Imesajiliwa';
+
+  @override
+  String get efdNotRegistered => 'EFD Haijasajiliwa';
+
+  @override
+  String get efdAllSubmitted => 'Risiti zote zimetumwa';
+
+  @override
+  String get whatsappReceipts => 'Risiti za WhatsApp';
+
+  @override
+  String get whatsappSettings => 'Utoaji wa risiti kwa WhatsApp';
+
+  @override
+  String get deliveryMode => 'Njia ya Utoaji';
+
+  @override
+  String get automatic => 'Otomatiki';
+
+  @override
+  String get automaticDesc => 'Tuma risiti moja kwa moja baada ya kila mauzo yenye nambari ya simu';
+
+  @override
+  String get prompted => 'Kwa Ruhusa';
+
+  @override
+  String get promptedDesc => 'Karani anachagua kutuma baada ya kila mauzo';
+
+  @override
+  String get smsFallback => 'SMS Mbadala';
+
+  @override
+  String get smsFallbackDesc => 'Tuma SMS ikiwa WhatsApp itashindwa';
+
+  @override
+  String get marketingFooter => 'Ujumbe wa Masoko';
+
+  @override
+  String get marketingFooterHint => 'Ujumbe maalum unaoongezwa kwenye risiti...';
+
+  @override
+  String get sendWhatsAppReceipt => 'Tuma Risiti kwa WhatsApp';
+
+  @override
+  String get resendReceipt => 'Tuma Tena Risiti';
+
+  @override
+  String get receiptSent => 'Imetumwa';
+
+  @override
+  String get receiptDelivered => 'Imepokelewa';
+
+  @override
+  String get receiptFailed => 'Imeshindwa kutuma risiti';
+
+  @override
+  String get receiptPending => 'Inatuma...';
+
+  @override
+  String get receiptStatus => 'Hali ya Risiti';
+
+  @override
+  String get sendingReceipt => 'Inatuma risiti...';
+
+  @override
+  String get enterCustomerPhone => 'Weka Nambari ya Simu ya Mteja';
+
+  @override
+  String get whatsappReceiptSent => 'Risiti ya WhatsApp imetumwa!';
+
+  @override
+  String get testWhatsApp => 'Tuma Ujumbe wa Majaribio';
+
+  @override
+  String get whatsappEnabled => 'Risiti za WhatsApp zimewashwa';
+
+  @override
+  String get whatsappDisabled => 'Risiti za WhatsApp zimezimwa';
+
+  @override
+  String get noPhoneNumber => 'Hakuna nambari ya simu';
+
+  @override
+  String get sentViaWhatsapp => 'Imetumwa kwa WhatsApp';
+
+  @override
+  String get sentViaSms => 'Imetumwa kwa SMS';
 }

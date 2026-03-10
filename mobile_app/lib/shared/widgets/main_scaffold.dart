@@ -17,9 +17,11 @@ class MainScaffold extends StatelessWidget {
     if (location.startsWith('/expenses')) return 3;
     if (location.startsWith('/inventory')) return 3;
     if (location.startsWith('/orders')) return 3;
+    if (location.startsWith('/customers')) return 3;
     if (location == '/settings') return 4;
     if (location.startsWith('/store-settings')) return 4;
     if (location.startsWith('/dashboard-customization')) return 4;
+    if (location.startsWith('/printer-setup')) return 4;
     if (location.startsWith('/webview')) return 0;
     return 0;
   }

@@ -10,6 +10,7 @@ class Transaction {
   final String? paymentMethod;
   final double amountPaid;
   final double changeGiven;
+  final int? customerId;
   final String? customerName;
   final String? customerPhone;
   final String? customerTin;
@@ -20,6 +21,11 @@ class Transaction {
   final String createdAt;
   final String? createdAtHuman;
   final String? validUntil;
+  final String? fiscalReceiptNumber;
+  final String? fiscalVerificationCode;
+  final String? fiscalQrCode;
+  final bool fiscalSubmitted;
+  final String? whatsappReceiptStatus;
 
   Transaction({
     required this.id,
@@ -33,6 +39,7 @@ class Transaction {
     this.paymentMethod,
     required this.amountPaid,
     required this.changeGiven,
+    this.customerId,
     this.customerName,
     this.customerPhone,
     this.customerTin,
@@ -43,6 +50,11 @@ class Transaction {
     required this.createdAt,
     this.createdAtHuman,
     this.validUntil,
+    this.fiscalReceiptNumber,
+    this.fiscalVerificationCode,
+    this.fiscalQrCode,
+    this.fiscalSubmitted = false,
+    this.whatsappReceiptStatus,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -58,6 +70,7 @@ class Transaction {
       paymentMethod: json['payment_method'],
       amountPaid: (json['amount_paid'] ?? 0).toDouble(),
       changeGiven: (json['change_given'] ?? 0).toDouble(),
+      customerId: json['customer_id'],
       customerName: json['customer_name'],
       customerPhone: json['customer_phone'],
       customerTin: json['customer_tin'],
@@ -70,6 +83,11 @@ class Transaction {
       createdAt: json['created_at'],
       createdAtHuman: json['created_at_human'],
       validUntil: json['valid_until'],
+      fiscalReceiptNumber: json['fiscal']?['receipt_number'],
+      fiscalVerificationCode: json['fiscal']?['verification_code'],
+      fiscalQrCode: json['fiscal']?['qr_code'],
+      fiscalSubmitted: json['fiscal']?['submitted'] ?? false,
+      whatsappReceiptStatus: json['whatsapp_receipt_status'],
     );
   }
 
@@ -89,6 +107,8 @@ class Transaction {
         return 'Mobile Money';
       case 'bank_transfer':
         return 'Bank Transfer';
+      case 'credit':
+        return 'Credit';
       default:
         return paymentMethod ?? '-';
     }

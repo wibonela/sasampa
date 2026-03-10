@@ -4,8 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/services/escpos_commands.dart';
+import '../../../core/services/printer_preferences.dart';
+import '../../../core/services/printer_providers.dart';
 import '../../../core/services/receipt_service.dart';
 import '../../../core/utils/error_utils.dart';
+import '../../../core/network/api_client.dart';
+import '../../../shared/models/customer.dart';
 
 class CheckoutSheet extends ConsumerStatefulWidget {
   const CheckoutSheet({super.key});
@@ -24,6 +29,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   bool _showCustomerInfo = false;
   String _selectedPaymentMethod = 'cash';
   String? _error;
+  Customer? _selectedCustomer;
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
 
@@ -68,6 +74,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       final response = await api.createOrder(
         items: cart.toCheckoutItems(),
         customerName: customerName,
+        customerId: _selectedCustomer?.id,
         customerPhone: _customerPhoneController.text.trim().isNotEmpty
             ? _customerPhoneController.text.trim()
             : null,
@@ -165,7 +172,8 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       final response = await api.checkout(
         items: cart.toCheckoutItems(),
         paymentMethod: _selectedPaymentMethod,
-        amountPaid: amountPaid,
+        amountPaid: _selectedPaymentMethod == 'credit' ? 0 : amountPaid,
+        customerId: _selectedCustomer?.id,
         customerName: _customerNameController.text.trim().isNotEmpty
             ? _customerNameController.text.trim()
             : null,
@@ -182,6 +190,27 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
 
       // Clear cart
       ref.read(cartProvider.notifier).clearCart();
+
+      // Auto-print after sale if enabled
+      final printerPrefs = ref.read(printerPrefsProvider).prefs;
+      if (printerPrefs.autoPrintAfterSale && data['data'] != null) {
+        final transaction = data['data'];
+        if (printerPrefs.printerType == PrinterType.bluetooth) {
+          final btService = ref.read(bluetoothPrinterServiceProvider);
+          if (btService.isConnected) {
+            final paperSize = printerPrefs.paperSize == 'mm58'
+                ? PaperSize.mm58
+                : PaperSize.mm80;
+            final authState = ref.read(authProvider);
+            await ReceiptService.bluetoothPrintSimpleReceipt(
+              transaction: transaction,
+              btService: btService,
+              paperSize: paperSize,
+              companyName: authState.user?.company?.name,
+            );
+          }
+        }
+      }
 
       if (mounted) {
         // Show success dialog first (while sheet is still mounted)
@@ -418,7 +447,25 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () async {
+                          final prefsState = ref.read(printerPrefsProvider);
+                          final prefs = prefsState.prefs;
                           final authState = ref.read(authProvider);
+
+                          if (prefs.printerType == PrinterType.bluetooth) {
+                            final btService = ref.read(bluetoothPrinterServiceProvider);
+                            if (btService.isConnected) {
+                              final paperSize = prefs.paperSize == 'mm58'
+                                  ? PaperSize.mm58
+                                  : PaperSize.mm80;
+                              await ReceiptService.bluetoothPrintSimpleReceipt(
+                                transaction: transaction,
+                                btService: btService,
+                                paperSize: paperSize,
+                                companyName: authState.user?.company?.name,
+                              );
+                              return;
+                            }
+                          }
                           await ReceiptService.printReceipt(
                             transaction: transaction,
                             companyName: authState.user?.company?.name,
@@ -538,8 +585,149 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       'card' => l10n.card,
       'mobile' => l10n.mobileMoney,
       'bank_transfer' => l10n.bankTransfer,
+      'credit' => l10n.credit,
       _ => method,
     };
+  }
+
+  Future<void> _showCustomerSearch() async {
+    final l10n = AppLocalizations.of(context)!;
+    final searchController = TextEditingController();
+    List<Customer> results = [];
+    bool searching = false;
+
+    final selected = await showModalBottomSheet<Customer>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(ctx).size.height * 0.6,
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.gray4,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.selectCustomer,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: searchController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: l10n.searchCustomers,
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: AppColors.gray6,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (q) async {
+                        if (q.length < 2) {
+                          setSheetState(() => results = []);
+                          return;
+                        }
+                        setSheetState(() => searching = true);
+                        try {
+                          final api = ref.read(apiClientProvider);
+                          final response = await api.searchCustomers(q);
+                          final data = response.data['data'] as List;
+                          setSheetState(() {
+                            results = data.map((e) => Customer.fromJson(e)).toList();
+                            searching = false;
+                          });
+                        } catch (_) {
+                          setSheetState(() => searching = false);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    // Add new customer link
+                    TextButton.icon(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        // Quick-create: just fill in the name/phone fields
+                        setState(() => _showCustomerInfo = true);
+                      },
+                      icon: const Icon(Icons.person_add, size: 18),
+                      label: Text(l10n.addCustomer),
+                    ),
+                    if (searching)
+                      const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    if (!searching && results.isNotEmpty)
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: results.length,
+                          itemBuilder: (ctx, i) {
+                            final c = results[i];
+                            return ListTile(
+                              onTap: () => Navigator.pop(ctx, c),
+                              leading: CircleAvatar(
+                                radius: 18,
+                                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                                child: Text(
+                                  c.name[0].toUpperCase(),
+                                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                              subtitle: Text(c.phone, style: const TextStyle(fontSize: 13)),
+                              trailing: c.hasCredit
+                                  ? Text(
+                                      l10n.credit,
+                                      style: const TextStyle(fontSize: 11, color: AppColors.primary),
+                                    )
+                                  : null,
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedCustomer = selected;
+        _customerNameController.text = selected.name;
+        _customerPhoneController.text = selected.phone;
+        _tinController.text = selected.tin ?? '';
+        _showCustomerInfo = true;
+      });
+    }
   }
 
   void _showQuantityDialog(int productId, int currentQuantity) {
@@ -580,108 +768,15 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   Widget _buildSuccessDialog(BuildContext dialogContext, Map<String, dynamic> transaction) {
     final l10n = AppLocalizations.of(dialogContext)!;
     final change = (transaction['change_given'] ?? 0).toDouble();
+    final waStatus = transaction['whatsapp_receipt_status'];
 
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: const BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check, color: Colors.white, size: 32),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.saleComplete,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              transaction['transaction_number'] ?? '',
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.gray6,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(l10n.total),
-                      Text(
-                        _currencyFormat.format((transaction['total'] ?? 0).toDouble()),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  if (change > 0) ...[
-                    const Divider(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.change,
-                          style: const TextStyle(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          _currencyFormat.format(change),
-                          style: const TextStyle(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(dialogContext, false),
-                      child: Text(l10n.close),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(dialogContext, true),
-                      child: Text(l10n.viewReceipt),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return _SuccessDialogContent(
+      l10n: l10n,
+      transaction: transaction,
+      change: change,
+      waStatus: waStatus,
+      currencyFormat: _currencyFormat,
+      apiClient: ref.read(apiClientProvider),
     );
   }
 
@@ -908,46 +1003,133 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                       _buildPaymentChip('card', l10n.card, Icons.credit_card),
                       _buildPaymentChip('mobile', l10n.mobileMoney, Icons.phone_android),
                       _buildPaymentChip('bank_transfer', l10n.bankTransfer, Icons.account_balance),
+                      if (_selectedCustomer != null && _selectedCustomer!.hasCredit)
+                        _buildPaymentChip('credit', l10n.credit, Icons.credit_score),
                     ],
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Amount Paid
-                  TextField(
-                    controller: _amountPaidController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.amountPaid,
-                      prefixText: 'TZS ',
+                  // Amount Paid (hide for credit)
+                  if (_selectedPaymentMethod != 'credit')
+                    TextField(
+                      controller: _amountPaidController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.amountPaid,
+                        prefixText: 'TZS ',
+                      ),
                     ),
-                  ),
+
+                  // Credit info
+                  if (_selectedPaymentMethod == 'credit' && _selectedCustomer != null)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(l10n.availableCredit, style: const TextStyle(fontSize: 13)),
+                          Text(
+                            _currencyFormat.format(_selectedCustomer!.availableCredit),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   const SizedBox(height: 12),
 
-                  // Customer Info (optional toggle)
-                  GestureDetector(
-                    onTap: () => setState(() => _showCustomerInfo = !_showCustomerInfo),
-                    child: Row(
+                  // Customer selection
+                  if (_selectedCustomer != null)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            child: Text(
+                              _selectedCustomer!.name[0].toUpperCase(),
+                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_selectedCustomer!.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                                Text(_selectedCustomer!.phone, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _selectedCustomer = null;
+                                _customerNameController.clear();
+                                _customerPhoneController.clear();
+                                _tinController.clear();
+                                if (_selectedPaymentMethod == 'credit') {
+                                  _selectedPaymentMethod = 'cash';
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Row(
                       children: [
-                        Icon(
-                          _showCustomerInfo ? Icons.remove_circle_outline : Icons.add_circle_outline,
-                          size: 18,
-                          color: AppColors.primary,
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _showCustomerSearch,
+                            icon: const Icon(Icons.person_search, size: 18),
+                            label: Text(l10n.selectCustomer),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _showCustomerInfo ? l10n.hideCustomerInfo : l10n.addCustomerInfo,
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => setState(() => _showCustomerInfo = !_showCustomerInfo),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _showCustomerInfo ? Icons.remove_circle_outline : Icons.add_circle_outline,
+                                size: 16,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _showCustomerInfo ? l10n.hideCustomerInfo : l10n.addCustomerInfo,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  if (_showCustomerInfo) ...[
+
+                  if (_showCustomerInfo && _selectedCustomer == null) ...[
                     const SizedBox(height: 12),
                     TextField(
                       controller: _customerNameController,
@@ -1038,3 +1220,260 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   }
 
 }
+
+/// Success dialog with WhatsApp receipt support
+class _SuccessDialogContent extends StatefulWidget {
+  final AppLocalizations l10n;
+  final Map<String, dynamic> transaction;
+  final double change;
+  final String? waStatus;
+  final NumberFormat currencyFormat;
+  final ApiClient apiClient;
+
+  const _SuccessDialogContent({
+    required this.l10n,
+    required this.transaction,
+    required this.change,
+    this.waStatus,
+    required this.currencyFormat,
+    required this.apiClient,
+  });
+
+  @override
+  State<_SuccessDialogContent> createState() => _SuccessDialogContentState();
+}
+
+class _SuccessDialogContentState extends State<_SuccessDialogContent> {
+  String? _waStatus;
+  bool _isSendingWhatsApp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _waStatus = widget.waStatus;
+  }
+
+  Future<void> _sendWhatsAppReceipt({String? phone}) async {
+    final txId = widget.transaction['id'];
+    final customerPhone = phone ?? widget.transaction['customer_phone'];
+
+    if (customerPhone == null && phone == null) {
+      // Show phone input dialog
+      final enteredPhone = await _showPhoneInputDialog();
+      if (enteredPhone == null || enteredPhone.isEmpty) return;
+      return _sendWhatsAppReceipt(phone: enteredPhone);
+    }
+
+    setState(() => _isSendingWhatsApp = true);
+    try {
+      await widget.apiClient.sendWhatsAppReceipt(txId, phone: phone ?? customerPhone);
+      setState(() {
+        _waStatus = 'pending';
+        _isSendingWhatsApp = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.l10n.whatsappReceiptSent),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _waStatus = 'failed';
+        _isSendingWhatsApp = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.l10n.receiptFailed),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<String?> _showPhoneInputDialog() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(widget.l10n.enterCustomerPhone),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            labelText: widget.l10n.phoneNumber,
+            hintText: '+255...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(widget.l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(widget.l10n.confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWhatsAppRow() {
+    final l10n = widget.l10n;
+
+    if (_waStatus == 'pending' || _waStatus == 'sent') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.success.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.chat, size: 16, color: AppColors.success),
+            const SizedBox(width: 8),
+            Text(
+              _waStatus == 'sent' ? l10n.sentViaWhatsapp : l10n.sendingReceipt,
+              style: const TextStyle(color: AppColors.success, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 40,
+      child: OutlinedButton.icon(
+        onPressed: _isSendingWhatsApp ? null : () => _sendWhatsAppReceipt(),
+        icon: _isSendingWhatsApp
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.chat_outlined, size: 16),
+        label: Text(l10n.sendWhatsAppReceipt, style: const TextStyle(fontSize: 13)),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF25D366),
+          side: const BorderSide(color: Color(0xFF25D366)),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: AppColors.success,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check, color: Colors.white, size: 32),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.saleComplete,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.transaction['transaction_number'] ?? '',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.gray6,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.total),
+                      Text(
+                        widget.currencyFormat.format((widget.transaction['total'] ?? 0).toDouble()),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  if (widget.change > 0) ...[
+                    const Divider(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.change,
+                          style: const TextStyle(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          widget.currencyFormat.format(widget.change),
+                          style: const TextStyle(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildWhatsAppRow(),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(l10n.close),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(l10n.viewReceipt),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -20,6 +20,8 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
   Transaction? _transaction;
   bool _isLoading = true;
   String? _error;
+  bool _isSendingWhatsApp = false;
+  String? _whatsappStatus;
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
   final _dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
@@ -39,8 +41,10 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.getTransaction(widget.transactionId);
+      final tx = Transaction.fromJson(response.data['data']);
       setState(() {
-        _transaction = Transaction.fromJson(response.data['data']);
+        _transaction = tx;
+        _whatsappStatus = tx.whatsappReceiptStatus;
         _isLoading = false;
       });
     } catch (e) {
@@ -94,7 +98,10 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       final response = await api.getReceipt(widget.transactionId);
       final receiptData = response.data['data'];
 
-      await ReceiptService.printReceiptFromApi(receiptData);
+      await ReceiptService.printWithPreferredMethod(
+        receiptData: receiptData,
+        ref: ref,
+      );
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -106,6 +113,82 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
         );
       }
     }
+  }
+
+  Future<void> _sendWhatsAppReceipt({String? phone}) async {
+    if (_transaction == null) return;
+
+    final customerPhone = phone ?? _transaction!.customerPhone;
+
+    if (customerPhone == null && phone == null) {
+      final enteredPhone = await _showPhoneInputDialog();
+      if (enteredPhone == null || enteredPhone.isEmpty) return;
+      return _sendWhatsAppReceipt(phone: enteredPhone);
+    }
+
+    setState(() => _isSendingWhatsApp = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      final isResend = _whatsappStatus != null;
+      await api.sendWhatsAppReceipt(
+        widget.transactionId,
+        phone: phone ?? customerPhone,
+        resend: isResend,
+      );
+      setState(() {
+        _whatsappStatus = 'pending';
+        _isSendingWhatsApp = false;
+      });
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.whatsappReceiptSent),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isSendingWhatsApp = false);
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.receiptFailed),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<String?> _showPhoneInputDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.enterCustomerPhone),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            labelText: l10n.phoneNumber,
+            hintText: '+255...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _shareReceipt() async {
@@ -380,6 +463,69 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                         ),
                       ),
 
+                      const SizedBox(height: 16),
+
+                      // WhatsApp Receipt Section
+                      if (_transaction!.isCompleted)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.chat_outlined, size: 18, color: Color(0xFF25D366)),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    l10n.whatsappReceipts,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Divider(height: 24),
+                              if (_whatsappStatus != null) ...[
+                                _buildDetailRow(
+                                  l10n.receiptStatus,
+                                  _whatsappStatusLabel(_whatsappStatus!, l10n),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              SizedBox(
+                                width: double.infinity,
+                                height: 44,
+                                child: OutlinedButton.icon(
+                                  onPressed: _isSendingWhatsApp
+                                      ? null
+                                      : () => _sendWhatsAppReceipt(),
+                                  icon: _isSendingWhatsApp
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Icon(Icons.chat_outlined, size: 18),
+                                  label: Text(
+                                    _whatsappStatus != null
+                                        ? l10n.resendReceipt
+                                        : l10n.sendWhatsAppReceipt,
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFF25D366),
+                                    side: const BorderSide(color: Color(0xFF25D366)),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                       const SizedBox(height: 100),
                     ],
                   ),
@@ -398,6 +544,17 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
         ],
       ),
     );
+  }
+
+  String _whatsappStatusLabel(String status, AppLocalizations l10n) {
+    return switch (status) {
+      'pending' => l10n.receiptPending,
+      'sent' => l10n.receiptSent,
+      'delivered' => l10n.receiptDelivered,
+      'failed' => l10n.receiptFailed,
+      'read' => l10n.receiptDelivered,
+      _ => status,
+    };
   }
 
   Widget _buildTotalRow(String label, double value, {bool isDiscount = false, bool isChange = false}) {

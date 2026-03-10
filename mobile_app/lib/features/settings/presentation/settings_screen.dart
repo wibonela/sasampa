@@ -1,9 +1,6 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
@@ -265,91 +262,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _showPrinterSetup() async {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.printerSetup),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.receiptPrintingOptions,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.print, color: AppColors.primary),
-              title: Text(l10n.airprint),
-              subtitle: Text(l10n.printToAnyPrinter),
-              contentPadding: EdgeInsets.zero,
-              onTap: () async {
-                Navigator.pop(context);
-                // Test print
-                await Printing.layoutPdf(
-                  onLayout: (_) async {
-                    // Generate a simple test page
-                    final pdf = await _generateTestReceipt();
-                    return pdf;
-                  },
-                  name: l10n.testReceipt,
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.share, color: AppColors.primary),
-              title: Text(l10n.shareAsPdf),
-              subtitle: Text(l10n.saveOrShareReceipts),
-              contentPadding: EdgeInsets.zero,
-              onTap: () async {
-                Navigator.pop(context);
-                final pdf = await _generateTestReceipt();
-                await Printing.sharePdf(bytes: pdf, filename: 'test_receipt.pdf');
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.printerTip,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.close),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<Uint8List> _generateTestReceipt() async {
-    final pdf = await Printing.convertHtml(
-      format: PdfPageFormat.roll80,
-      html: '''
-        <html>
-        <body style="font-family: monospace; font-size: 12px; text-align: center;">
-          <h2>Test Receipt</h2>
-          <p>-----------------------</p>
-          <p>SASAMPA POS</p>
-          <p>Test Print</p>
-          <p>-----------------------</p>
-          <p>Date: ${DateTime.now().toString().substring(0, 16)}</p>
-          <p>-----------------------</p>
-          <p>If you can see this,</p>
-          <p>printing is working!</p>
-          <p>-----------------------</p>
-        </body>
-        </html>
-      ''',
-    );
-    return Uint8List.fromList(pdf);
-  }
-
   Future<void> _showNotificationSettings() async {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
@@ -493,6 +405,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: l10n.stockLevels,
                   onTap: () => context.push('/inventory'),
                 ),
+                if (user?.isCompanyOwner == true || user?.hasPermission('manage_settings') == true) ...[
+                  const Divider(height: 1, indent: 56),
+                  _buildSettingItem(
+                    icon: Icons.chat_outlined,
+                    title: l10n.whatsappReceipts,
+                    subtitle: l10n.whatsappSettings,
+                    onTap: () => context.push('/whatsapp-settings'),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  _buildSettingItem(
+                    icon: Icons.receipt_long_outlined,
+                    title: l10n.efdSettings,
+                    subtitle: l10n.traRegistration,
+                    onTap: () => context.push('/efd-settings'),
+                  ),
+                ],
               ],
             ),
           ),
@@ -565,7 +493,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.print_outlined,
                   title: l10n.printerSetup,
                   subtitle: l10n.receipt,
-                  onTap: _showPrinterSetup,
+                  onTap: () => context.push('/printer-setup'),
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildSettingItem(

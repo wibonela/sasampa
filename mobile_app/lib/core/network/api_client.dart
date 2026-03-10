@@ -229,6 +229,7 @@ class ApiClient {
     required List<Map<String, dynamic>> items,
     required String paymentMethod,
     required double amountPaid,
+    int? customerId,
     String? customerName,
     String? customerPhone,
     String? customerTin,
@@ -240,6 +241,7 @@ class ApiClient {
       'items': items,
       'payment_method': paymentMethod,
       'amount_paid': amountPaid,
+      if (customerId != null) 'customer_id': customerId,
       if (customerName != null) 'customer_name': customerName,
       if (customerPhone != null) 'customer_phone': customerPhone,
       if (customerTin != null) 'customer_tin': customerTin,
@@ -268,6 +270,7 @@ class ApiClient {
   Future<Response> createOrder({
     required List<Map<String, dynamic>> items,
     required String customerName,
+    int? customerId,
     String? customerPhone,
     String? customerTin,
     double? discountAmount,
@@ -277,6 +280,7 @@ class ApiClient {
     return _dio.post('/pos/orders', data: {
       'items': items,
       'customer_name': customerName,
+      if (customerId != null) 'customer_id': customerId,
       if (customerPhone != null) 'customer_phone': customerPhone,
       if (customerTin != null) 'customer_tin': customerTin,
       if (discountAmount != null) 'discount_amount': discountAmount,
@@ -306,6 +310,7 @@ class ApiClient {
   Future<Response> updateOrder(int id, {
     required List<Map<String, dynamic>> items,
     required String customerName,
+    int? customerId,
     String? customerPhone,
     String? customerTin,
     double? discountAmount,
@@ -314,6 +319,7 @@ class ApiClient {
     return _dio.put('/pos/orders/$id', data: {
       'items': items,
       'customer_name': customerName,
+      if (customerId != null) 'customer_id': customerId,
       if (customerPhone != null) 'customer_phone': customerPhone,
       if (customerTin != null) 'customer_tin': customerTin,
       if (discountAmount != null) 'discount_amount': discountAmount,
@@ -523,6 +529,91 @@ class ApiClient {
     return _dio.delete('/expenses/$id');
   }
 
+  // Customers (Wateja)
+  Future<Response> getCustomers({
+    String? search,
+    bool? active,
+    int page = 1,
+    int perPage = 20,
+  }) {
+    return _dio.get('/customers', queryParameters: {
+      if (search != null) 'search': search,
+      if (active != null) 'active': active,
+      'page': page,
+      'per_page': perPage,
+    });
+  }
+
+  Future<Response> searchCustomers(String query) {
+    return _dio.get('/customers/search', queryParameters: {'q': query});
+  }
+
+  Future<Response> createCustomer({
+    required String name,
+    required String phone,
+    String? email,
+    String? tin,
+    String? address,
+    double? creditLimit,
+    String? notes,
+  }) {
+    return _dio.post('/customers', data: {
+      'name': name,
+      'phone': phone,
+      if (email != null) 'email': email,
+      if (tin != null) 'tin': tin,
+      if (address != null) 'address': address,
+      if (creditLimit != null) 'credit_limit': creditLimit,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  Future<Response> getCustomer(int id) {
+    return _dio.get('/customers/$id');
+  }
+
+  Future<Response> updateCustomer(int id, Map<String, dynamic> data) {
+    return _dio.put('/customers/$id', data: data);
+  }
+
+  Future<Response> getCustomerTransactions(int id, {int page = 1, int perPage = 20}) {
+    return _dio.get('/customers/$id/transactions', queryParameters: {
+      'page': page,
+      'per_page': perPage,
+    });
+  }
+
+  Future<Response> getCustomerCreditHistory(int id, {int page = 1, int perPage = 20}) {
+    return _dio.get('/customers/$id/credit-history', queryParameters: {
+      'page': page,
+      'per_page': perPage,
+    });
+  }
+
+  Future<Response> recordCreditPayment(int customerId, {
+    required double amount,
+    required String paymentMethod,
+    String? reference,
+    String? notes,
+  }) {
+    return _dio.post('/customers/$customerId/credit-payment', data: {
+      'amount': amount,
+      'payment_method': paymentMethod,
+      if (reference != null) 'reference': reference,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  Future<Response> recordCreditAdjustment(int customerId, {
+    required double amount,
+    required String notes,
+  }) {
+    return _dio.post('/customers/$customerId/credit-adjustment', data: {
+      'amount': amount,
+      'notes': notes,
+    });
+  }
+
   // Store Settings
   Future<Response> getSettings() {
     return _dio.get('/settings');
@@ -541,5 +632,50 @@ class ApiClient {
 
   Future<Response> removeLogo() {
     return _dio.delete('/settings/logo');
+  }
+
+  // WhatsApp Receipt Settings
+  Future<Response> getWhatsAppSettings() {
+    return _dio.get('/settings/whatsapp');
+  }
+
+  Future<Response> updateWhatsAppSettings(Map<String, dynamic> data) {
+    return _dio.put('/settings/whatsapp', data: data);
+  }
+
+  Future<Response> sendWhatsAppReceipt(int transactionId, {String? phone, bool resend = false}) {
+    return _dio.post('/pos/transactions/$transactionId/whatsapp', data: {
+      if (phone != null) 'phone': phone,
+      if (resend) 'resend': true,
+    });
+  }
+
+  Future<Response> getWhatsAppReceiptStatus(int transactionId) {
+    return _dio.get('/pos/transactions/$transactionId/whatsapp/status');
+  }
+
+  // EFD Settings
+  Future<Response> getEfdSettings() {
+    return _dio.get('/settings/efd');
+  }
+
+  Future<Response> updateEfdSettings(Map<String, dynamic> data) {
+    return _dio.put('/settings/efd', data: data);
+  }
+
+  Future<Response> registerEfd() {
+    return _dio.post('/settings/efd/register');
+  }
+
+  Future<Response> testEfd() {
+    return _dio.post('/settings/efd/test');
+  }
+
+  Future<Response> getEfdPending() {
+    return _dio.get('/settings/efd/pending');
+  }
+
+  Future<Response> retryEfd() {
+    return _dio.post('/settings/efd/retry');
   }
 }

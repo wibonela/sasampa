@@ -33,6 +33,13 @@ class Company extends Model
         'onboarding_completed',
         'branches_enabled',
         'branch_sharing_mode',
+        'tin',
+        'vrn',
+        'efd_serial_number',
+        'efd_uin',
+        'efd_enabled',
+        'efd_environment',
+        'efd_registered_at',
     ];
 
     protected $casts = [
@@ -40,6 +47,8 @@ class Company extends Model
         'onboarding_completed' => 'boolean',
         'branches_enabled' => 'boolean',
         'is_suspended' => 'boolean',
+        'efd_enabled' => 'boolean',
+        'efd_registered_at' => 'datetime',
     ];
 
     /*
@@ -219,6 +228,22 @@ class Company extends Model
     public function scopeApproved($query)
     {
         return $query->where('status', self::STATUS_APPROVED);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EFD Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function isEfdEnabled(): bool
+    {
+        return $this->efd_enabled && $this->efd_serial_number && $this->efd_uin;
+    }
+
+    public function isEfdProduction(): bool
+    {
+        return $this->efd_environment === 'production';
     }
 
     /*
