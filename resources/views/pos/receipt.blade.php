@@ -246,7 +246,9 @@
             @endif
             <div class="store-address">
                 @if($storeAddress){{ $storeAddress }}<br>@endif
-                @if($storePhone)Tel: {{ $storePhone }}@endif
+                @if($storePhone)Tel: {{ $storePhone }}<br>@endif
+                @if($company->tin)TIN: {{ $company->tin }}<br>@endif
+                @if($company->vrn)VRN: {{ $company->vrn }}@endif
             </div>
         </div>
 
@@ -337,6 +339,27 @@
         @endif
 
         <hr class="divider">
+
+        <!-- Fiscal Data -->
+        @if($transaction->fiscal_receipt_number)
+        <div style="text-align: center; margin: 10px 0;">
+            <div style="font-weight: bold; font-size: 11px; margin-bottom: 4px;">FISCAL RECEIPT</div>
+            <div class="info-row">
+                <span class="info-label">Fiscal #:</span>
+                <span class="info-value">{{ $transaction->fiscal_receipt_number }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Verify:</span>
+                <span class="info-value">{{ $transaction->fiscal_verification_code }}</span>
+            </div>
+            @if($transaction->fiscal_qr_code)
+            <div style="margin: 8px 0;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode($transaction->fiscal_qr_code) }}" alt="QR Code" style="width: 120px; height: 120px;">
+            </div>
+            @endif
+        </div>
+        <hr class="divider">
+        @endif
 
         <!-- Footer -->
         <div class="footer">

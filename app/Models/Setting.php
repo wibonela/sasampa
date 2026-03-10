@@ -78,6 +78,10 @@ class Setting extends Model
             'low_stock_threshold' => 10,
             'receipt_header' => '',
             'receipt_footer' => 'Thank you for your business!',
+            'whatsapp_receipts_enabled' => false,
+            'whatsapp_receipts_mode' => 'prompted',
+            'whatsapp_receipts_sms_fallback' => true,
+            'whatsapp_receipts_marketing_footer' => '',
         ];
     }
 }

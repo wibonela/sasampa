@@ -67,6 +67,18 @@ class MenuScreen extends ConsumerWidget {
         ],
       ),
       _MenuSection(
+        title: l10n.customers,
+        items: [
+          _MenuItem(
+            icon: Icons.people_outlined,
+            title: l10n.customers,
+            subtitle: l10n.manageCustomers,
+            route: '/customers',
+            isNative: true,
+          ),
+        ],
+      ),
+      _MenuSection(
         title: l10n.inventory,
         items: [
           _MenuItem(

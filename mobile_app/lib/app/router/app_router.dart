@@ -14,6 +14,9 @@ import '../../features/transactions/presentation/transaction_detail_screen.dart'
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/settings/presentation/store_settings_screen.dart';
 import '../../features/settings/presentation/dashboard_customization_screen.dart';
+import '../../features/customers/presentation/customers_screen.dart';
+import '../../features/customers/presentation/add_customer_screen.dart';
+import '../../features/customers/presentation/customer_detail_screen.dart';
 import '../../features/expenses/presentation/expenses_screen.dart';
 import '../../features/expenses/presentation/add_expense_screen.dart';
 import '../../features/expenses/presentation/expense_summary_screen.dart';
@@ -21,6 +24,9 @@ import '../../features/inventory/presentation/inventory_screen.dart';
 import '../../features/menu/presentation/menu_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/settings/presentation/efd_settings_screen.dart';
+import '../../features/settings/presentation/printer_setup_screen.dart';
+import '../../features/settings/presentation/whatsapp_settings_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../shared/widgets/webview_screen.dart';
 
@@ -152,6 +158,28 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
           GoRoute(
+            path: '/customers',
+            builder: (context, state) => const CustomersScreen(),
+          ),
+          GoRoute(
+            path: '/customers/add',
+            builder: (context, state) => const AddCustomerScreen(),
+          ),
+          GoRoute(
+            path: '/customers/edit/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return AddCustomerScreen(customerId: id);
+            },
+          ),
+          GoRoute(
+            path: '/customers/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return CustomerDetailScreen(customerId: id);
+            },
+          ),
+          GoRoute(
             path: '/expenses',
             builder: (context, state) => const ExpensesScreen(),
           ),
@@ -192,6 +220,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/expenses/summary',
             builder: (context, state) => const ExpenseSummaryScreen(),
+          ),
+          GoRoute(
+            path: '/printer-setup',
+            builder: (context, state) => const PrinterSetupScreen(),
+          ),
+          GoRoute(
+            path: '/efd-settings',
+            builder: (context, state) => const EfdSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/whatsapp-settings',
+            builder: (context, state) => const WhatsAppSettingsScreen(),
           ),
           // WebView screen for web-only features
           GoRoute(

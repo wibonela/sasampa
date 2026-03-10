@@ -21,6 +21,7 @@ class TransactionItem extends Model
         'cost_price',
         'tax_rate',
         'tax_amount',
+        'tax_category',
         'subtotal',
     ];
 

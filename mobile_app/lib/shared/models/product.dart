@@ -5,6 +5,7 @@ class Product {
   final String? barcode;
   final double sellingPrice;
   final double taxRate;
+  final String taxCategory;
   final int stock;
   final int lowStockThreshold;
   final bool isLowStock;
@@ -18,6 +19,7 @@ class Product {
     this.barcode,
     required this.sellingPrice,
     required this.taxRate,
+    this.taxCategory = 'standard',
     required this.stock,
     this.lowStockThreshold = 10,
     this.isLowStock = false,
@@ -33,6 +35,7 @@ class Product {
       barcode: json['barcode'],
       sellingPrice: (json['selling_price'] ?? 0).toDouble(),
       taxRate: (json['tax_rate'] ?? 0).toDouble(),
+      taxCategory: json['tax_category'] ?? 'standard',
       stock: json['stock'] ?? 0,
       lowStockThreshold: json['low_stock_threshold'] ?? 10,
       isLowStock: json['is_low_stock'] ?? false,
@@ -49,6 +52,7 @@ class Product {
       'barcode': barcode,
       'selling_price': sellingPrice,
       'tax_rate': taxRate,
+      'tax_category': taxCategory,
       'stock': stock,
       'low_stock_threshold': lowStockThreshold,
       'is_low_stock': isLowStock,
@@ -57,7 +61,12 @@ class Product {
     };
   }
 
-  double get priceWithTax => sellingPrice * (1 + taxRate / 100);
+  double get effectiveTaxRate {
+    if (taxCategory == 'zero_rated' || taxCategory == 'exempt') return 0;
+    return taxRate;
+  }
+
+  double get priceWithTax => sellingPrice * (1 + effectiveTaxRate / 100);
 
   bool get isInStock => stock > 0;
 }

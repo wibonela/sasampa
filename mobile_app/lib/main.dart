@@ -9,6 +9,7 @@ import 'app/router/app_router.dart';
 import 'app/theme/theme.dart';
 import 'app/theme/colors.dart';
 import 'core/providers.dart';
+import 'core/services/printer_providers.dart';
 import 'core/storage/secure_storage.dart';
 
 // Global storage instance - initialized before app starts
@@ -206,6 +207,7 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
     // Load locale and dashboard preferences
     await ref.read(localeProvider.notifier).loadLocale();
     await ref.read(dashboardPrefsProvider.notifier).loadPreferences();
+    await ref.read(printerPrefsProvider.notifier).loadPreferences();
 
     try {
       // Check if user is already logged in (with timeout)

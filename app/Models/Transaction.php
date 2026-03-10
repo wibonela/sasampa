@@ -37,6 +37,7 @@ class Transaction extends Model
     protected $fillable = [
         'company_id',
         'branch_id',
+        'customer_id',
         'transaction_number',
         'type',
         'user_id',
@@ -53,6 +54,12 @@ class Transaction extends Model
         'status',
         'notes',
         'valid_until',
+        'fiscal_receipt_number',
+        'fiscal_verification_code',
+        'fiscal_qr_code',
+        'fiscal_receipt_time',
+        'fiscal_submitted',
+        'fiscal_submission_error',
     ];
 
     protected $casts = [
@@ -63,6 +70,8 @@ class Transaction extends Model
         'amount_paid' => 'decimal:2',
         'change_given' => 'decimal:2',
         'valid_until' => 'datetime',
+        'fiscal_receipt_time' => 'datetime',
+        'fiscal_submitted' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -73,6 +82,11 @@ class Transaction extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function items(): HasMany
@@ -157,6 +171,7 @@ class Transaction extends Model
             'card' => 'Card',
             'mobile' => 'Mobile Money',
             'bank_transfer' => 'Bank Transfer',
+            'credit' => 'Credit',
             default => ucfirst($this->payment_method),
         };
     }
@@ -184,5 +199,12 @@ class Transaction extends Model
     public function scopeToday($query)
     {
         return $query->whereDate('created_at', today());
+    }
+
+    public function scopeFiscalPending($query)
+    {
+        return $query->where('status', 'completed')
+            ->where('fiscal_submitted', false)
+            ->whereNull('fiscal_receipt_number');
     }
 }

@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\EfdSettingsController;
 use App\Http\Controllers\Api\V1\ExpenseController;
+use App\Http\Controllers\Api\V1\WhatsAppReceiptController;
+use App\Http\Controllers\Api\V1\WhatsAppSettingsController;
 use App\Http\Controllers\Api\V1\InventoryController;
 use App\Http\Controllers\Api\V1\MobileAccessController;
 use App\Http\Controllers\Api\V1\OnboardingApiController;
@@ -118,6 +122,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
                 Route::get('/transactions/{id}/receipt', [POSController::class, 'receipt']);
                 Route::post('/transactions/{id}/void', [POSController::class, 'voidTransaction']);
+                Route::post('/transactions/{id}/whatsapp', [WhatsAppReceiptController::class, 'send']);
+                Route::get('/transactions/{id}/whatsapp/status', [WhatsAppReceiptController::class, 'status']);
 
                 // Orders
                 Route::get('/orders', [OrderController::class, 'index']);
@@ -153,6 +159,23 @@ Route::prefix('v1')->group(function () {
 
             /*
             |--------------------------------------------------------------------------
+            | Customers (Wateja)
+            |--------------------------------------------------------------------------
+            */
+            Route::prefix('customers')->group(function () {
+                Route::get('/', [CustomerController::class, 'index']);
+                Route::get('/search', [CustomerController::class, 'search']);
+                Route::post('/', [CustomerController::class, 'store']);
+                Route::get('/{id}', [CustomerController::class, 'show']);
+                Route::put('/{id}', [CustomerController::class, 'update']);
+                Route::get('/{id}/transactions', [CustomerController::class, 'transactions']);
+                Route::get('/{id}/credit-history', [CustomerController::class, 'creditHistory']);
+                Route::post('/{id}/credit-payment', [CustomerController::class, 'creditPayment']);
+                Route::post('/{id}/credit-adjustment', [CustomerController::class, 'creditAdjustment']);
+            });
+
+            /*
+            |--------------------------------------------------------------------------
             | Expenses (Matumizi)
             |--------------------------------------------------------------------------
             */
@@ -178,6 +201,18 @@ Route::prefix('v1')->group(function () {
                 Route::put('/', [SettingsController::class, 'update']);
                 Route::post('/logo', [SettingsController::class, 'uploadLogo']);
                 Route::delete('/logo', [SettingsController::class, 'removeLogo']);
+
+                // WhatsApp Receipt Settings
+                Route::get('/whatsapp', [WhatsAppSettingsController::class, 'index']);
+                Route::put('/whatsapp', [WhatsAppSettingsController::class, 'update']);
+
+                // EFD Settings
+                Route::get('/efd', [EfdSettingsController::class, 'index']);
+                Route::put('/efd', [EfdSettingsController::class, 'update']);
+                Route::post('/efd/register', [EfdSettingsController::class, 'register']);
+                Route::post('/efd/test', [EfdSettingsController::class, 'test']);
+                Route::get('/efd/pending', [EfdSettingsController::class, 'pending']);
+                Route::post('/efd/retry', [EfdSettingsController::class, 'retry']);
             });
 
             /*
