@@ -1294,7 +1294,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get automatic => 'Automatic';
 
   @override
-  String get automaticDesc => 'Send receipt automatically after every sale with a phone number';
+  String get automaticDesc =>
+      'Send receipt automatically after every sale with a phone number';
 
   @override
   String get prompted => 'Prompted';
@@ -1361,4 +1362,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sentViaSms => 'Sent via SMS';
+
+  @override
+  String get changesSaved => 'Changes saved';
+
+  @override
+  String get unsavedChanges => 'Unsaved Changes';
+
+  @override
+  String get unsavedChangesMessage =>
+      'You have unsaved changes. Would you like to apply them before leaving?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get applyChanges => 'Apply Changes';
+
+  @override
+  String get chooseLayoutPreset =>
+      'Choose a preset to quickly configure your dashboard';
+
+  @override
+  String get classicDesc => 'Balanced overview';
+
+  @override
+  String get analyticsDesc => 'Data focused';
+
+  @override
+  String get compactDesc => 'Minimal view';
+
+  @override
+  String get widgetsVisible => 'visible';
+
+  @override
+  String get todayStatsDesc => 'Sales, orders & revenue for today';
+
+  @override
+  String get quickActionsDesc => 'Fast access to common tasks';
+
+  @override
+  String get lowStockAlertDesc => 'Products running low';
+
+  @override
+  String get recentTransactionsDesc => 'Latest sales activity';
+
+  @override
+  String get weeklySummaryDesc => '7-day performance chart';
+
+  @override
+  String get topProductsDesc => 'Best selling products';
+
+  @override
+  String get profitBreakdownDesc => 'Revenue, costs & profit analysis';
+
+  @override
+  String get landingPageDesc => 'Screen shown when you open the app';
+
+  @override
+  String get totalCosts => 'Total Costs';
 }
