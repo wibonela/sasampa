@@ -104,6 +104,9 @@ Route::prefix('docs')->name('docs.')->group(function () {
     Route::get('/{category}/{article}', [DocumentationController::class, 'show'])->name('show');
 });
 
+// CSRF token refresh endpoint (prevents "page expired" on long forms)
+Route::get('/csrf-token', fn() => response()->json(['token' => csrf_token()]));
+
 // Onboarding - Step 1 (guests only)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [OnboardingController::class, 'showStep1'])->name('onboarding.step1');
