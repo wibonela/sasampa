@@ -287,15 +287,22 @@ class AdminUserManagementController extends Controller
                 // Delete user limit requests
                 $company->userLimitRequests()->delete();
 
+                // Delete mobile access requests and devices
+                DB::table('mobile_app_requests')->where('company_id', $companyId)->delete();
+                DB::table('mobile_devices')->where('company_id', $companyId)->delete();
+
                 // Delete branches (detach users first)
                 $company->branches()->each(function ($branch) {
                     $branch->users()->detach();
                 });
                 $company->branches()->delete();
 
-                // Delete all users permissions first
+                // Delete all users: tokens, permissions, password resets, sessions
                 $company->users()->each(function ($user) {
+                    $user->tokens()->delete();
                     $user->permissions()->detach();
+                    DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+                    DB::table('sessions')->where('user_id', $user->id)->delete();
                 });
 
                 // Delete all users
@@ -311,6 +318,11 @@ class AdminUserManagementController extends Controller
 
         // Regular user (cashier) - just delete the user
         DB::transaction(function () use ($user) {
+            // Delete tokens and sessions
+            $user->tokens()->delete();
+            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+
             // Detach from branches
             $user->branches()->detach();
 
