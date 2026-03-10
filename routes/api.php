@@ -82,6 +82,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('/resend-verification', [OnboardingApiController::class, 'resendVerification']);
             Route::get('/verify-status', [OnboardingApiController::class, 'verifyStatus']);
+            Route::post('/update-email', [OnboardingApiController::class, 'updateEmail']);
         });
         Route::prefix('onboarding')->group(function () {
             Route::post('/business', [OnboardingApiController::class, 'saveBusiness']);
