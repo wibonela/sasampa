@@ -48,8 +48,15 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
             : null,
       );
 
+      // Complete onboarding in the same step
+      await api.completeOnboarding();
+
+      // Refresh auth state
+      await ref.read(authProvider.notifier).refreshUser();
+
       if (mounted) {
-        context.go('/onboarding-complete');
+        // Go directly to mobile access request
+        context.go('/mobile-access');
       }
     } catch (e) {
       setState(() {
@@ -119,12 +126,12 @@ class _BusinessDetailsScreenState extends ConsumerState<BusinessDetailsScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.companyName,
-                    hintText: 'Enter your business name',
+                    hintText: l10n.enterBusinessName,
                     prefixIcon: const Icon(Icons.business_outlined),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your business name';
+                      return l10n.pleaseEnterBusinessName;
                     }
                     return null;
                   },

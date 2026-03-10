@@ -16,13 +16,14 @@ class VerifyEmailScreen extends ConsumerStatefulWidget {
 class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   bool _isResending = false;
   bool _isChecking = false;
+  bool _isUpdatingEmail = false;
   String? _message;
+  bool _isError = false;
   Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    // Poll every 5 seconds for verification status
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkStatus());
   }
 
@@ -61,17 +62,95 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     try {
       final api = ref.read(apiClientProvider);
       await api.resendVerification();
-      if (mounted) setState(() => _message = AppLocalizations.of(context)!.verificationEmailSent);
+      if (mounted) {
+        setState(() {
+          _message = AppLocalizations.of(context)!.verificationEmailSent;
+          _isError = false;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _message = AppLocalizations.of(context)!.failedToSend);
+      if (mounted) {
+        setState(() {
+          _message = AppLocalizations.of(context)!.failedToSend;
+          _isError = true;
+        });
+      }
     } finally {
       setState(() => _isResending = false);
+    }
+  }
+
+  void _showEditEmailDialog() {
+    final user = ref.read(authProvider).user;
+    final controller = TextEditingController(text: user?.email ?? '');
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.editEmail),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: l10n.email,
+            hintText: 'example@email.com',
+            prefixIcon: const Icon(Icons.email_outlined),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newEmail = controller.text.trim();
+              if (newEmail.isNotEmpty && newEmail.contains('@')) {
+                Navigator.pop(dialogContext);
+                _updateEmail(newEmail);
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updateEmail(String newEmail) async {
+    setState(() {
+      _isUpdatingEmail = true;
+      _message = null;
+    });
+
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.updateEmail(newEmail);
+      if (mounted) {
+        setState(() {
+          _message = AppLocalizations.of(context)!.emailUpdatedVerificationSent;
+          _isError = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _message = AppLocalizations.of(context)!.failedToProcess;
+          _isError = true;
+        });
+      }
+    } finally {
+      setState(() => _isUpdatingEmail = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final user = ref.watch(authProvider).user;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -117,23 +196,80 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                 ),
               ),
 
+              // Show current email
+              if (user?.email != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.email, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          user!.email,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 32),
 
+              // Status message
               if (_message != null)
                 Container(
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: _isError
+                        ? AppColors.error.withOpacity(0.1)
+                        : AppColors.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     _message!,
-                    style: const TextStyle(color: AppColors.success),
+                    style: TextStyle(
+                      color: _isError ? AppColors.error : AppColors.success,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
 
+              // "I've Verified" button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isChecking ? null : _checkStatus,
+                  child: _isChecking
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : Text(l10n.iveVerifiedEmail),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Resend button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -152,13 +288,17 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
               const SizedBox(height: 12),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isChecking ? null : _checkStatus,
-                  child: Text(l10n.iveVerifiedEmail),
-                ),
+              // Edit email button
+              TextButton.icon(
+                onPressed: _isUpdatingEmail ? null : _showEditEmailDialog,
+                icon: _isUpdatingEmail
+                    ? const SizedBox(
+                        height: 14,
+                        width: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.edit, size: 16),
+                label: Text(l10n.editEmail),
               ),
 
               const SizedBox(height: 24),

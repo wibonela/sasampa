@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,20 +78,75 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
   bool _isInitializing = true;
   bool _hasError = false;
   String? _errorMessage;
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+  Uri? _pendingDeepLink;
 
   @override
   void initState() {
     super.initState();
     // Listen to app lifecycle changes
     WidgetsBinding.instance.addObserver(this);
+    // Initialize deep link handling
+    _appLinks = AppLinks();
+    _initDeepLinks();
     // Schedule initialization after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeApp();
     });
   }
 
+  void _initDeepLinks() {
+    // Listen for links while the app is running (warm start)
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      debugPrint('DEEP_LINK: Received uri=$uri');
+      _handleDeepLink(uri);
+    });
+
+    // Check for initial link (cold start)
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) {
+        debugPrint('DEEP_LINK: Initial uri=$uri');
+        if (_isInitializing) {
+          _pendingDeepLink = uri;
+        } else {
+          _handleDeepLink(uri);
+        }
+      }
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    // Handle verify-email deep links: /verify-email/{id}/{hash}
+    final segments = uri.pathSegments;
+    if (segments.length >= 3 && segments[0] == 'verify-email') {
+      final id = int.tryParse(segments[1]);
+      final hash = segments[2];
+      if (id != null && hash.isNotEmpty) {
+        _verifyEmailFromDeepLink(id, hash);
+      }
+    }
+  }
+
+  Future<void> _verifyEmailFromDeepLink(int id, String hash) async {
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.verifyEmailByLink(id, hash);
+      if (response.data['verified'] == true) {
+        debugPrint('DEEP_LINK: Email verified successfully');
+        // Navigate to business-details
+        final router = ref.read(routerProvider);
+        router.go('/business-details');
+      }
+    } catch (e) {
+      debugPrint('DEEP_LINK: Verification failed - $e');
+      // Fall back to the verify-email screen — polling will handle it
+    }
+  }
+
   @override
   void dispose() {
+    _linkSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -168,6 +225,13 @@ class _SasampaAppState extends ConsumerState<SasampaApp> with WidgetsBindingObse
       setState(() {
         _isInitializing = false;
       });
+
+      // Process any deep link that arrived during initialization
+      if (_pendingDeepLink != null) {
+        final link = _pendingDeepLink!;
+        _pendingDeepLink = null;
+        _handleDeepLink(link);
+      }
     }
   }
 

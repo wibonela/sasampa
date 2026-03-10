@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
@@ -47,6 +48,28 @@ class ReportController extends Controller
             ->take(10)
             ->get();
 
+        // Month profit breakdown
+        $monthTransactionIds = $monthTransactions->pluck('id');
+        $monthCogs = TransactionItem::whereIn('transaction_id', $monthTransactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
+        $monthGrossProfit = $monthTransactions->sum('total') - $monthCogs;
+
+        $monthExpenses = Expense::where('expense_date', '>=', now()->startOfMonth())
+            ->selectRaw('SUM(amount * quantity) as total')
+            ->value('total') ?? 0;
+        $monthNetProfit = $monthGrossProfit - $monthExpenses;
+
+        // Today profit
+        $todayCogs = TransactionItem::whereIn('transaction_id', $todayTransactions->pluck('id'))
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
+        $todayGrossProfit = $todayTransactions->sum('total') - $todayCogs;
+        $todayExpenses = Expense::whereDate('expense_date', today())
+            ->selectRaw('SUM(amount * quantity) as total')
+            ->value('total') ?? 0;
+        $todayNetProfit = $todayGrossProfit - $todayExpenses;
+
         // Top products today
         $topProductsToday = TransactionItem::whereHas('transaction', function ($q) use ($user) {
             $q->where('company_id', $user->company_id)
@@ -68,12 +91,23 @@ class ReportController extends Controller
                         ? (float) ($todayTransactions->sum('total') / $todayTransactions->count())
                         : 0,
                     'items_sold' => $todayTransactions->sum(fn ($t) => $t->items->sum('quantity')),
+                    'gross_profit' => (float) $todayGrossProfit,
+                    'expenses' => (float) $todayExpenses,
+                    'net_profit' => (float) $todayNetProfit,
                 ],
                 'this_month' => [
                     'sales_total' => (float) $monthTransactions->sum('total'),
                     'transactions_count' => $monthTransactions->count(),
                     'average_sale' => $monthTransactions->count() > 0
                         ? (float) ($monthTransactions->sum('total') / $monthTransactions->count())
+                        : 0,
+                    'revenue' => (float) $monthTransactions->sum('total'),
+                    'cogs' => (float) $monthCogs,
+                    'gross_profit' => (float) $monthGrossProfit,
+                    'expenses' => (float) $monthExpenses,
+                    'net_profit' => (float) $monthNetProfit,
+                    'profit_margin' => $monthTransactions->sum('total') > 0
+                        ? round(($monthNetProfit / $monthTransactions->sum('total')) * 100, 1)
                         : 0,
                 ],
                 'alerts' => [

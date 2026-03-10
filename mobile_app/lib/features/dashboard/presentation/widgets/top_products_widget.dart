@@ -24,7 +24,7 @@ class TopProductsWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -43,12 +43,12 @@ class TopProductsWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             if (topProducts.isEmpty)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Text(
-                    'No product data available',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    l10n?.noProductData ?? 'No product data available',
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ),
               )
@@ -65,7 +65,7 @@ class TopProductsWidget extends StatelessWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(
@@ -93,7 +93,7 @@ class TopProductsWidget extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              '$qty sold',
+                              '$qty ${l10n?.sold ?? 'sold'}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,

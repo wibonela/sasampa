@@ -30,6 +30,8 @@ class _DashboardCustomizationScreenState
         return l10n?.weeklySummaryWidget ?? 'Weekly Summary';
       case DashboardWidgetId.topProducts:
         return l10n?.topProductsWidget ?? 'Top Products';
+      case DashboardWidgetId.profitBreakdown:
+        return l10n?.profitBreakdownWidget ?? 'Profit Breakdown';
     }
   }
 
@@ -47,6 +49,8 @@ class _DashboardCustomizationScreenState
         return Icons.bar_chart;
       case DashboardWidgetId.topProducts:
         return Icons.star;
+      case DashboardWidgetId.profitBreakdown:
+        return Icons.account_balance_wallet;
     }
   }
 
@@ -182,7 +186,7 @@ class _DashboardCustomizationScreenState
                         Switch(
                           value: !isHidden,
                           onChanged: (_) => notifier.toggleWidget(widgetId),
-                          activeColor: AppColors.primary,
+                          activeTrackColor: AppColors.primary,
                         ),
                         const Icon(Icons.drag_handle, color: AppColors.gray3),
                       ],
@@ -267,7 +271,7 @@ class _DashboardCustomizationScreenState
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.white,
+            color: isActive ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isActive ? AppColors.primary : AppColors.divider,

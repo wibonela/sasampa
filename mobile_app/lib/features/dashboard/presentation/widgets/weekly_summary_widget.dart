@@ -25,7 +25,15 @@ class WeeklySummaryWidget extends StatelessWidget {
     }
     if (maxValue == 0) maxValue = 1;
 
-    final dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final dayLabels = [
+      l10n?.mon ?? 'Mon',
+      l10n?.tue ?? 'Tue',
+      l10n?.wed ?? 'Wed',
+      l10n?.thu ?? 'Thu',
+      l10n?.fri ?? 'Fri',
+      l10n?.sat ?? 'Sat',
+      l10n?.sun ?? 'Sun',
+    ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -36,7 +44,7 @@ class WeeklySummaryWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -68,12 +76,12 @@ class WeeklySummaryWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             if (dailyTotals.isEmpty)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Text(
-                    'No weekly data available',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    l10n?.noWeeklyData ?? 'No weekly data available',
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ),
               )
@@ -109,8 +117,8 @@ class WeeklySummaryWidget extends StatelessWidget {
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               decoration: BoxDecoration(
                                 color: value > 0
-                                    ? AppColors.primary.withOpacity(0.7)
-                                    : AppColors.gray3.withOpacity(0.3),
+                                    ? AppColors.primary.withValues(alpha: 0.7)
+                                    : AppColors.gray3.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),

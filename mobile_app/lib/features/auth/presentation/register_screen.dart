@@ -16,6 +16,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -27,6 +28,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -43,10 +45,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final storage = ref.read(secureStorageProvider);
+      final authNotifier = ref.read(authProvider.notifier);
 
       final response = await api.register(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
         password: _passwordController.text,
         passwordConfirmation: _confirmPasswordController.text,
         deviceName: 'Mobile App',
@@ -55,9 +59,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final data = response.data;
       await storage.saveToken(data['token']);
 
+      // Navigate FIRST, then set auth state
+      // (setting state triggers router rebuild which would redirect away from /register)
       if (mounted) {
         context.go('/verify-email');
       }
+
+      // Now set auth state — router will see user on onboarding route and allow it
+      authNotifier.setRegisteredUser(data['user']);
     } catch (e) {
       setState(() {
         _error = _extractError(e);
@@ -70,7 +79,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (error is Exception) {
       final str = error.toString();
       if (str.contains('email has already been taken')) {
-        return 'This email is already registered. Please login instead.';
+        final l10n = AppLocalizations.of(context);
+        return l10n?.emailAlreadyRegistered ?? 'This email is already registered. Please login instead.';
       }
     }
     // Use the error_utils pattern
@@ -90,7 +100,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         }
       }
     } catch (_) {}
-    return 'Registration failed. Please try again.';
+    final l10n = AppLocalizations.of(context);
+    return l10n?.registrationFailed ?? 'Registration failed. Please try again.';
   }
 
   @override
@@ -165,12 +176,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.fullName,
-                    hintText: 'Enter your full name',
+                    hintText: l10n.enterYourFullName,
                     prefixIcon: const Icon(Icons.person_outline),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your name';
+                      return l10n.pleaseEnterName;
                     }
                     return null;
                   },
@@ -185,15 +196,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.email,
-                    hintText: 'Enter your email',
+                    hintText: l10n.enterYourEmail,
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.pleaseEnterEmail;
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return l10n.pleaseEnterValidEmail;
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Phone
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
+                    hintText: '+XXX XXXXXXXXX',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterPhoneNumber;
+                    }
+                    final phone = value.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
+                    // Must start with + and country code, minimum 8 digits total
+                    if (!RegExp(r'^\+?\d{8,15}$').hasMatch(phone)) {
+                      return l10n.invalidPhoneNumber;
                     }
                     return null;
                   },
@@ -208,7 +244,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.password,
-                    hintText: 'Minimum 8 characters',
+                    hintText: l10n.minimumEightCharacters,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -237,7 +273,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
                     labelText: l10n.confirmPassword,
-                    hintText: 'Re-enter your password',
+                    hintText: l10n.reenterPassword,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -320,6 +356,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Language Toggle
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      final localeNotifier = ref.read(localeProvider.notifier);
+                      final current = ref.read(localeProvider);
+                      if (current.languageCode == 'sw') {
+                        localeNotifier.setLocale(const Locale('en'));
+                      } else {
+                        localeNotifier.setLocale(const Locale('sw'));
+                      }
+                    },
+                    icon: const Icon(Icons.language, size: 18),
+                    label: Text(
+                      ref.watch(localeProvider).languageCode == 'sw'
+                          ? 'English'
+                          : 'Kiswahili',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ],
             ),
