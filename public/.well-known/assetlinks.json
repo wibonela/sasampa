@@ -1,0 +1,12 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.sasampa.pos",
+            "sha256_cert_fingerprints": [
+                "50:40:96:8A:B5:01:B4:37:60:90:0B:57:2F:CA:06:27:92:F6:D5:29:FF:F0:4F:B2:2A:1F:15:7F:6C:B9:53:7C"
+            ]
+        }
+    }
+]

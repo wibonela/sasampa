@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/login/pin', [AuthController::class, 'loginWithPin']);
         Route::post('/register', [OnboardingApiController::class, 'register']);
+        Route::get('/verify-email/{id}/{hash}', [OnboardingApiController::class, 'verifyEmailFromApp']);
     });
 
     /*
