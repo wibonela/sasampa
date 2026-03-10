@@ -1295,7 +1295,8 @@ class AppLocalizationsSw extends AppLocalizations {
   String get automatic => 'Otomatiki';
 
   @override
-  String get automaticDesc => 'Tuma risiti moja kwa moja baada ya kila mauzo yenye nambari ya simu';
+  String get automaticDesc =>
+      'Tuma risiti moja kwa moja baada ya kila mauzo yenye nambari ya simu';
 
   @override
   String get prompted => 'Kwa Ruhusa';
@@ -1313,7 +1314,8 @@ class AppLocalizationsSw extends AppLocalizations {
   String get marketingFooter => 'Ujumbe wa Masoko';
 
   @override
-  String get marketingFooterHint => 'Ujumbe maalum unaoongezwa kwenye risiti...';
+  String get marketingFooterHint =>
+      'Ujumbe maalum unaoongezwa kwenye risiti...';
 
   @override
   String get sendWhatsAppReceipt => 'Tuma Risiti kwa WhatsApp';
@@ -1362,4 +1364,66 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get sentViaSms => 'Imetumwa kwa SMS';
+
+  @override
+  String get changesSaved => 'Mabadiliko yamehifadhiwa';
+
+  @override
+  String get unsavedChanges => 'Mabadiliko Hayajahifadhiwa';
+
+  @override
+  String get unsavedChangesMessage =>
+      'Una mabadiliko ambayo hayajahifadhiwa. Unataka kuyatumia kabla ya kuondoka?';
+
+  @override
+  String get discard => 'Tupa';
+
+  @override
+  String get apply => 'Tumia';
+
+  @override
+  String get applyChanges => 'Tumia Mabadiliko';
+
+  @override
+  String get chooseLayoutPreset =>
+      'Chagua mpangilio wa haraka wa dashibodi yako';
+
+  @override
+  String get classicDesc => 'Muhtasari kamili';
+
+  @override
+  String get analyticsDesc => 'Inazingatia data';
+
+  @override
+  String get compactDesc => 'Mtazamo mfupi';
+
+  @override
+  String get widgetsVisible => 'vinaonekana';
+
+  @override
+  String get todayStatsDesc => 'Mauzo, oda na mapato ya leo';
+
+  @override
+  String get quickActionsDesc => 'Ufikiaji wa haraka wa kazi za kawaida';
+
+  @override
+  String get lowStockAlertDesc => 'Bidhaa zinazopungua';
+
+  @override
+  String get recentTransactionsDesc => 'Shughuli za mauzo za hivi karibuni';
+
+  @override
+  String get weeklySummaryDesc => 'Chati ya utendaji wa siku 7';
+
+  @override
+  String get topProductsDesc => 'Bidhaa zinazouzwa zaidi';
+
+  @override
+  String get profitBreakdownDesc => 'Mapato, gharama na uchambuzi wa faida';
+
+  @override
+  String get landingPageDesc => 'Skrini inayoonyeshwa unapofungua programu';
+
+  @override
+  String get totalCosts => 'Gharama Zote';
 }
