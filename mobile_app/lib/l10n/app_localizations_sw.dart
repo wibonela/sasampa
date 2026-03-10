@@ -300,7 +300,7 @@ class AppLocalizationsSw extends AppLocalizations {
   String get quantity => 'Idadi';
 
   @override
-  String get unitPrice => 'Bei ya kitu';
+  String get unitPrice => 'Bei ya Kitu (TZS)';
 
   @override
   String get item => 'Bidhaa';
@@ -811,4 +811,291 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get dragToReorder => 'Buruta kupanga upya';
+
+  @override
+  String get enterYourEmail => 'Weka barua pepe yako';
+
+  @override
+  String get pleaseEnterEmail => 'Tafadhali weka barua pepe yako';
+
+  @override
+  String get pleaseEnterValidEmail => 'Tafadhali weka barua pepe sahihi';
+
+  @override
+  String get enterYourPassword => 'Weka nywila yako';
+
+  @override
+  String get pleaseEnterPassword => 'Tafadhali weka nywila yako';
+
+  @override
+  String get enterYourFullName => 'Weka jina lako kamili';
+
+  @override
+  String get pleaseEnterName => 'Tafadhali weka jina lako';
+
+  @override
+  String get minimumEightCharacters => 'Herufi 8 au zaidi';
+
+  @override
+  String get reenterPassword => 'Weka tena nywila yako';
+
+  @override
+  String get emailAlreadyRegistered =>
+      'Barua pepe hii imesajiliwa tayari. Tafadhali ingia badala yake.';
+
+  @override
+  String get registrationFailed => 'Usajili umeshindwa. Tafadhali jaribu tena.';
+
+  @override
+  String get enterBusinessName => 'Weka jina la biashara yako';
+
+  @override
+  String get pleaseEnterBusinessName => 'Tafadhali weka jina la biashara yako';
+
+  @override
+  String get pleaseEnterPin => 'Tafadhali weka PIN yako';
+
+  @override
+  String get pinMustBeFourDigits => 'PIN lazima iwe tarakimu 4';
+
+  @override
+  String get productsNeedRestocking => 'bidhaa zinahitaji kujazwa';
+
+  @override
+  String get noWeeklyData => 'Hakuna data ya wiki';
+
+  @override
+  String get noProductData => 'Hakuna data ya bidhaa';
+
+  @override
+  String get sold => 'zimeuzwa';
+
+  @override
+  String get failedToLoadDashboard => 'Imeshindwa kupakia dashibodi';
+
+  @override
+  String get hello => 'Habari';
+
+  @override
+  String get mon => 'Jtt';
+
+  @override
+  String get tue => 'Jnn';
+
+  @override
+  String get wed => 'Jtn';
+
+  @override
+  String get thu => 'Alh';
+
+  @override
+  String get fri => 'Ijm';
+
+  @override
+  String get sat => 'Jmt';
+
+  @override
+  String get sun => 'Jpi';
+
+  @override
+  String get currentPin => 'PIN ya Sasa';
+
+  @override
+  String get newPin => 'PIN Mpya (tarakimu 4-6)';
+
+  @override
+  String get confirmNewPin => 'Thibitisha PIN Mpya';
+
+  @override
+  String get pinTooShort => 'PIN lazima iwe tarakimu 4 au zaidi';
+
+  @override
+  String get pinsDoNotMatch => 'PIN hazilingani';
+
+  @override
+  String get pinChangedSuccessfully => 'PIN imebadilishwa';
+
+  @override
+  String get currentPassword => 'Nywila ya Sasa';
+
+  @override
+  String get newPassword => 'Nywila Mpya';
+
+  @override
+  String get confirmNewPassword => 'Thibitisha Nywila Mpya';
+
+  @override
+  String get passwordTooShort => 'Nywila lazima iwe herufi 8 au zaidi';
+
+  @override
+  String get passwordsDoNotMatch => 'Nywila hazilingani';
+
+  @override
+  String get passwordChangedSuccessfully => 'Nywila imebadilishwa';
+
+  @override
+  String get changeAction => 'Badilisha';
+
+  @override
+  String get receiptPrintingOptions => 'Chaguo za Kuchapisha Risiti:';
+
+  @override
+  String get airprint => 'AirPrint';
+
+  @override
+  String get printToAnyPrinter => 'Chapisha kwa printa yoyote ya AirPrint';
+
+  @override
+  String get testReceipt => 'Risiti ya Majaribio';
+
+  @override
+  String get shareAsPdf => 'Shiriki kama PDF';
+
+  @override
+  String get saveOrShareReceipts => 'Hifadhi au shiriki risiti kama PDF';
+
+  @override
+  String get printerTip =>
+      'Tumia vitufe vya Chapisha au Shiriki kwenye risiti kuchapisha moja kwa moja.';
+
+  @override
+  String get manageNotificationPreferences =>
+      'Dhibiti mapendeleo yako ya arifa:';
+
+  @override
+  String get openSystemSettings => 'Fungua Mipangilio ya Simu';
+
+  @override
+  String get configureNotifications => 'Weka arifa za programu';
+
+  @override
+  String get notificationsInclude => 'Arifa zinajumuisha:';
+
+  @override
+  String get lowStockAlerts => 'Tahadhari za bidhaa chache';
+
+  @override
+  String get newOrderNotifications => 'Arifa za oda mpya';
+
+  @override
+  String get systemUpdates => 'Masasisho ya mfumo';
+
+  @override
+  String get forAssistanceContact => 'Kwa msaada, wasiliana na:';
+
+  @override
+  String get aboutSasampa => 'Kuhusu Sasampa';
+
+  @override
+  String get modernPosSystem => 'Mfumo wa kisasa wa mauzo kwa biashara yako.';
+
+  @override
+  String get failedToLogout => 'Imeshindwa kutoka. Tafadhali jaribu tena.';
+
+  @override
+  String get noInternetConnection => 'Hakuna mtandao';
+
+  @override
+  String get editExpense => 'Hariri Matumizi';
+
+  @override
+  String get expenseUpdated => 'Matumizi yamesasishwa';
+
+  @override
+  String get expenseRecorded => 'Matumizi yamerekodiwa';
+
+  @override
+  String get addCategory => 'Ongeza Aina';
+
+  @override
+  String get categoryName => 'Jina la Aina';
+
+  @override
+  String get selectCategory => 'Chagua';
+
+  @override
+  String get unitPriceTzs => 'Bei ya Kitu (TZS)';
+
+  @override
+  String get supplier => 'Msambazaji';
+
+  @override
+  String get vendorOrSupplierName => 'Jina la msambazaji';
+
+  @override
+  String get referenceNumber => 'Nambari ya Rejea';
+
+  @override
+  String get receiptOrInvoiceNumber => 'Nambari ya risiti au ankara';
+
+  @override
+  String get additionalNotes => 'Maelezo zaidi...';
+
+  @override
+  String get updateExpense => 'Sasisha Matumizi';
+
+  @override
+  String get saveExpense => 'Hifadhi Matumizi';
+
+  @override
+  String get expenseSummary => 'Muhtasari wa Matumizi';
+
+  @override
+  String get period => 'Kipindi';
+
+  @override
+  String get totalExpensesLabel => 'Jumla ya Matumizi';
+
+  @override
+  String get byCategory => 'KWA AINA';
+
+  @override
+  String get byPaymentMethod => 'KWA NJIA YA MALIPO';
+
+  @override
+  String get noExpensesInPeriod => 'Hakuna matumizi katika kipindi hiki';
+
+  @override
+  String get unit => 'Kipimo';
+
+  @override
+  String get selectUnit => 'Chagua Kipimo';
+
+  @override
+  String get notes => 'Maelezo';
+
+  @override
+  String get profitBreakdown => 'Uchambuzi wa Faida';
+
+  @override
+  String get profitBreakdownWidget => 'Uchambuzi wa Faida';
+
+  @override
+  String get revenue => 'Mapato';
+
+  @override
+  String get costOfGoods => 'Gharama za Bidhaa';
+
+  @override
+  String get grossProfit => 'Faida Ghafi';
+
+  @override
+  String get netProfit => 'Faida Halisi';
+
+  @override
+  String get margin => 'faida';
+
+  @override
+  String get pleaseEnterPhoneNumber => 'Tafadhali weka namba ya simu yako';
+
+  @override
+  String get invalidPhoneNumber =>
+      'Weka namba sahihi ya simu na nambari ya nchi (mfano +255712345678)';
+
+  @override
+  String get editEmail => 'Badilisha Barua Pepe';
+
+  @override
+  String get emailUpdatedVerificationSent =>
+      'Barua pepe imebadilishwa. Barua pepe mpya ya uthibitisho imetumwa!';
 }

@@ -683,7 +683,7 @@ abstract class AppLocalizations {
   /// No description provided for @unitPrice.
   ///
   /// In sw, this message translates to:
-  /// **'Bei ya kitu'**
+  /// **'Bei ya Kitu (TZS)'**
   String get unitPrice;
 
   /// No description provided for @item.
@@ -1693,6 +1693,570 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Buruta kupanga upya'**
   String get dragToReorder;
+
+  /// No description provided for @enterYourEmail.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka barua pepe yako'**
+  String get enterYourEmail;
+
+  /// No description provided for @pleaseEnterEmail.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka barua pepe yako'**
+  String get pleaseEnterEmail;
+
+  /// No description provided for @pleaseEnterValidEmail.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka barua pepe sahihi'**
+  String get pleaseEnterValidEmail;
+
+  /// No description provided for @enterYourPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka nywila yako'**
+  String get enterYourPassword;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka nywila yako'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @enterYourFullName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka jina lako kamili'**
+  String get enterYourFullName;
+
+  /// No description provided for @pleaseEnterName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka jina lako'**
+  String get pleaseEnterName;
+
+  /// No description provided for @minimumEightCharacters.
+  ///
+  /// In sw, this message translates to:
+  /// **'Herufi 8 au zaidi'**
+  String get minimumEightCharacters;
+
+  /// No description provided for @reenterPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka tena nywila yako'**
+  String get reenterPassword;
+
+  /// No description provided for @emailAlreadyRegistered.
+  ///
+  /// In sw, this message translates to:
+  /// **'Barua pepe hii imesajiliwa tayari. Tafadhali ingia badala yake.'**
+  String get emailAlreadyRegistered;
+
+  /// No description provided for @registrationFailed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Usajili umeshindwa. Tafadhali jaribu tena.'**
+  String get registrationFailed;
+
+  /// No description provided for @enterBusinessName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka jina la biashara yako'**
+  String get enterBusinessName;
+
+  /// No description provided for @pleaseEnterBusinessName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka jina la biashara yako'**
+  String get pleaseEnterBusinessName;
+
+  /// No description provided for @pleaseEnterPin.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka PIN yako'**
+  String get pleaseEnterPin;
+
+  /// No description provided for @pinMustBeFourDigits.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN lazima iwe tarakimu 4'**
+  String get pinMustBeFourDigits;
+
+  /// No description provided for @productsNeedRestocking.
+  ///
+  /// In sw, this message translates to:
+  /// **'bidhaa zinahitaji kujazwa'**
+  String get productsNeedRestocking;
+
+  /// No description provided for @noWeeklyData.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna data ya wiki'**
+  String get noWeeklyData;
+
+  /// No description provided for @noProductData.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna data ya bidhaa'**
+  String get noProductData;
+
+  /// No description provided for @sold.
+  ///
+  /// In sw, this message translates to:
+  /// **'zimeuzwa'**
+  String get sold;
+
+  /// No description provided for @failedToLoadDashboard.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kupakia dashibodi'**
+  String get failedToLoadDashboard;
+
+  /// No description provided for @hello.
+  ///
+  /// In sw, this message translates to:
+  /// **'Habari'**
+  String get hello;
+
+  /// No description provided for @mon.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jtt'**
+  String get mon;
+
+  /// No description provided for @tue.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jnn'**
+  String get tue;
+
+  /// No description provided for @wed.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jtn'**
+  String get wed;
+
+  /// No description provided for @thu.
+  ///
+  /// In sw, this message translates to:
+  /// **'Alh'**
+  String get thu;
+
+  /// No description provided for @fri.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ijm'**
+  String get fri;
+
+  /// No description provided for @sat.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jmt'**
+  String get sat;
+
+  /// No description provided for @sun.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jpi'**
+  String get sun;
+
+  /// No description provided for @currentPin.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN ya Sasa'**
+  String get currentPin;
+
+  /// No description provided for @newPin.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN Mpya (tarakimu 4-6)'**
+  String get newPin;
+
+  /// No description provided for @confirmNewPin.
+  ///
+  /// In sw, this message translates to:
+  /// **'Thibitisha PIN Mpya'**
+  String get confirmNewPin;
+
+  /// No description provided for @pinTooShort.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN lazima iwe tarakimu 4 au zaidi'**
+  String get pinTooShort;
+
+  /// No description provided for @pinsDoNotMatch.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN hazilingani'**
+  String get pinsDoNotMatch;
+
+  /// No description provided for @pinChangedSuccessfully.
+  ///
+  /// In sw, this message translates to:
+  /// **'PIN imebadilishwa'**
+  String get pinChangedSuccessfully;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nywila ya Sasa'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nywila Mpya'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In sw, this message translates to:
+  /// **'Thibitisha Nywila Mpya'**
+  String get confirmNewPassword;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nywila lazima iwe herufi 8 au zaidi'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nywila hazilingani'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordChangedSuccessfully.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nywila imebadilishwa'**
+  String get passwordChangedSuccessfully;
+
+  /// No description provided for @changeAction.
+  ///
+  /// In sw, this message translates to:
+  /// **'Badilisha'**
+  String get changeAction;
+
+  /// No description provided for @receiptPrintingOptions.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chaguo za Kuchapisha Risiti:'**
+  String get receiptPrintingOptions;
+
+  /// No description provided for @airprint.
+  ///
+  /// In sw, this message translates to:
+  /// **'AirPrint'**
+  String get airprint;
+
+  /// No description provided for @printToAnyPrinter.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chapisha kwa printa yoyote ya AirPrint'**
+  String get printToAnyPrinter;
+
+  /// No description provided for @testReceipt.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti ya Majaribio'**
+  String get testReceipt;
+
+  /// No description provided for @shareAsPdf.
+  ///
+  /// In sw, this message translates to:
+  /// **'Shiriki kama PDF'**
+  String get shareAsPdf;
+
+  /// No description provided for @saveOrShareReceipts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hifadhi au shiriki risiti kama PDF'**
+  String get saveOrShareReceipts;
+
+  /// No description provided for @printerTip.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tumia vitufe vya Chapisha au Shiriki kwenye risiti kuchapisha moja kwa moja.'**
+  String get printerTip;
+
+  /// No description provided for @manageNotificationPreferences.
+  ///
+  /// In sw, this message translates to:
+  /// **'Dhibiti mapendeleo yako ya arifa:'**
+  String get manageNotificationPreferences;
+
+  /// No description provided for @openSystemSettings.
+  ///
+  /// In sw, this message translates to:
+  /// **'Fungua Mipangilio ya Simu'**
+  String get openSystemSettings;
+
+  /// No description provided for @configureNotifications.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka arifa za programu'**
+  String get configureNotifications;
+
+  /// No description provided for @notificationsInclude.
+  ///
+  /// In sw, this message translates to:
+  /// **'Arifa zinajumuisha:'**
+  String get notificationsInclude;
+
+  /// No description provided for @lowStockAlerts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tahadhari za bidhaa chache'**
+  String get lowStockAlerts;
+
+  /// No description provided for @newOrderNotifications.
+  ///
+  /// In sw, this message translates to:
+  /// **'Arifa za oda mpya'**
+  String get newOrderNotifications;
+
+  /// No description provided for @systemUpdates.
+  ///
+  /// In sw, this message translates to:
+  /// **'Masasisho ya mfumo'**
+  String get systemUpdates;
+
+  /// No description provided for @forAssistanceContact.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kwa msaada, wasiliana na:'**
+  String get forAssistanceContact;
+
+  /// No description provided for @aboutSasampa.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kuhusu Sasampa'**
+  String get aboutSasampa;
+
+  /// No description provided for @modernPosSystem.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mfumo wa kisasa wa mauzo kwa biashara yako.'**
+  String get modernPosSystem;
+
+  /// No description provided for @failedToLogout.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kutoka. Tafadhali jaribu tena.'**
+  String get failedToLogout;
+
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna mtandao'**
+  String get noInternetConnection;
+
+  /// No description provided for @editExpense.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hariri Matumizi'**
+  String get editExpense;
+
+  /// No description provided for @expenseUpdated.
+  ///
+  /// In sw, this message translates to:
+  /// **'Matumizi yamesasishwa'**
+  String get expenseUpdated;
+
+  /// No description provided for @expenseRecorded.
+  ///
+  /// In sw, this message translates to:
+  /// **'Matumizi yamerekodiwa'**
+  String get expenseRecorded;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ongeza Aina'**
+  String get addCategory;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jina la Aina'**
+  String get categoryName;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua'**
+  String get selectCategory;
+
+  /// No description provided for @unitPriceTzs.
+  ///
+  /// In sw, this message translates to:
+  /// **'Bei ya Kitu (TZS)'**
+  String get unitPriceTzs;
+
+  /// No description provided for @supplier.
+  ///
+  /// In sw, this message translates to:
+  /// **'Msambazaji'**
+  String get supplier;
+
+  /// No description provided for @vendorOrSupplierName.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jina la msambazaji'**
+  String get vendorOrSupplierName;
+
+  /// No description provided for @referenceNumber.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nambari ya Rejea'**
+  String get referenceNumber;
+
+  /// No description provided for @receiptOrInvoiceNumber.
+  ///
+  /// In sw, this message translates to:
+  /// **'Nambari ya risiti au ankara'**
+  String get receiptOrInvoiceNumber;
+
+  /// No description provided for @additionalNotes.
+  ///
+  /// In sw, this message translates to:
+  /// **'Maelezo zaidi...'**
+  String get additionalNotes;
+
+  /// No description provided for @updateExpense.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sasisha Matumizi'**
+  String get updateExpense;
+
+  /// No description provided for @saveExpense.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hifadhi Matumizi'**
+  String get saveExpense;
+
+  /// No description provided for @expenseSummary.
+  ///
+  /// In sw, this message translates to:
+  /// **'Muhtasari wa Matumizi'**
+  String get expenseSummary;
+
+  /// No description provided for @period.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kipindi'**
+  String get period;
+
+  /// No description provided for @totalExpensesLabel.
+  ///
+  /// In sw, this message translates to:
+  /// **'Jumla ya Matumizi'**
+  String get totalExpensesLabel;
+
+  /// No description provided for @byCategory.
+  ///
+  /// In sw, this message translates to:
+  /// **'KWA AINA'**
+  String get byCategory;
+
+  /// No description provided for @byPaymentMethod.
+  ///
+  /// In sw, this message translates to:
+  /// **'KWA NJIA YA MALIPO'**
+  String get byPaymentMethod;
+
+  /// No description provided for @noExpensesInPeriod.
+  ///
+  /// In sw, this message translates to:
+  /// **'Hakuna matumizi katika kipindi hiki'**
+  String get noExpensesInPeriod;
+
+  /// No description provided for @unit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kipimo'**
+  String get unit;
+
+  /// No description provided for @selectUnit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua Kipimo'**
+  String get selectUnit;
+
+  /// No description provided for @notes.
+  ///
+  /// In sw, this message translates to:
+  /// **'Maelezo'**
+  String get notes;
+
+  /// No description provided for @profitBreakdown.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchambuzi wa Faida'**
+  String get profitBreakdown;
+
+  /// No description provided for @profitBreakdownWidget.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchambuzi wa Faida'**
+  String get profitBreakdownWidget;
+
+  /// No description provided for @revenue.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mapato'**
+  String get revenue;
+
+  /// No description provided for @costOfGoods.
+  ///
+  /// In sw, this message translates to:
+  /// **'Gharama za Bidhaa'**
+  String get costOfGoods;
+
+  /// No description provided for @grossProfit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Faida Ghafi'**
+  String get grossProfit;
+
+  /// No description provided for @netProfit.
+  ///
+  /// In sw, this message translates to:
+  /// **'Faida Halisi'**
+  String get netProfit;
+
+  /// No description provided for @margin.
+  ///
+  /// In sw, this message translates to:
+  /// **'faida'**
+  String get margin;
+
+  /// No description provided for @pleaseEnterPhoneNumber.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali weka namba ya simu yako'**
+  String get pleaseEnterPhoneNumber;
+
+  /// No description provided for @invalidPhoneNumber.
+  ///
+  /// In sw, this message translates to:
+  /// **'Weka namba sahihi ya simu na nambari ya nchi (mfano +255712345678)'**
+  String get invalidPhoneNumber;
+
+  /// No description provided for @editEmail.
+  ///
+  /// In sw, this message translates to:
+  /// **'Badilisha Barua Pepe'**
+  String get editEmail;
+
+  /// No description provided for @emailUpdatedVerificationSent.
+  ///
+  /// In sw, this message translates to:
+  /// **'Barua pepe imebadilishwa. Barua pepe mpya ya uthibitisho imetumwa!'**
+  String get emailUpdatedVerificationSent;
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ enum DashboardWidgetId {
   recentTransactions,
   weeklySummary,
   topProducts,
+  profitBreakdown,
 }
 
 enum DashboardLayout { classic, analytics, compact }
@@ -21,6 +22,7 @@ class DashboardPreferences {
     this.layout = DashboardLayout.classic,
     this.widgetOrder = const [
       DashboardWidgetId.todayStats,
+      DashboardWidgetId.profitBreakdown,
       DashboardWidgetId.quickActions,
       DashboardWidgetId.lowStockAlert,
       DashboardWidgetId.recentTransactions,
@@ -35,6 +37,7 @@ class DashboardPreferences {
         layout: DashboardLayout.analytics,
         widgetOrder: [
           DashboardWidgetId.todayStats,
+          DashboardWidgetId.profitBreakdown,
           DashboardWidgetId.weeklySummary,
           DashboardWidgetId.topProducts,
           DashboardWidgetId.recentTransactions,
@@ -84,6 +87,7 @@ class DashboardPreferences {
               .toList() ??
           const [
             DashboardWidgetId.todayStats,
+            DashboardWidgetId.profitBreakdown,
             DashboardWidgetId.quickActions,
             DashboardWidgetId.lowStockAlert,
             DashboardWidgetId.recentTransactions,

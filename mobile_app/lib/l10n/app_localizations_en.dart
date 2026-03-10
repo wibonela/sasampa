@@ -300,7 +300,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quantity => 'Quantity';
 
   @override
-  String get unitPrice => 'Unit Price';
+  String get unitPrice => 'Unit Price (TZS)';
 
   @override
   String get item => 'Item';
@@ -809,4 +809,292 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dragToReorder => 'Drag to reorder';
+
+  @override
+  String get enterYourEmail => 'Enter your email';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter your email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Please enter a valid email';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter your password';
+
+  @override
+  String get enterYourFullName => 'Enter your full name';
+
+  @override
+  String get pleaseEnterName => 'Please enter your name';
+
+  @override
+  String get minimumEightCharacters => 'Minimum 8 characters';
+
+  @override
+  String get reenterPassword => 'Re-enter your password';
+
+  @override
+  String get emailAlreadyRegistered =>
+      'This email is already registered. Please login instead.';
+
+  @override
+  String get registrationFailed => 'Registration failed. Please try again.';
+
+  @override
+  String get enterBusinessName => 'Enter your business name';
+
+  @override
+  String get pleaseEnterBusinessName => 'Please enter your business name';
+
+  @override
+  String get pleaseEnterPin => 'Please enter your PIN';
+
+  @override
+  String get pinMustBeFourDigits => 'PIN must be 4 digits';
+
+  @override
+  String get productsNeedRestocking => 'products need restocking';
+
+  @override
+  String get noWeeklyData => 'No weekly data available';
+
+  @override
+  String get noProductData => 'No product data available';
+
+  @override
+  String get sold => 'sold';
+
+  @override
+  String get failedToLoadDashboard => 'Failed to load dashboard';
+
+  @override
+  String get hello => 'Hello';
+
+  @override
+  String get mon => 'Mon';
+
+  @override
+  String get tue => 'Tue';
+
+  @override
+  String get wed => 'Wed';
+
+  @override
+  String get thu => 'Thu';
+
+  @override
+  String get fri => 'Fri';
+
+  @override
+  String get sat => 'Sat';
+
+  @override
+  String get sun => 'Sun';
+
+  @override
+  String get currentPin => 'Current PIN';
+
+  @override
+  String get newPin => 'New PIN (4-6 digits)';
+
+  @override
+  String get confirmNewPin => 'Confirm New PIN';
+
+  @override
+  String get pinTooShort => 'PIN must be at least 4 digits';
+
+  @override
+  String get pinsDoNotMatch => 'PINs do not match';
+
+  @override
+  String get pinChangedSuccessfully => 'PIN changed successfully';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordChangedSuccessfully => 'Password changed successfully';
+
+  @override
+  String get changeAction => 'Change';
+
+  @override
+  String get receiptPrintingOptions => 'Receipt Printing Options:';
+
+  @override
+  String get airprint => 'AirPrint';
+
+  @override
+  String get printToAnyPrinter => 'Print to any AirPrint-enabled printer';
+
+  @override
+  String get testReceipt => 'Test Receipt';
+
+  @override
+  String get shareAsPdf => 'Share as PDF';
+
+  @override
+  String get saveOrShareReceipts => 'Save or share receipts as PDF';
+
+  @override
+  String get printerTip =>
+      'Use the Print or Share buttons on receipts to print directly.';
+
+  @override
+  String get manageNotificationPreferences =>
+      'Manage your notification preferences:';
+
+  @override
+  String get openSystemSettings => 'Open System Settings';
+
+  @override
+  String get configureNotifications => 'Configure app notifications';
+
+  @override
+  String get notificationsInclude => 'Notifications include:';
+
+  @override
+  String get lowStockAlerts => 'Low stock alerts';
+
+  @override
+  String get newOrderNotifications => 'New order notifications';
+
+  @override
+  String get systemUpdates => 'System updates';
+
+  @override
+  String get forAssistanceContact => 'For assistance, please contact:';
+
+  @override
+  String get aboutSasampa => 'About Sasampa';
+
+  @override
+  String get modernPosSystem =>
+      'A modern point of sale system for your business.';
+
+  @override
+  String get failedToLogout => 'Failed to logout. Please try again.';
+
+  @override
+  String get noInternetConnection => 'No internet connection';
+
+  @override
+  String get editExpense => 'Edit Expense';
+
+  @override
+  String get expenseUpdated => 'Expense updated';
+
+  @override
+  String get expenseRecorded => 'Expense recorded';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get selectCategory => 'Select';
+
+  @override
+  String get unitPriceTzs => 'Unit Price (TZS)';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get vendorOrSupplierName => 'Vendor or supplier name';
+
+  @override
+  String get referenceNumber => 'Reference Number';
+
+  @override
+  String get receiptOrInvoiceNumber => 'Receipt or invoice number';
+
+  @override
+  String get additionalNotes => 'Additional notes...';
+
+  @override
+  String get updateExpense => 'Update Expense';
+
+  @override
+  String get saveExpense => 'Save Expense';
+
+  @override
+  String get expenseSummary => 'Expense Summary';
+
+  @override
+  String get period => 'Period';
+
+  @override
+  String get totalExpensesLabel => 'Total Expenses';
+
+  @override
+  String get byCategory => 'BY CATEGORY';
+
+  @override
+  String get byPaymentMethod => 'BY PAYMENT METHOD';
+
+  @override
+  String get noExpensesInPeriod => 'No expenses in this period';
+
+  @override
+  String get unit => 'Unit';
+
+  @override
+  String get selectUnit => 'Select Unit';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get profitBreakdown => 'Profit Breakdown';
+
+  @override
+  String get profitBreakdownWidget => 'Profit Breakdown';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get costOfGoods => 'Cost of Goods';
+
+  @override
+  String get grossProfit => 'Gross Profit';
+
+  @override
+  String get netProfit => 'Net Profit';
+
+  @override
+  String get margin => 'margin';
+
+  @override
+  String get pleaseEnterPhoneNumber => 'Please enter your phone number';
+
+  @override
+  String get invalidPhoneNumber =>
+      'Enter a valid phone number with country code (e.g. +255712345678)';
+
+  @override
+  String get editEmail => 'Edit Email';
+
+  @override
+  String get emailUpdatedVerificationSent =>
+      'Email updated. New verification email sent!';
 }

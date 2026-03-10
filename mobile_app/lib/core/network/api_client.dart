@@ -67,6 +67,7 @@ class ApiClient {
   Future<Response> register({
     required String name,
     required String email,
+    required String phone,
     required String password,
     required String passwordConfirmation,
     required String deviceName,
@@ -74,6 +75,7 @@ class ApiClient {
     return _dio.post('/auth/register', data: {
       'name': name,
       'email': email,
+      'phone': phone,
       'password': password,
       'password_confirmation': passwordConfirmation,
       'device_name': deviceName,
@@ -86,6 +88,14 @@ class ApiClient {
 
   Future<Response> checkVerificationStatus() {
     return _dio.get('/auth/verify-status');
+  }
+
+  Future<Response> updateEmail(String newEmail) {
+    return _dio.post('/auth/update-email', data: {'email': newEmail});
+  }
+
+  Future<Response> verifyEmailByLink(int id, String hash) {
+    return _dio.get('/auth/verify-email/$id/$hash');
   }
 
   Future<Response> saveBusinessDetails({

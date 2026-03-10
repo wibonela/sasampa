@@ -167,6 +167,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Set user from registration response so onboarding routes work
+  void setRegisteredUser(Map<String, dynamic> userData) {
+    final user = User.fromJson(userData);
+    state = AuthState(
+      user: user,
+      mobileAccess: MobileAccess(canUseMobile: false),
+      isInitialized: true,
+    );
+  }
+
   Future<void> logout() async {
     try {
       await _api.logout();

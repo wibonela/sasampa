@@ -12,6 +12,7 @@ import 'widgets/quick_actions_widget.dart';
 import 'widgets/low_stock_widget.dart';
 import 'widgets/weekly_summary_widget.dart';
 import 'widgets/top_products_widget.dart';
+import 'widgets/profit_breakdown_widget.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -49,7 +50,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      String errorMsg = 'Failed to load dashboard';
+      String errorMsg = AppLocalizations.of(context)?.failedToLoadDashboard ?? 'Failed to load dashboard';
       if (e is DioException) {
         final response = e.response;
         if (response != null && response.data is Map<String, dynamic>) {
@@ -81,6 +82,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return WeeklySummaryWidget(dashboardData: _dashboardData);
       case DashboardWidgetId.topProducts:
         return TopProductsWidget(dashboardData: _dashboardData);
+      case DashboardWidgetId.profitBreakdown:
+        return ProfitBreakdownWidget(dashboardData: _dashboardData);
     }
   }
 
@@ -109,7 +112,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Hello, ${user?.name.split(' ').first ?? 'User'}',
+                              '${AppLocalizations.of(context)?.hello ?? 'Hello'}, ${user?.name.split(' ').first ?? 'User'}',
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -216,7 +219,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -265,8 +268,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             height: 44,
             decoration: BoxDecoration(
               color: isVoided
-                  ? AppColors.error.withOpacity(0.1)
-                  : AppColors.success.withOpacity(0.1),
+                  ? AppColors.error.withValues(alpha: 0.1)
+                  : AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(

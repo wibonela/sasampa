@@ -248,15 +248,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.email,
-                    hintText: 'Enter your email',
+                    hintText: l10n.enterYourEmail,
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.pleaseEnterEmail;
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return l10n.pleaseEnterValidEmail;
                     }
                     return null;
                   },
@@ -280,10 +280,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your PIN';
+                        return l10n.pleaseEnterPin;
                       }
                       if (value.length != 4) {
-                        return 'PIN must be 4 digits';
+                        return l10n.pinMustBeFourDigits;
                       }
                       return null;
                     },
@@ -296,7 +296,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: l10n.password,
-                      hintText: 'Enter your password',
+                      hintText: l10n.enterYourPassword,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -307,7 +307,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return l10n.pleaseEnterPassword;
                       }
                       return null;
                     },
@@ -420,6 +420,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppColors.textTertiary,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Language Toggle
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      final localeNotifier = ref.read(localeProvider.notifier);
+                      final current = ref.read(localeProvider);
+                      if (current.languageCode == 'sw') {
+                        localeNotifier.setLocale(const Locale('en'));
+                      } else {
+                        localeNotifier.setLocale(const Locale('sw'));
+                      }
+                    },
+                    icon: const Icon(Icons.language, size: 18),
+                    label: Text(
+                      ref.watch(localeProvider).languageCode == 'sw'
+                          ? 'English'
+                          : 'Kiswahili',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],

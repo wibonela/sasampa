@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -104,9 +105,10 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load: $e'),
+            content: Text('${l10n.failedToLoad}: $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -133,27 +135,28 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   }
 
   Future<void> _addCategory() async {
+    final l10n = AppLocalizations.of(context)!;
     final nameController = TextEditingController();
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Category'),
+        title: Text(l10n.addCategory),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Category Name',
+          decoration: InputDecoration(
+            labelText: l10n.categoryName,
             hintText: 'e.g., Raw Materials, Utilities',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Add'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -176,7 +179,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to add category: $e'),
+              content: Text('${l10n.failedToProcess}: $e'),
               backgroundColor: AppColors.error,
             ),
           );
@@ -186,11 +189,12 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   }
 
   Future<void> _saveExpense() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a category'),
+        SnackBar(
+          content: Text('${l10n.category} - ${l10n.required}'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -239,7 +243,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isEditing ? 'Expense updated' : 'Expense recorded'),
+            content: Text(isEditing ? l10n.expenseUpdated : l10n.expenseRecorded),
             backgroundColor: AppColors.success,
           ),
         );
@@ -249,7 +253,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save: $e'),
+            content: Text('${l10n.failedToLoad}: $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -261,12 +265,23 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     }
   }
 
+  String _getPaymentMethodLabel(String value, AppLocalizations l10n) {
+    return switch (value) {
+      'cash' => l10n.cash,
+      'mobile' => l10n.mobileMoney,
+      'card' => l10n.card,
+      'bank' => l10n.bankTransfer,
+      _ => value,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Expense' : 'Add Expense'),
+        title: Text(isEditing ? l10n.editExpense : l10n.addExpense),
         centerTitle: true,
         actions: [
           TextButton(
@@ -277,7 +292,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(l10n.save),
           ),
         ],
       ),
@@ -304,9 +319,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Category *',
-                                    style: TextStyle(
+                                  Text(
+                                    '${l10n.category} *',
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       color: AppColors.textSecondary,
@@ -324,7 +339,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                                         vertical: 12,
                                       ),
                                     ),
-                                    hint: const Text('Select'),
+                                    hint: Text(l10n.selectCategory),
                                     items: _categories.map((c) {
                                       return DropdownMenuItem<int>(
                                         value: c['id'],
@@ -341,14 +356,14 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                             IconButton(
                               onPressed: _addCategory,
                               icon: const Icon(Icons.add_circle_outline),
-                              tooltip: 'Add Category',
+                              tooltip: l10n.addCategory,
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Date *',
-                          style: TextStyle(
+                        Text(
+                          '${l10n.date} *',
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -394,9 +409,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Description *',
-                          style: TextStyle(
+                        Text(
+                          '${l10n.description} *',
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -412,7 +427,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                             ),
                           ),
                           validator: (v) =>
-                              v?.isEmpty == true ? 'Required' : null,
+                              v?.isEmpty == true ? l10n.required : null,
                         ),
                       ],
                     ),
@@ -436,9 +451,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Unit Price (TZS) *',
-                                    style: TextStyle(
+                                  Text(
+                                    '${l10n.unitPrice} *',
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       color: AppColors.textSecondary,
@@ -455,7 +470,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                                     ),
                                     onChanged: (_) => setState(() {}),
                                     validator: (v) =>
-                                        v?.isEmpty == true ? 'Required' : null,
+                                        v?.isEmpty == true ? l10n.required : null,
                                   ),
                                 ],
                               ),
@@ -465,9 +480,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Quantity *',
-                                    style: TextStyle(
+                                  Text(
+                                    '${l10n.quantity} *',
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       color: AppColors.textSecondary,
@@ -484,7 +499,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                                     ),
                                     onChanged: (_) => setState(() {}),
                                     validator: (v) =>
-                                        v?.isEmpty == true ? 'Required' : null,
+                                        v?.isEmpty == true ? l10n.required : null,
                                   ),
                                 ],
                               ),
@@ -492,9 +507,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Unit',
-                          style: TextStyle(
+                        Text(
+                          l10n.unit,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -512,7 +527,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                               vertical: 12,
                             ),
                           ),
-                          hint: const Text('Select Unit'),
+                          hint: Text(l10n.selectUnit),
                           items: _units.map((u) {
                             return DropdownMenuItem<String>(
                               value: u,
@@ -531,9 +546,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Total:',
-                                style: TextStyle(
+                              Text(
+                                '${l10n.total}:',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
@@ -565,9 +580,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Supplier',
-                          style: TextStyle(
+                        Text(
+                          l10n.supplier,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -577,16 +592,16 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                         TextFormField(
                           controller: _supplierController,
                           decoration: InputDecoration(
-                            hintText: 'Vendor or supplier name',
+                            hintText: l10n.vendorOrSupplierName,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Reference Number',
-                          style: TextStyle(
+                        Text(
+                          l10n.referenceNumber,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -596,7 +611,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                         TextFormField(
                           controller: _referenceController,
                           decoration: InputDecoration(
-                            hintText: 'Receipt or invoice number',
+                            hintText: l10n.receiptOrInvoiceNumber,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -618,9 +633,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Payment Method *',
-                          style: TextStyle(
+                        Text(
+                          '${l10n.paymentMethod} *',
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -665,7 +680,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      m['label'],
+                                      _getPaymentMethodLabel(m['value'], l10n),
                                       style: TextStyle(
                                         fontWeight: isSelected
                                             ? FontWeight.w600
@@ -697,9 +712,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Notes',
-                          style: TextStyle(
+                        Text(
+                          l10n.notes,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
@@ -710,7 +725,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           controller: _notesController,
                           maxLines: 3,
                           decoration: InputDecoration(
-                            hintText: 'Additional notes...',
+                            hintText: l10n.additionalNotes,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -744,7 +759,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                                     AlwaysStoppedAnimation(Colors.white),
                               ),
                             )
-                          : Text(isEditing ? 'Update Expense' : 'Save Expense'),
+                          : Text(isEditing ? l10n.updateExpense : l10n.saveExpense),
                     ),
                   ),
 

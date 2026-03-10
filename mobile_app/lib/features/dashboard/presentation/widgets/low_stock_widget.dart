@@ -17,9 +17,9 @@ class LowStockWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.warning.withOpacity(0.1),
+          color: AppColors.warning.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -27,7 +27,7 @@ class LowStockWidget extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.2),
+                color: AppColors.warning.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -48,7 +48,7 @@ class LowStockWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$lowStockCount products need restocking',
+                    '$lowStockCount ${AppLocalizations.of(context)?.productsNeedRestocking ?? 'products need restocking'}',
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
