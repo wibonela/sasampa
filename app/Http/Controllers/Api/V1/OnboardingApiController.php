@@ -29,6 +29,13 @@ class OnboardingApiController extends Controller
         ]);
 
         $user = DB::transaction(function () use ($validated) {
+            // Clean up any orphaned company from a previous failed registration
+            Company::where('email', $validated['email'])
+                ->where('name', 'Pending Setup')
+                ->where('status', Company::STATUS_PENDING)
+                ->whereDoesntHave('users')
+                ->delete();
+
             $company = Company::create([
                 'name' => 'Pending Setup',
                 'email' => $validated['email'],
@@ -86,6 +93,47 @@ class OnboardingApiController extends Controller
         $user->sendEmailVerificationNotification();
 
         return response()->json(['message' => 'Verification email sent.']);
+    }
+
+    /**
+     * Update email during verification (before verified)
+     */
+    public function updateEmail(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['error' => 'Email already verified. Cannot change.'], 422);
+        }
+
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        // Update user email
+        $user->update(['email' => $validated['email']]);
+
+        // Update company email too
+        $company = $user->company;
+        if ($company && $company->name === 'Pending Setup') {
+            // Clean up any orphaned company with the new email
+            Company::where('email', $validated['email'])
+                ->where('id', '!=', $company->id)
+                ->where('name', 'Pending Setup')
+                ->where('status', Company::STATUS_PENDING)
+                ->whereDoesntHave('users')
+                ->delete();
+
+            $company->update(['email' => $validated['email']]);
+        }
+
+        // Send new verification email
+        $user->sendEmailVerificationNotification();
+
+        return response()->json([
+            'message' => 'Email updated. New verification email sent.',
+            'email' => $validated['email'],
+        ]);
     }
 
     /**
