@@ -15,6 +15,13 @@ class InvitationController extends Controller
 {
     public function show(string $token): View|RedirectResponse
     {
+        // Log out any existing session so the invitation page is always accessible
+        if (Auth::check()) {
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+
         $user = User::findByInvitationToken($token);
 
         if (!$user) {
