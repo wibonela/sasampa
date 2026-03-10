@@ -91,10 +91,15 @@ Route::get('/privacy-policy', function () {
     return view('privacy-policy');
 })->name('privacy-policy');
 
-// App Update Guide (password-protected client-side)
-Route::get('/app-update-guide', function () {
-    return view('app-update-guide');
-})->name('app-update-guide');
+// Unified Guide (password-protected client-side) — iOS, Android, APIs, Server Config
+Route::get('/guide', function () {
+    return view('guide');
+})->name('guide');
+
+// Legacy redirects to unified guide
+Route::get('/app-update-guide', fn() => redirect('/guide#android'))->name('app-update-guide');
+Route::get('/whatsapp-api-guide', fn() => redirect('/guide#whatsapp'));
+Route::get('/api-setup-guide', fn() => redirect('/guide#whatsapp'));
 
 // Public Documentation
 Route::prefix('docs')->name('docs.')->group(function () {

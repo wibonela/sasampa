@@ -2494,134 +2494,134 @@ abstract class AppLocalizations {
 
   /// No description provided for @efdSettings.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Settings'**
+  /// In sw, this message translates to:
+  /// **'Mipangilio ya EFD'**
   String get efdSettings;
 
   /// No description provided for @traRegistration.
   ///
-  /// In en, this message translates to:
-  /// **'TRA Registration'**
+  /// In sw, this message translates to:
+  /// **'Usajili wa TRA'**
   String get traRegistration;
 
   /// No description provided for @vrnNumber.
   ///
-  /// In en, this message translates to:
-  /// **'VRN Number'**
+  /// In sw, this message translates to:
+  /// **'Namba ya VRN'**
   String get vrnNumber;
 
   /// No description provided for @efdSerialNumber.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Serial Number'**
+  /// In sw, this message translates to:
+  /// **'Namba ya Serial ya EFD'**
   String get efdSerialNumber;
 
   /// No description provided for @registerDevice.
   ///
-  /// In en, this message translates to:
-  /// **'Register Device'**
+  /// In sw, this message translates to:
+  /// **'Sajili Kifaa'**
   String get registerDevice;
 
   /// No description provided for @testConnection.
   ///
-  /// In en, this message translates to:
-  /// **'Test Connection'**
+  /// In sw, this message translates to:
+  /// **'Jaribu Muunganisho'**
   String get testConnection;
 
   /// No description provided for @efdEnabled.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Enabled'**
+  /// In sw, this message translates to:
+  /// **'EFD Imewashwa'**
   String get efdEnabled;
 
   /// No description provided for @efdDisabled.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Disabled'**
+  /// In sw, this message translates to:
+  /// **'EFD Imezimwa'**
   String get efdDisabled;
 
   /// No description provided for @efdEnvironment.
   ///
-  /// In en, this message translates to:
-  /// **'Environment'**
+  /// In sw, this message translates to:
+  /// **'Mazingira'**
   String get efdEnvironment;
 
   /// No description provided for @sandbox.
   ///
-  /// In en, this message translates to:
-  /// **'Sandbox'**
+  /// In sw, this message translates to:
+  /// **'Majaribio'**
   String get sandbox;
 
   /// No description provided for @production.
   ///
-  /// In en, this message translates to:
-  /// **'Production'**
+  /// In sw, this message translates to:
+  /// **'Uzalishaji'**
   String get production;
 
   /// No description provided for @fiscalReceipt.
   ///
-  /// In en, this message translates to:
-  /// **'Fiscal Receipt'**
+  /// In sw, this message translates to:
+  /// **'Risiti ya Kodi'**
   String get fiscalReceipt;
 
   /// No description provided for @verificationCode.
   ///
-  /// In en, this message translates to:
-  /// **'Verification Code'**
+  /// In sw, this message translates to:
+  /// **'Nambari ya Uthibitisho'**
   String get verificationCode;
 
   /// No description provided for @pendingSubmissions.
   ///
-  /// In en, this message translates to:
-  /// **'Pending Submissions'**
+  /// In sw, this message translates to:
+  /// **'Risiti Zinazosubiri'**
   String get pendingSubmissions;
 
   /// No description provided for @retryFailed.
   ///
-  /// In en, this message translates to:
-  /// **'Retry Failed'**
+  /// In sw, this message translates to:
+  /// **'Jaribu Tena Zilizoshindwa'**
   String get retryFailed;
 
   /// No description provided for @taxCategory.
   ///
-  /// In en, this message translates to:
-  /// **'Tax Category'**
+  /// In sw, this message translates to:
+  /// **'Aina ya Kodi'**
   String get taxCategory;
 
   /// No description provided for @standardRate.
   ///
-  /// In en, this message translates to:
-  /// **'Standard Rate (18%)'**
+  /// In sw, this message translates to:
+  /// **'Kiwango cha Kawaida (18%)'**
   String get standardRate;
 
   /// No description provided for @zeroRated.
   ///
-  /// In en, this message translates to:
-  /// **'Zero Rated'**
+  /// In sw, this message translates to:
+  /// **'Kiwango Sifuri'**
   String get zeroRated;
 
   /// No description provided for @exempt.
   ///
-  /// In en, this message translates to:
-  /// **'Exempt'**
+  /// In sw, this message translates to:
+  /// **'Imesamehewa'**
   String get exempt;
 
   /// No description provided for @efdRegistered.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Registered'**
+  /// In sw, this message translates to:
+  /// **'EFD Imesajiliwa'**
   String get efdRegistered;
 
   /// No description provided for @efdNotRegistered.
   ///
-  /// In en, this message translates to:
-  /// **'EFD Not Registered'**
+  /// In sw, this message translates to:
+  /// **'EFD Haijasajiliwa'**
   String get efdNotRegistered;
 
   /// No description provided for @efdAllSubmitted.
   ///
-  /// In en, this message translates to:
-  /// **'All receipts submitted'**
+  /// In sw, this message translates to:
+  /// **'Risiti zote zimetumwa'**
   String get efdAllSubmitted;
 
   /// No description provided for @whatsappReceipts.
@@ -2785,6 +2785,126 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Imetumwa kwa SMS'**
   String get sentViaSms;
+
+  /// No description provided for @changesSaved.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mabadiliko yamehifadhiwa'**
+  String get changesSaved;
+
+  /// No description provided for @unsavedChanges.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mabadiliko Hayajahifadhiwa'**
+  String get unsavedChanges;
+
+  /// No description provided for @unsavedChangesMessage.
+  ///
+  /// In sw, this message translates to:
+  /// **'Una mabadiliko ambayo hayajahifadhiwa. Unataka kuyatumia kabla ya kuondoka?'**
+  String get unsavedChangesMessage;
+
+  /// No description provided for @discard.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tupa'**
+  String get discard;
+
+  /// No description provided for @apply.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tumia'**
+  String get apply;
+
+  /// No description provided for @applyChanges.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tumia Mabadiliko'**
+  String get applyChanges;
+
+  /// No description provided for @chooseLayoutPreset.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chagua mpangilio wa haraka wa dashibodi yako'**
+  String get chooseLayoutPreset;
+
+  /// No description provided for @classicDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Muhtasari kamili'**
+  String get classicDesc;
+
+  /// No description provided for @analyticsDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inazingatia data'**
+  String get analyticsDesc;
+
+  /// No description provided for @compactDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mtazamo mfupi'**
+  String get compactDesc;
+
+  /// No description provided for @widgetsVisible.
+  ///
+  /// In sw, this message translates to:
+  /// **'vinaonekana'**
+  String get widgetsVisible;
+
+  /// No description provided for @todayStatsDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mauzo, oda na mapato ya leo'**
+  String get todayStatsDesc;
+
+  /// No description provided for @quickActionsDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji wa haraka wa kazi za kawaida'**
+  String get quickActionsDesc;
+
+  /// No description provided for @lowStockAlertDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Bidhaa zinazopungua'**
+  String get lowStockAlertDesc;
+
+  /// No description provided for @recentTransactionsDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Shughuli za mauzo za hivi karibuni'**
+  String get recentTransactionsDesc;
+
+  /// No description provided for @weeklySummaryDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Chati ya utendaji wa siku 7'**
+  String get weeklySummaryDesc;
+
+  /// No description provided for @topProductsDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Bidhaa zinazouzwa zaidi'**
+  String get topProductsDesc;
+
+  /// No description provided for @profitBreakdownDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mapato, gharama na uchambuzi wa faida'**
+  String get profitBreakdownDesc;
+
+  /// No description provided for @landingPageDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Skrini inayoonyeshwa unapofungua programu'**
+  String get landingPageDesc;
+
+  /// No description provided for @totalCosts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Gharama Zote'**
+  String get totalCosts;
 }
 
 class _AppLocalizationsDelegate
