@@ -22,6 +22,7 @@ class OnboardingApiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
             'password' => ['required', 'confirmed', Password::min(8)],
             'device_name' => 'required|string',
         ]);
@@ -30,6 +31,7 @@ class OnboardingApiController extends Controller
             $company = Company::create([
                 'name' => 'Pending Setup',
                 'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'status' => Company::STATUS_PENDING,
                 'onboarding_step' => 2,
             ]);
@@ -37,6 +39,7 @@ class OnboardingApiController extends Controller
             return User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'password' => Hash::make($validated['password']),
                 'company_id' => $company->id,
                 'role' => 'company_owner',
