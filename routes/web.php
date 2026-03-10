@@ -107,16 +107,16 @@ Route::prefix('docs')->name('docs.')->group(function () {
 // CSRF token refresh endpoint (prevents "page expired" on long forms)
 Route::get('/csrf-token', fn() => response()->json(['token' => csrf_token()]));
 
+// Staff invitation acceptance (no auth restriction - logged in users should also access)
+Route::get('/invitation/{token}', [InvitationController::class, 'show'])->name('invitation.show');
+Route::post('/invitation/{token}', [InvitationController::class, 'accept'])->name('invitation.accept');
+
 // Onboarding - Step 1 (guests only)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [OnboardingController::class, 'showStep1'])->name('onboarding.step1');
     Route::post('/register', [OnboardingController::class, 'processStep1']);
     // Keep alias for old route
     Route::get('/onboarding', fn() => redirect()->route('onboarding.step1'))->name('company.register');
-
-    // Staff invitation acceptance
-    Route::get('/invitation/{token}', [InvitationController::class, 'show'])->name('invitation.show');
-    Route::post('/invitation/{token}', [InvitationController::class, 'accept'])->name('invitation.accept');
 
     // PIN Login
     Route::get('/pin-login', [PinLoginController::class, 'showForm'])->name('pos.pin-login');
