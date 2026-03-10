@@ -40,5 +40,25 @@
 
     <!-- Sanduku Feedback -->
     @include('components.sanduku')
+
+    {{-- Refresh CSRF token before form submit to prevent "page expired" --}}
+    <script>
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetch('/csrf-token', { credentials: 'same-origin' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var tokenInput = form.querySelector('input[name="_token"]');
+                        if (tokenInput && data.token) tokenInput.value = data.token;
+                        form.removeEventListener('submit', arguments.callee);
+                        form.submit();
+                    }).catch(function() {
+                        form.removeEventListener('submit', arguments.callee);
+                        form.submit();
+                    });
+            });
+        });
+    </script>
 </body>
 </html>
