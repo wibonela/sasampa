@@ -39,6 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoginRoute = location == '/login';
       final isRegisterRoute = location == '/register';
       final isOnboardingRoute = location == '/verify-email' ||
+          location.startsWith('/verify-email/') ||
           location == '/business-details' ||
           location == '/onboarding-complete';
       final isMobileAccessRoute = location == '/mobile-access';
@@ -48,8 +49,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Not logged in - reset redirect flag and allow login/register only
-      if (!isLoggedIn && !isPublicRoute) {
+      // Not logged in - reset redirect flag and allow login/register/onboarding only
+      if (!isLoggedIn && !isPublicRoute && !isOnboardingRoute) {
         _hasRedirectedToDefaultTab = false;
         return '/login';
       }
@@ -100,6 +101,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/verify-email',
         builder: (context, state) => const VerifyEmailScreen(),
+      ),
+      // Deep link route for email verification — redirects are handled by main.dart
+      GoRoute(
+        path: '/verify-email/:id/:hash',
+        redirect: (context, state) => '/verify-email',
       ),
       GoRoute(
         path: '/business-details',
@@ -157,47 +163,46 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/orders',
             builder: (context, state) => const OrdersScreen(),
           ),
+          GoRoute(
+            path: '/orders/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return OrderDetailScreen(orderId: id);
+            },
+          ),
+          GoRoute(
+            path: '/store-settings',
+            builder: (context, state) => const StoreSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/dashboard-customization',
+            builder: (context, state) => const DashboardCustomizationScreen(),
+          ),
+          GoRoute(
+            path: '/expenses/add',
+            builder: (context, state) => const AddExpenseScreen(),
+          ),
+          GoRoute(
+            path: '/expenses/edit/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return AddExpenseScreen(expenseId: id);
+            },
+          ),
+          GoRoute(
+            path: '/expenses/summary',
+            builder: (context, state) => const ExpenseSummaryScreen(),
+          ),
+          // WebView screen for web-only features
+          GoRoute(
+            path: '/webview',
+            builder: (context, state) {
+              final path = state.uri.queryParameters['path'] ?? '/dashboard';
+              final title = state.uri.queryParameters['title'] ?? 'Sasampa';
+              return WebViewScreen(webPath: path, title: title);
+            },
+          ),
         ],
-      ),
-      // Standalone screens (pushed on top, no bottom nav)
-      GoRoute(
-        path: '/orders/:id',
-        builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return OrderDetailScreen(orderId: id);
-        },
-      ),
-      GoRoute(
-        path: '/store-settings',
-        builder: (context, state) => const StoreSettingsScreen(),
-      ),
-      GoRoute(
-        path: '/dashboard-customization',
-        builder: (context, state) => const DashboardCustomizationScreen(),
-      ),
-      GoRoute(
-        path: '/expenses/add',
-        builder: (context, state) => const AddExpenseScreen(),
-      ),
-      GoRoute(
-        path: '/expenses/edit/:id',
-        builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return AddExpenseScreen(expenseId: id);
-        },
-      ),
-      GoRoute(
-        path: '/expenses/summary',
-        builder: (context, state) => const ExpenseSummaryScreen(),
-      ),
-      // WebView screen for web-only features
-      GoRoute(
-        path: '/webview',
-        builder: (context, state) {
-          final path = state.uri.queryParameters['path'] ?? '/dashboard';
-          final title = state.uri.queryParameters['title'] ?? 'Sasampa';
-          return WebViewScreen(webPath: path, title: title);
-        },
       ),
     ],
   );

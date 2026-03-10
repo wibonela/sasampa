@@ -52,8 +52,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to logout. Please try again.'),
+          SnackBar(
+            content: Text(l10n.failedToLogout),
             backgroundColor: AppColors.error,
           ),
         );
@@ -66,6 +66,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _changePin() async {
+    final l10n = AppLocalizations.of(context)!;
     final currentPinController = TextEditingController();
     final newPinController = TextEditingController();
     final confirmPinController = TextEditingController();
@@ -73,7 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change PIN'),
+        title: Text(l10n.changePin),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -82,8 +83,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               keyboardType: TextInputType.number,
               maxLength: 6,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Current PIN',
+              decoration: InputDecoration(
+                labelText: l10n.currentPin,
                 counterText: '',
               ),
             ),
@@ -93,8 +94,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               keyboardType: TextInputType.number,
               maxLength: 6,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New PIN (4-6 digits)',
+              decoration: InputDecoration(
+                labelText: l10n.newPin,
                 counterText: '',
               ),
             ),
@@ -104,8 +105,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               keyboardType: TextInputType.number,
               maxLength: 6,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm New PIN',
+              decoration: InputDecoration(
+                labelText: l10n.confirmNewPin,
                 counterText: '',
               ),
             ),
@@ -114,19 +115,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
               if (newPinController.text.length < 4) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PIN must be at least 4 digits')),
+                  SnackBar(content: Text(l10n.pinTooShort)),
                 );
                 return;
               }
               if (newPinController.text != confirmPinController.text) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('PINs do not match')),
+                  SnackBar(content: Text(l10n.pinsDoNotMatch)),
                 );
                 return;
               }
@@ -143,15 +144,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to change PIN'),
+                    SnackBar(
+                      content: Text('${l10n.failedToProcess}: $e'),
                       backgroundColor: AppColors.error,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Change'),
+            child: Text(l10n.changeAction),
           ),
         ],
       ),
@@ -159,8 +160,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     if (result == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PIN changed successfully'),
+        SnackBar(
+          content: Text(l10n.pinChangedSuccessfully),
           backgroundColor: AppColors.success,
         ),
       );
@@ -168,6 +169,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _changePassword() async {
+    final l10n = AppLocalizations.of(context)!;
     final currentPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -175,7 +177,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
+        title: Text(l10n.changePassword),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -183,24 +185,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               TextField(
                 controller: currentPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Current Password',
+                decoration: InputDecoration(
+                  labelText: l10n.currentPassword,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: newPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'New Password',
+                decoration: InputDecoration(
+                  labelText: l10n.newPassword,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: confirmPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm New Password',
+                decoration: InputDecoration(
+                  labelText: l10n.confirmNewPassword,
                 ),
               ),
             ],
@@ -209,19 +211,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
               if (newPasswordController.text.length < 8) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password must be at least 8 characters')),
+                  SnackBar(content: Text(l10n.passwordTooShort)),
                 );
                 return;
               }
               if (newPasswordController.text != confirmPasswordController.text) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Passwords do not match')),
+                  SnackBar(content: Text(l10n.passwordsDoNotMatch)),
                 );
                 return;
               }
@@ -239,15 +241,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to change password'),
+                    SnackBar(
+                      content: Text('${l10n.failedToProcess}: $e'),
                       backgroundColor: AppColors.error,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Change'),
+            child: Text(l10n.changeAction),
           ),
         ],
       ),
@@ -255,8 +257,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     if (result == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password changed successfully'),
+        SnackBar(
+          content: Text(l10n.passwordChangedSuccessfully),
           backgroundColor: AppColors.success,
         ),
       );
@@ -264,23 +266,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _showPrinterSetup() async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Printer Setup'),
+        title: Text(l10n.printerSetup),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Receipt Printing Options:',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            Text(
+              l10n.receiptPrintingOptions,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.print, color: AppColors.primary),
-              title: const Text('AirPrint'),
-              subtitle: const Text('Print to any AirPrint-enabled printer'),
+              title: Text(l10n.airprint),
+              subtitle: Text(l10n.printToAnyPrinter),
               contentPadding: EdgeInsets.zero,
               onTap: () async {
                 Navigator.pop(context);
@@ -291,15 +294,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final pdf = await _generateTestReceipt();
                     return pdf;
                   },
-                  name: 'Test Receipt',
+                  name: l10n.testReceipt,
                 );
               },
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.share, color: AppColors.primary),
-              title: const Text('Share as PDF'),
-              subtitle: const Text('Save or share receipts as PDF'),
+              title: Text(l10n.shareAsPdf),
+              subtitle: Text(l10n.saveOrShareReceipts),
               contentPadding: EdgeInsets.zero,
               onTap: () async {
                 Navigator.pop(context);
@@ -308,16 +311,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tip: Use the Print or Share buttons on receipts to print directly.',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            Text(
+              l10n.printerTip,
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -348,20 +351,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _showNotificationSettings() async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Notification Settings'),
+        title: Text(l10n.notifications),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Manage your notification preferences:'),
+            Text(l10n.manageNotificationPreferences),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.settings, color: AppColors.primary),
-              title: const Text('Open System Settings'),
-              subtitle: const Text('Configure app notifications'),
+              title: Text(l10n.openSystemSettings),
+              subtitle: Text(l10n.configureNotifications),
               contentPadding: EdgeInsets.zero,
               onTap: () {
                 Navigator.pop(context);
@@ -369,20 +373,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Notifications include:',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            Text(
+              l10n.notificationsInclude,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
             const SizedBox(height: 8),
-            const Text('Low stock alerts', style: TextStyle(fontSize: 13)),
-            const Text('New order notifications', style: TextStyle(fontSize: 13)),
-            const Text('System updates', style: TextStyle(fontSize: 13)),
+            Text(l10n.lowStockAlerts, style: const TextStyle(fontSize: 13)),
+            Text(l10n.newOrderNotifications, style: const TextStyle(fontSize: 13)),
+            Text(l10n.systemUpdates, style: const TextStyle(fontSize: 13)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -515,7 +519,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingItem(
                   icon: Icons.lock_outline,
                   title: l10n.changePin,
-                  subtitle: 'PIN',
+                  subtitle: l10n.pin,
                   onTap: _changePin,
                 ),
                 const Divider(height: 1, indent: 56),
@@ -601,21 +605,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Help & Support'),
-                        content: const Column(
+                        title: Text(l10n.helpSupport),
+                        content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('For assistance, please contact:'),
-                            SizedBox(height: 12),
-                            Text('Email: support@sasampa.com'),
-                            Text('Phone: +255 123 456 789'),
+                            Text(l10n.forAssistanceContact),
+                            const SizedBox(height: 12),
+                            const Text('Email: support@sasampa.com'),
+                            const Text('Phone: +255 123 456 789'),
                           ],
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
+                            child: Text(l10n.close),
                           ),
                         ],
                       ),
@@ -631,16 +635,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('About Sasampa POS'),
-                        content: const Column(
+                        title: Text('${l10n.aboutSasampa} POS'),
+                        content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Version: 1.0.0'),
-                            SizedBox(height: 8),
-                            Text('A modern point of sale system for your business.'),
-                            SizedBox(height: 16),
-                            Text(
+                            Text('${l10n.version}: 1.0.0'),
+                            const SizedBox(height: 8),
+                            Text(l10n.modernPosSystem),
+                            const SizedBox(height: 16),
+                            const Text(
                               '2024 Sasampa POS',
                               style: TextStyle(color: AppColors.textSecondary),
                             ),
@@ -649,7 +653,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
+                            child: Text(l10n.close),
                           ),
                         ],
                       ),

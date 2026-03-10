@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -40,9 +41,10 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load summary: $e'),
+            content: Text('${l10n.failedToLoad}: $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -69,10 +71,11 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
-        title: const Text('Expense Summary'),
+        title: Text(l10n.expenseSummary),
         centerTitle: true,
       ),
       body: _isLoading
@@ -99,9 +102,9 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Period',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.period,
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     color: AppColors.textSecondary,
                                   ),
@@ -140,9 +143,9 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Total Expenses',
-                          style: TextStyle(
+                        Text(
+                          l10n.totalExpensesLabel,
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
                           ),
@@ -158,7 +161,7 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${_summary?['totals']?['count'] ?? 0} records',
+                          '${_summary?['totals']?['count'] ?? 0} ${l10n.records.toLowerCase()}',
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
@@ -171,9 +174,9 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                   const SizedBox(height: 24),
 
                   // By Category
-                  const Text(
-                    'BY CATEGORY',
-                    style: TextStyle(
+                  Text(
+                    l10n.byCategory,
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -238,11 +241,11 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                           );
                         }),
                         if ((_summary?['by_category'] as List?)?.isEmpty ?? true)
-                          const Padding(
-                            padding: EdgeInsets.all(24),
+                          Padding(
+                            padding: const EdgeInsets.all(24),
                             child: Text(
-                              'No expenses in this period',
-                              style: TextStyle(color: AppColors.textSecondary),
+                              l10n.noExpensesInPeriod,
+                              style: const TextStyle(color: AppColors.textSecondary),
                             ),
                           ),
                       ],
@@ -252,9 +255,9 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                   const SizedBox(height: 24),
 
                   // By Payment Method
-                  const Text(
-                    'BY PAYMENT METHOD',
-                    style: TextStyle(
+                  Text(
+                    l10n.byPaymentMethod,
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -270,10 +273,10 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                       children: [
                         ...(_summary?['by_payment_method'] as List? ?? []).map((item) {
                           final methodLabel = switch (item['method']) {
-                            'cash' => 'Cash',
-                            'mobile' => 'Mobile Money',
-                            'card' => 'Card',
-                            'bank' => 'Bank Transfer',
+                            'cash' => l10n.cash,
+                            'mobile' => l10n.mobileMoney,
+                            'card' => l10n.card,
+                            'bank' => l10n.bankTransfer,
                             _ => item['method'],
                           };
                           final icon = switch (item['method']) {
@@ -300,7 +303,7 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                                   child: Icon(icon, color: AppColors.primary, size: 20),
                                 ),
                                 title: Text(methodLabel),
-                                subtitle: Text('${item['count']} transactions'),
+                                subtitle: Text('${item['count']} ${l10n.transactions.toLowerCase()}'),
                                 trailing: Text(
                                   'TZS ${_currencyFormat.format(item['total'])}',
                                   style: const TextStyle(
@@ -313,11 +316,11 @@ class _ExpenseSummaryScreenState extends ConsumerState<ExpenseSummaryScreen> {
                           );
                         }),
                         if ((_summary?['by_payment_method'] as List?)?.isEmpty ?? true)
-                          const Padding(
-                            padding: EdgeInsets.all(24),
+                          Padding(
+                            padding: const EdgeInsets.all(24),
                             child: Text(
-                              'No expenses in this period',
-                              style: TextStyle(color: AppColors.textSecondary),
+                              l10n.noExpensesInPeriod,
+                              style: const TextStyle(color: AppColors.textSecondary),
                             ),
                           ),
                       ],
