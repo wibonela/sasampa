@@ -20,7 +20,7 @@ return [
         'access_token' => env('META_WHATSAPP_TOKEN', ''),
         'phone_number_id' => env('META_WHATSAPP_PHONE_ID', ''),
         'business_account_id' => env('META_WHATSAPP_BUSINESS_ID', ''),
-        'api_version' => env('META_WHATSAPP_API_VERSION', 'v22.0'),
+        'api_version' => env('META_WHATSAPP_API_VERSION', 'v23.0'),
     ],
 
 ];

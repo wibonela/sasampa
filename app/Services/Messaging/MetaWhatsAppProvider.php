@@ -27,7 +27,7 @@ class MetaWhatsAppProvider implements MessagingProviderInterface
     {
         $this->token = config('messaging.meta.access_token', '');
         $this->phoneNumberId = config('messaging.meta.phone_number_id', '');
-        $this->apiVersion = config('messaging.meta.api_version', 'v22.0');
+        $this->apiVersion = config('messaging.meta.api_version', 'v23.0');
     }
 
     public function sendWhatsApp(string $phone, string $message): array
