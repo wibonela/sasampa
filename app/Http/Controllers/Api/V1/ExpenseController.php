@@ -360,6 +360,28 @@ class ExpenseController extends Controller
     }
 
     /**
+     * Get distinct suppliers from previous expenses
+     */
+    public function suppliers(Request $request): JsonResponse
+    {
+        $query = Expense::whereNotNull('supplier')
+            ->where('supplier', '!=', '')
+            ->select('supplier')
+            ->distinct()
+            ->orderBy('supplier');
+
+        if ($request->filled('q')) {
+            $query->where('supplier', 'like', '%' . $request->input('q') . '%');
+        }
+
+        $suppliers = $query->limit(20)->pluck('supplier');
+
+        return response()->json([
+            'data' => $suppliers,
+        ]);
+    }
+
+    /**
      * Create a new expense category
      */
     public function storeCategory(Request $request): JsonResponse

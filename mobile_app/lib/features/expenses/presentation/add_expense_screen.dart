@@ -20,6 +20,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   bool _isSaving = false;
 
   List<Map<String, dynamic>> _categories = [];
+  List<String> _knownSuppliers = [];
   int? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
   String _selectedPaymentMethod = 'cash';
@@ -76,10 +77,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       final api = ref.read(apiClientProvider);
       final categoriesResponse = await api.getExpenseCategories();
 
+      // Load suppliers in parallel
+      final suppliersResponse = await api.getExpenseSuppliers();
       setState(() {
         _categories = List<Map<String, dynamic>>.from(
           categoriesResponse.data['data'] ?? [],
         );
+        _knownSuppliers = List<String>.from(suppliersResponse.data['data'] ?? []);
       });
 
       // If editing, load the expense data
@@ -589,14 +593,40 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _supplierController,
-                          decoration: InputDecoration(
-                            hintText: l10n.vendorOrSupplierName,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
+                        Autocomplete<String>(
+                          optionsBuilder: (textEditingValue) {
+                            if (textEditingValue.text.isEmpty) {
+                              return _knownSuppliers;
+                            }
+                            return _knownSuppliers.where((s) =>
+                              s.toLowerCase().contains(textEditingValue.text.toLowerCase()),
+                            );
+                          },
+                          onSelected: (value) {
+                            _supplierController.text = value;
+                          },
+                          fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                            // Sync with our controller
+                            if (controller.text != _supplierController.text && _supplierController.text.isNotEmpty && controller.text.isEmpty) {
+                              controller.text = _supplierController.text;
+                            }
+                            controller.addListener(() {
+                              _supplierController.text = controller.text;
+                            });
+                            return TextFormField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                hintText: l10n.vendorOrSupplierName,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                suffixIcon: _knownSuppliers.isNotEmpty
+                                    ? const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary)
+                                    : null,
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 16),
                         Text(

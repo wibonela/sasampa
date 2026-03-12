@@ -436,7 +436,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     icon: Icons.receipt_long_outlined,
                     title: l10n.efdSettings,
                     subtitle: l10n.traRegistration,
-                    onTap: () => context.push('/efd-settings'),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${l10n.efdSettings} - ${l10n.comingSoon}'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        l10n.comingSoon,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.warning),
+                      ),
+                    ),
                   ),
                 ],
               ],

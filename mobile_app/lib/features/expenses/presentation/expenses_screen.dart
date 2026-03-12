@@ -79,14 +79,30 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       final categoriesResponse = results[0];
       final expensesResponse = results[1];
 
+      final expenses = List<Map<String, dynamic>>.from(
+        expensesResponse.data['data'] ?? [],
+      );
+
+      // getTodayExpenses returns 'summary', getExpenses doesn't - compute from list
+      Map<String, dynamic> summary;
+      if (expensesResponse.data['summary'] != null) {
+        summary = expensesResponse.data['summary'];
+      } else {
+        final totalAmount = expenses.fold<double>(
+          0, (sum, e) => sum + ((e['total'] ?? e['amount'] ?? 0) as num).toDouble(),
+        );
+        summary = {
+          'total_amount': totalAmount,
+          'total_count': expenses.length,
+        };
+      }
+
       setState(() {
         _categories = List<Map<String, dynamic>>.from(
           categoriesResponse.data['data'] ?? [],
         );
-        _expenses = List<Map<String, dynamic>>.from(
-          expensesResponse.data['data'] ?? [],
-        );
-        _summary = expensesResponse.data['summary'] ?? {};
+        _expenses = expenses;
+        _summary = summary;
         _isLoading = false;
       });
     } catch (e) {
@@ -195,7 +211,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                         children: [
                           Expanded(
                             child: _buildSummaryCard(
-                              l10n.todayExpenses,
+                              _getDateFilterLabel(l10n),
                               'TZS ${_currencyFormat.format(_summary['total_amount'] ?? 0)}',
                               Icons.wallet_outlined,
                               AppColors.error,
