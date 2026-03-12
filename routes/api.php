@@ -56,6 +56,8 @@ Route::prefix('v1')->group(function () {
         */
         Route::prefix('auth')->group(function () {
             Route::get('/user', [AuthController::class, 'user']);
+            Route::put('/user', [AuthController::class, 'updateProfile']);
+            Route::delete('/user', [AuthController::class, 'deleteAccount']);
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/logout-all', [AuthController::class, 'logoutAll']);
             Route::post('/pin', [AuthController::class, 'setPin']);
