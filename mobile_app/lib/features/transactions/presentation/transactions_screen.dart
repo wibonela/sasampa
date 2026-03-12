@@ -92,22 +92,31 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     try {
       final api = ref.read(apiClientProvider);
 
-      final results = await Future.wait([
-        api.getSalesInsights(),
-        api.getTransactions(
-          search: _searchQuery.isNotEmpty ? _searchQuery : null,
-          paymentMethod: _paymentFilter,
-        ),
-      ]);
+      // Load transactions (required)
+      final txResponse = await api.getTransactions(
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        paymentMethod: _paymentFilter,
+      );
 
       setState(() {
-        _insights = results[0].data['data'];
-        _transactions = (results[1].data['data'] as List)
+        _transactions = (txResponse.data['data'] as List)
             .map((e) => Transaction.fromJson(e))
             .toList();
         _hasMore = _transactions.length >= 20;
         _isLoading = false;
       });
+
+      // Load insights separately (non-blocking)
+      try {
+        final insightsResponse = await api.getSalesInsights();
+        if (mounted) {
+          setState(() {
+            _insights = insightsResponse.data['data'];
+          });
+        }
+      } catch (_) {
+        // Insights failed — page still works with transactions
+      }
     } catch (e) {
       setState(() {
         _error = extractErrorMessage(e, 'Failed to load');
@@ -332,7 +341,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     title: l10n.today,
                     value: _currencyFormat.format((today['total'] ?? 0).toDouble()),
                     subtitle: '${today['count'] ?? 0} ${l10n.sales.toLowerCase()}',
-                    change: (today['total_change_percent'] ?? 0).toDouble(),
+                    change: (today['total_change_pct'] ?? 0).toDouble(),
                     changeLabel: l10n.vsYesterday,
                   ),
                 ),
@@ -355,7 +364,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     title: l10n.thisWeek,
                     value: _currencyFormat.format((week['total'] ?? 0).toDouble()),
                     subtitle: '${week['count'] ?? 0} ${l10n.sales.toLowerCase()}',
-                    change: (week['total_change_percent'] ?? 0).toDouble(),
+                    change: (week['total_change_pct'] ?? 0).toDouble(),
                     changeLabel: l10n.vsLastWeek,
                   ),
                 ),
@@ -365,7 +374,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     title: l10n.thisMonth,
                     value: _currencyFormat.format((month['total'] ?? 0).toDouble()),
                     subtitle: '${month['count'] ?? 0} ${l10n.sales.toLowerCase()}',
-                    change: (month['total_change_percent'] ?? 0).toDouble(),
+                    change: (month['total_change_pct'] ?? 0).toDouble(),
                     changeLabel: l10n.vsLastMonth,
                   ),
                 ),
