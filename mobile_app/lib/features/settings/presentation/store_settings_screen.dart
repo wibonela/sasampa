@@ -139,6 +139,8 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.uploadLogo(picked.path);
+      // Refresh user data so dashboard shows the new logo
+      await ref.read(authProvider.notifier).refreshUser();
       setState(() {
         _logoUrl = response.data['data']?['logo_url'] ?? response.data['logo_url'];
         _isUploadingLogo = false;
@@ -158,6 +160,7 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
     try {
       final api = ref.read(apiClientProvider);
       await api.removeLogo();
+      await ref.read(authProvider.notifier).refreshUser();
       setState(() {
         _logoUrl = null;
         _isUploadingLogo = false;

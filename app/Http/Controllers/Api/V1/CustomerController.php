@@ -14,7 +14,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Customer::query();
+        $query = Customer::where('company_id', auth()->user()->company_id);
 
         if ($request->filled('search')) {
             $query->search($request->input('search'));
@@ -42,7 +42,8 @@ class CustomerController extends Controller
     {
         $request->validate(['q' => 'required|string|min:1']);
 
-        $customers = Customer::active()
+        $customers = Customer::where('company_id', auth()->user()->company_id)
+            ->active()
             ->search($request->input('q'))
             ->limit(10)
             ->get();
