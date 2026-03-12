@@ -95,6 +95,18 @@ class POSController extends Controller
                     $customerName = $customerName ?: $customer->name;
                     $customerPhone = $customerPhone ?: $customer->phone;
                     $customerTin = $customerTin ?: $customer->tin;
+                } elseif ($customerName && $customerPhone) {
+                    // Auto-create or find customer when name + phone provided
+                    $customer = Customer::firstOrCreate(
+                        ['phone' => $customerPhone, 'company_id' => $user->company_id],
+                        [
+                            'name' => $customerName,
+                            'tin' => $customerTin,
+                            'credit_limit' => 0,
+                            'current_balance' => 0,
+                        ]
+                    );
+                    $customerId = $customer->id;
                 }
 
                 // Credit payment validation
