@@ -90,6 +90,7 @@ class BackfillCustomersFromTransactions extends Command
                 $existing = Customer::withoutGlobalScope('company')->create([
                     'company_id' => $row->company_id,
                     'name' => $row->customer_name,
+                    'phone' => '',
                     'tin' => $row->customer_tin,
                     'credit_limit' => 0,
                     'current_balance' => 0,
