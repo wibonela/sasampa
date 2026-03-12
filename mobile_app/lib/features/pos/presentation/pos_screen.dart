@@ -57,11 +57,18 @@ class _POSScreenState extends ConsumerState<POSScreen> {
 
     ref.read(cartProvider.notifier).addProduct(product);
 
+    // Brief, non-intrusive feedback - dismiss any previous one first
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${product.name} ${AppLocalizations.of(context)!.addedToCart}'),
-        duration: const Duration(seconds: 1),
+        duration: const Duration(milliseconds: 800),
         behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.success,
+        dismissDirection: DismissDirection.horizontal,
+        margin: const EdgeInsets.only(bottom: 60, left: 16, right: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

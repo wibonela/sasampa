@@ -4,6 +4,7 @@ class User {
   final String email;
   final String role;
   final bool hasPin;
+  final bool emailVerified;
   final Company? company;
   final Branch? currentBranch;
   final List<String> permissions;
@@ -14,6 +15,7 @@ class User {
     required this.email,
     required this.role,
     required this.hasPin,
+    this.emailVerified = false,
     this.company,
     this.currentBranch,
     this.permissions = const [],
@@ -26,6 +28,7 @@ class User {
       email: json['email'],
       role: json['role'],
       hasPin: json['has_pin'] ?? false,
+      emailVerified: json['email_verified'] ?? false,
       company: json['company'] != null ? Company.fromJson(json['company']) : null,
       currentBranch: json['current_branch'] != null ? Branch.fromJson(json['current_branch']) : null,
       permissions: json['permissions'] != null
@@ -41,6 +44,7 @@ class User {
       'email': email,
       'role': role,
       'has_pin': hasPin,
+      'email_verified': emailVerified,
       'company': company?.toJson(),
       'current_branch': currentBranch?.toJson(),
       'permissions': permissions,
@@ -50,6 +54,20 @@ class User {
   bool get isPlatformAdmin => role == 'platform_admin';
   bool get isCompanyOwner => role == 'company_owner';
   bool get isCashier => role == 'cashier';
+
+  /// Whether this user still needs to complete onboarding steps
+  bool get needsOnboarding {
+    if (company == null) return true;
+    return !company!.onboardingCompleted;
+  }
+
+  /// Get the correct onboarding route for the user's current state
+  String? get onboardingRoute {
+    if (!emailVerified) return '/verify-email';
+    if (company == null || company!.onboardingStep < 4) return '/business-details';
+    if (!company!.onboardingCompleted) return '/business-details';
+    return null; // Onboarding complete
+  }
 
   bool hasPermission(String permission) {
     if (isCompanyOwner || isPlatformAdmin) return true;
@@ -66,6 +84,8 @@ class Company {
   final String? tin;
   final String? vrn;
   final bool efdEnabled;
+  final int onboardingStep;
+  final bool onboardingCompleted;
 
   Company({
     required this.id,
@@ -76,6 +96,8 @@ class Company {
     this.tin,
     this.vrn,
     this.efdEnabled = false,
+    this.onboardingStep = 1,
+    this.onboardingCompleted = false,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) {
@@ -83,11 +105,13 @@ class Company {
       id: json['id'],
       name: json['name'],
       logo: json['logo'],
-      status: json['status'],
+      status: json['status'] ?? 'pending',
       branchesEnabled: json['branches_enabled'] ?? false,
       tin: json['tin'],
       vrn: json['vrn'],
       efdEnabled: json['efd_enabled'] ?? false,
+      onboardingStep: json['onboarding_step'] ?? 1,
+      onboardingCompleted: json['onboarding_completed'] ?? false,
     );
   }
 
@@ -101,6 +125,8 @@ class Company {
       'tin': tin,
       'vrn': vrn,
       'efd_enabled': efdEnabled,
+      'onboarding_step': onboardingStep,
+      'onboarding_completed': onboardingCompleted,
     };
   }
 

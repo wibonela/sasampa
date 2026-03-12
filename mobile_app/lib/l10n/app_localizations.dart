@@ -2905,6 +2905,222 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Gharama Zote'**
   String get totalCosts;
+
+  /// No description provided for @mobileAccess.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji wa Simu'**
+  String get mobileAccess;
+
+  /// No description provided for @accessApproved.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji Umeidhinishwa'**
+  String get accessApproved;
+
+  /// No description provided for @pendingApproval.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inasubiri Idhini'**
+  String get pendingApproval;
+
+  /// No description provided for @requestRejected.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi Limekataliwa'**
+  String get requestRejected;
+
+  /// No description provided for @accessRevoked.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji Umefutwa'**
+  String get accessRevoked;
+
+  /// No description provided for @registerThisDevice.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sajili Kifaa Hiki'**
+  String get registerThisDevice;
+
+  /// No description provided for @registerThisDeviceDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ili kutumia POS kwenye kifaa hiki, unahitaji kusajili kwanza.'**
+  String get registerThisDeviceDesc;
+
+  /// No description provided for @requestPending.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi Linasubiri'**
+  String get requestPending;
+
+  /// No description provided for @requestPendingDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi lako linakaguliwa na msimamizi. Tafadhali angalia baadaye.'**
+  String get requestPendingDesc;
+
+  /// No description provided for @requestRejectedDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi lako limekataliwa. Tafadhali wasiliana na msaada.'**
+  String get requestRejectedDesc;
+
+  /// No description provided for @accessRevokedDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji wako wa simu umefutwa. Tafadhali wasiliana na msaada.'**
+  String get accessRevokedDesc;
+
+  /// No description provided for @requestMobileAccess.
+  ///
+  /// In sw, this message translates to:
+  /// **'Omba Ufikiaji wa Simu'**
+  String get requestMobileAccess;
+
+  /// No description provided for @requestMobileAccessDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma ombi la kutumia programu ya POS ya simu kwa biashara yako.'**
+  String get requestMobileAccessDesc;
+
+  /// No description provided for @mobileAccessRequired.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ufikiaji wa Simu Unahitajika'**
+  String get mobileAccessRequired;
+
+  /// No description provided for @mobileAccessRequiredDesc.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali mwambie mmiliki wa kampuni yako aombe ufikiaji wa simu.'**
+  String get mobileAccessRequiredDesc;
+
+  /// No description provided for @submitNewRequest.
+  ///
+  /// In sw, this message translates to:
+  /// **'Unaweza kutuma ombi jipya:'**
+  String get submitNewRequest;
+
+  /// No description provided for @registerDeviceBtn.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sajili Kifaa'**
+  String get registerDeviceBtn;
+
+  /// No description provided for @checkStatus.
+  ///
+  /// In sw, this message translates to:
+  /// **'Angalia Hali'**
+  String get checkStatus;
+
+  /// No description provided for @signOut.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ondoka'**
+  String get signOut;
+
+  /// No description provided for @submitRequest.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tuma Ombi'**
+  String get submitRequest;
+
+  /// No description provided for @reasonForRequest.
+  ///
+  /// In sw, this message translates to:
+  /// **'Sababu ya Ombi'**
+  String get reasonForRequest;
+
+  /// No description provided for @reasonForRequestHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Eleza kwa nini unahitaji ufikiaji wa simu...'**
+  String get reasonForRequestHint;
+
+  /// No description provided for @expectedDevices.
+  ///
+  /// In sw, this message translates to:
+  /// **'Idadi ya Vifaa Vinavyotarajiwa'**
+  String get expectedDevices;
+
+  /// No description provided for @expectedDevicesHint.
+  ///
+  /// In sw, this message translates to:
+  /// **'Vifaa vingapi vitatumia programu?'**
+  String get expectedDevicesHint;
+
+  /// No description provided for @provideReason.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tafadhali toa sababu ya kuomba ufikiaji wa simu'**
+  String get provideReason;
+
+  /// No description provided for @requestSubmitted.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi la ufikiaji wa simu limetumwa kwa mafanikio'**
+  String get requestSubmitted;
+
+  /// No description provided for @failedToSubmitRequest.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kutuma ombi. Tafadhali jaribu tena.'**
+  String get failedToSubmitRequest;
+
+  /// No description provided for @failedToRegisterDevice.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeshindwa kusajili kifaa. Tafadhali jaribu tena.'**
+  String get failedToRegisterDevice;
+
+  /// No description provided for @approvedSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Kampuni yako ina ufikiaji wa simu. Sajili kifaa hiki kuendelea.'**
+  String get approvedSubtitle;
+
+  /// No description provided for @pendingSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi lako linakaguliwa.'**
+  String get pendingSubtitle;
+
+  /// No description provided for @rejectedSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Ombi lako halikuidhinishwa.'**
+  String get rejectedSubtitle;
+
+  /// No description provided for @revokedSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wasiliana na msaada kwa usaidizi.'**
+  String get revokedSubtitle;
+
+  /// No description provided for @ownerSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Omba ufikiaji wa kutumia programu ya POS ya simu.'**
+  String get ownerSubtitle;
+
+  /// No description provided for @nonOwnerSubtitle.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wasiliana na mmiliki wa kampuni yako kwa ufikiaji.'**
+  String get nonOwnerSubtitle;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In sw, this message translates to:
+  /// **'Inakuja Hivi Karibuni'**
+  String get comingSoon;
+
+  /// No description provided for @whatsappComingSoon.
+  ///
+  /// In sw, this message translates to:
+  /// **'Risiti za WhatsApp zinakuja hivi karibuni'**
+  String get whatsappComingSoon;
 }
 
 class _AppLocalizationsDelegate
