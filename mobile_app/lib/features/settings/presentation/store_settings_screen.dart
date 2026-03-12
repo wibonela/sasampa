@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 
@@ -26,6 +27,7 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
   final _receiptFooterController = TextEditingController();
 
   String? _logoUrl;
+  bool _isUploadingLogo = false;
 
   @override
   void initState() {
@@ -119,6 +121,53 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  Future<void> _pickAndUploadLogo() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    setState(() => _isUploadingLogo = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.uploadLogo(picked.path);
+      setState(() {
+        _logoUrl = response.data['data']?['logo_url'] ?? response.data['logo_url'];
+        _isUploadingLogo = false;
+      });
+    } catch (e) {
+      setState(() => _isUploadingLogo = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeLogo() async {
+    setState(() => _isUploadingLogo = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.removeLogo();
+      setState(() {
+        _logoUrl = null;
+        _isUploadingLogo = false;
+      });
+    } catch (e) {
+      setState(() => _isUploadingLogo = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to remove: $e'), backgroundColor: AppColors.error),
+        );
       }
     }
   }
@@ -225,20 +274,56 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
                           ),
                         ],
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
+                        const SizedBox(height: 4),
+                        if (_isUploadingLogo)
+                          const SizedBox(
+                            width: 24, height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        else
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: _pickAndUploadLogo,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.camera_alt_outlined, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _logoUrl != null ? 'Change Logo' : 'Upload Logo',
+                                        style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (_logoUrl != null) ...[
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: _removeLogo,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withValues(alpha: 0.3),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'Remove',
+                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                          child: Text(
-                            'Logo managed in web dashboard',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

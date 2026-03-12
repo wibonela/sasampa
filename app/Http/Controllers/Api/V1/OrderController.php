@@ -22,7 +22,7 @@ class OrderController extends Controller
             ->where('type', 'order')
             ->with(['user', 'items']);
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
@@ -170,7 +170,7 @@ class OrderController extends Controller
 
         $order = Transaction::where('id', $id)
             ->where('company_id', $user->company_id)
-            ->whereIn('type', ['order', 'sale'])
+            ->where('type', 'order')
             ->with(['user', 'branch', 'items.product'])
             ->first();
 
@@ -344,7 +344,6 @@ class OrderController extends Controller
                 $changeGiven = max(0, $validated['amount_paid'] - $order->total);
 
                 $order->update([
-                    'type' => 'sale',
                     'status' => 'completed',
                     'payment_method' => $validated['payment_method'],
                     'amount_paid' => $validated['amount_paid'],

@@ -185,6 +185,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/categories', [ExpenseController::class, 'categories']);
                 Route::post('/categories', [ExpenseController::class, 'storeCategory']);
                 Route::get('/summary', [ExpenseController::class, 'summary']);
+                Route::get('/suppliers', [ExpenseController::class, 'suppliers']);
                 Route::post('/', [ExpenseController::class, 'store']);
                 Route::get('/{id}', [ExpenseController::class, 'show']);
                 Route::put('/{id}', [ExpenseController::class, 'update']);

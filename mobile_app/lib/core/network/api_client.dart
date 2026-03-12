@@ -491,6 +491,12 @@ class ApiClient {
     });
   }
 
+  Future<Response> getExpenseSuppliers({String? query}) {
+    return _dio.get('/expenses/suppliers', queryParameters: {
+      if (query != null) 'q': query,
+    });
+  }
+
   Future<Response> createExpense({
     required int categoryId,
     required String description,

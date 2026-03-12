@@ -594,7 +594,20 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     final l10n = AppLocalizations.of(context)!;
     final searchController = TextEditingController();
     List<Customer> results = [];
+    List<Customer> recentCustomers = [];
     bool searching = false;
+    bool loadingRecent = true;
+
+    // Pre-load recent customers
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.getCustomers(perPage: 20);
+      final data = response.data['data'] as List;
+      recentCustomers = data.map((e) => Customer.fromJson(e)).toList();
+    } catch (_) {}
+    loadingRecent = false;
+
+    if (!mounted) return;
 
     final selected = await showModalBottomSheet<Customer>(
       context: context,
@@ -605,6 +618,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
+            final displayList = searchController.text.length >= 2 ? results : recentCustomers;
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -635,7 +649,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: searchController,
-                      autofocus: true,
+                      autofocus: false,
                       decoration: InputDecoration(
                         hintText: l10n.searchCustomers,
                         prefixIcon: const Icon(Icons.search),
@@ -676,18 +690,18 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                       icon: const Icon(Icons.person_add, size: 18),
                       label: Text(l10n.addCustomer),
                     ),
-                    if (searching)
+                    if (searching || loadingRecent)
                       const Padding(
                         padding: EdgeInsets.all(16),
                         child: Center(child: CircularProgressIndicator()),
                       ),
-                    if (!searching && results.isNotEmpty)
+                    if (!searching && !loadingRecent && displayList.isNotEmpty)
                       Flexible(
                         child: ListView.builder(
                           shrinkWrap: true,
-                          itemCount: results.length,
+                          itemCount: displayList.length,
                           itemBuilder: (ctx, i) {
-                            final c = results[i];
+                            final c = displayList[i];
                             return ListTile(
                               onTap: () => Navigator.pop(ctx, c),
                               leading: CircleAvatar(
@@ -708,6 +722,15 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                                   : null,
                             );
                           },
+                        ),
+                      ),
+                    if (!searching && !loadingRecent && displayList.isEmpty && searchController.text.length >= 2)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          l10n.noCustomers,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppColors.textSecondary),
                         ),
                       ),
                   ],
