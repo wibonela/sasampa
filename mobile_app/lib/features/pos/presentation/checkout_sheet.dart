@@ -724,13 +724,27 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                           },
                         ),
                       ),
-                    if (!searching && !loadingRecent && displayList.isEmpty && searchController.text.length >= 2)
+                    if (!searching && !loadingRecent && displayList.isEmpty)
                       Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          l10n.noCustomers,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.textSecondary),
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            Icon(Icons.people_outline, size: 40, color: AppColors.gray3),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.noCustomers,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              searchController.text.isEmpty
+                                  ? 'Add customers from the Customers menu'
+                                  : '',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                            ),
+                          ],
                         ),
                       ),
                   ],

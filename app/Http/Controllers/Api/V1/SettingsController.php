@@ -99,6 +99,12 @@ class SettingsController extends Controller
         $logoPath = $request->file('logo')->store('logos', 'public');
         Setting::set('store_logo', $logoPath, 'string');
 
+        // Sync to company record so it shows in user/dashboard API responses
+        $company = auth()->user()->company;
+        if ($company) {
+            $company->update(['logo' => $logoPath]);
+        }
+
         return response()->json([
             'message' => 'Logo uploaded successfully.',
             'data' => [
@@ -117,6 +123,12 @@ class SettingsController extends Controller
         if ($logo) {
             Storage::disk('public')->delete($logo);
             Setting::set('store_logo', '', 'string');
+        }
+
+        // Clear company record too
+        $company = auth()->user()->company;
+        if ($company) {
+            $company->update(['logo' => null]);
         }
 
         return response()->json([
