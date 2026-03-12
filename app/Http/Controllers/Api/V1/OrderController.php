@@ -108,6 +108,18 @@ class OrderController extends Controller
                     $customerName = $customerName ?: $customer->name;
                     $customerPhone = $customerPhone ?: $customer->phone;
                     $customerTin = $customerTin ?: $customer->tin;
+                } elseif ($customerPhone) {
+                    // Auto-create or find customer when name + phone provided
+                    $customer = Customer::firstOrCreate(
+                        ['phone' => $customerPhone, 'company_id' => $user->company_id],
+                        [
+                            'name' => $customerName,
+                            'tin' => $customerTin,
+                            'credit_limit' => 0,
+                            'current_balance' => 0,
+                        ]
+                    );
+                    $customerId = $customer->id;
                 }
 
                 $order = Transaction::create([
@@ -254,6 +266,17 @@ class OrderController extends Controller
                     $customerName = $customerName ?: $customer->name;
                     $customerPhone = $customerPhone ?: $customer->phone;
                     $customerTin = $customerTin ?: $customer->tin;
+                } elseif ($customerPhone) {
+                    $customer = Customer::firstOrCreate(
+                        ['phone' => $customerPhone, 'company_id' => $user->company_id],
+                        [
+                            'name' => $customerName,
+                            'tin' => $customerTin,
+                            'credit_limit' => 0,
+                            'current_balance' => 0,
+                        ]
+                    );
+                    $customerId = $customer->id;
                 }
 
                 $order->update([
