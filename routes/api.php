@@ -119,6 +119,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/transactions/today', [TransactionController::class, 'today']);
                 Route::get('/transactions/mine', [TransactionController::class, 'mine']);
                 Route::get('/transactions/summary', [TransactionController::class, 'summary']);
+                Route::get('/transactions/insights', [TransactionController::class, 'insights']);
                 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
                 Route::get('/transactions/{id}/receipt', [POSController::class, 'receipt']);
                 Route::post('/transactions/{id}/void', [POSController::class, 'voidTransaction']);
