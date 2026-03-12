@@ -136,6 +136,62 @@ class AuthController extends Controller
     }
 
     /**
+     * Update user profile.
+     *
+     * PUT /api/v1/auth/user
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:50',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => $this->formatUser($user->fresh()),
+        ]);
+    }
+
+    /**
+     * Delete user account.
+     *
+     * DELETE /api/v1/auth/user
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'The provided password is incorrect.',
+            ], 422);
+        }
+
+        // Revoke all tokens
+        $user->tokens()->delete();
+
+        // Soft-delete or deactivate (keep data for accounting integrity)
+        $user->update([
+            'is_active' => false,
+            'email' => 'deleted_' . $user->id . '_' . $user->email,
+            'name' => 'Deleted User',
+        ]);
+
+        return response()->json([
+            'message' => 'Account deleted successfully.',
+        ]);
+    }
+
+    /**
      * Set or update user PIN.
      *
      * POST /api/v1/auth/pin
@@ -296,6 +352,7 @@ class AuthController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
             'role' => $user->role,
             'has_pin' => $user->hasPin(),
             'email_verified' => $user->hasVerifiedEmail(),
