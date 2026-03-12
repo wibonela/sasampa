@@ -1326,42 +1326,35 @@ class _SuccessDialogContentState extends State<_SuccessDialogContent> {
   Widget _buildWhatsAppRow() {
     final l10n = widget.l10n;
 
-    if (_waStatus == 'pending' || _waStatus == 'sent') {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.success.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.chat, size: 16, color: AppColors.success),
-            const SizedBox(width: 8),
-            Text(
-              _waStatus == 'sent' ? l10n.sentViaWhatsapp : l10n.sendingReceipt,
-              style: const TextStyle(color: AppColors.success, fontSize: 13),
+    // WhatsApp receipts - Coming Soon
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.chat_outlined, size: 16, color: Color(0xFF25D366)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.whatsappComingSoon,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 40,
-      child: OutlinedButton.icon(
-        onPressed: _isSendingWhatsApp ? null : () => _sendWhatsAppReceipt(),
-        icon: _isSendingWhatsApp
-            ? const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.chat_outlined, size: 16),
-        label: Text(l10n.sendWhatsAppReceipt, style: const TextStyle(fontSize: 13)),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF25D366),
-          side: const BorderSide(color: Color(0xFF25D366)),
-        ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              l10n.comingSoon,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.warning),
+            ),
+          ),
+        ],
       ),
     );
   }

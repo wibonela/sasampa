@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
@@ -30,15 +31,47 @@ import '../../features/settings/presentation/whatsapp_settings_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../shared/widgets/webview_screen.dart';
 
+/// Notifier that triggers GoRouter redirect re-evaluation when auth state changes.
+/// This avoids recreating the entire GoRouter instance.
+class _AuthChangeNotifier extends ChangeNotifier {
+  _AuthChangeNotifier(Ref ref) {
+    _subscription = ref.listen(authProvider, (previous, next) {
+      // Only notify when meaningful auth changes happen (not loading states)
+      if (previous?.isAuthenticated != next.isAuthenticated ||
+          previous?.isInitialized != next.isInitialized ||
+          previous?.canUseMobile != next.canUseMobile ||
+          previous?.user?.needsOnboarding != next.user?.needsOnboarding) {
+        notifyListeners();
+      }
+    });
+  }
+
+  late final ProviderSubscription<AuthState> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.close();
+    super.dispose();
+  }
+}
+
+final _authChangeNotifierProvider = ChangeNotifierProvider<_AuthChangeNotifier>((ref) {
+  return _AuthChangeNotifier(ref);
+});
+
 bool _hasRedirectedToDefaultTab = false;
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final dashboardPrefsState = ref.watch(dashboardPrefsProvider);
+  final notifier = ref.watch(_authChangeNotifierProvider);
 
   return GoRouter(
     initialLocation: '/login',
+    refreshListenable: notifier,
     redirect: (context, state) {
+      // Read current state at redirect time (not captured at creation time)
+      final authState = ref.read(authProvider);
+      final dashboardPrefsState = ref.read(dashboardPrefsProvider);
+
       final isLoggedIn = authState.isAuthenticated;
       final isInitialized = authState.isInitialized;
       final location = state.matchedLocation;
@@ -61,8 +94,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Logged in but on login/register page - check mobile access
+      // Logged in - check if user still needs onboarding
+      final user = authState.user;
+      final needsOnboarding = user != null && user.needsOnboarding;
+      final onboardingRoute = user?.onboardingRoute;
+
+      // Logged in but on login/register page - redirect to correct destination
       if (isLoggedIn && isPublicRoute) {
+        // If user needs onboarding, send them to the correct step
+        if (needsOnboarding && onboardingRoute != null) {
+          return onboardingRoute;
+        }
         if (!authState.canUseMobile) {
           return '/mobile-access';
         }
@@ -78,7 +120,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/';
       }
 
-      // Logged in but no mobile access - allow onboarding routes
+      // Logged in and needs onboarding - only allow the correct onboarding step
+      if (isLoggedIn && needsOnboarding && onboardingRoute != null) {
+        if (!isOnboardingRoute) {
+          return onboardingRoute;
+        }
+        return null; // Allow navigation within onboarding routes
+      }
+
+      // Logged in, onboarding done, but no mobile access - allow onboarding routes or mobile-access
       if (isLoggedIn && !authState.canUseMobile && !isMobileAccessRoute && !isOnboardingRoute) {
         return '/mobile-access';
       }

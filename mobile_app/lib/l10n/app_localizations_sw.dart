@@ -1426,4 +1426,125 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get totalCosts => 'Gharama Zote';
+
+  @override
+  String get mobileAccess => 'Ufikiaji wa Simu';
+
+  @override
+  String get accessApproved => 'Ufikiaji Umeidhinishwa';
+
+  @override
+  String get pendingApproval => 'Inasubiri Idhini';
+
+  @override
+  String get requestRejected => 'Ombi Limekataliwa';
+
+  @override
+  String get accessRevoked => 'Ufikiaji Umefutwa';
+
+  @override
+  String get registerThisDevice => 'Sajili Kifaa Hiki';
+
+  @override
+  String get registerThisDeviceDesc =>
+      'Ili kutumia POS kwenye kifaa hiki, unahitaji kusajili kwanza.';
+
+  @override
+  String get requestPending => 'Ombi Linasubiri';
+
+  @override
+  String get requestPendingDesc =>
+      'Ombi lako linakaguliwa na msimamizi. Tafadhali angalia baadaye.';
+
+  @override
+  String get requestRejectedDesc =>
+      'Ombi lako limekataliwa. Tafadhali wasiliana na msaada.';
+
+  @override
+  String get accessRevokedDesc =>
+      'Ufikiaji wako wa simu umefutwa. Tafadhali wasiliana na msaada.';
+
+  @override
+  String get requestMobileAccess => 'Omba Ufikiaji wa Simu';
+
+  @override
+  String get requestMobileAccessDesc =>
+      'Tuma ombi la kutumia programu ya POS ya simu kwa biashara yako.';
+
+  @override
+  String get mobileAccessRequired => 'Ufikiaji wa Simu Unahitajika';
+
+  @override
+  String get mobileAccessRequiredDesc =>
+      'Tafadhali mwambie mmiliki wa kampuni yako aombe ufikiaji wa simu.';
+
+  @override
+  String get submitNewRequest => 'Unaweza kutuma ombi jipya:';
+
+  @override
+  String get registerDeviceBtn => 'Sajili Kifaa';
+
+  @override
+  String get checkStatus => 'Angalia Hali';
+
+  @override
+  String get signOut => 'Ondoka';
+
+  @override
+  String get submitRequest => 'Tuma Ombi';
+
+  @override
+  String get reasonForRequest => 'Sababu ya Ombi';
+
+  @override
+  String get reasonForRequestHint =>
+      'Eleza kwa nini unahitaji ufikiaji wa simu...';
+
+  @override
+  String get expectedDevices => 'Idadi ya Vifaa Vinavyotarajiwa';
+
+  @override
+  String get expectedDevicesHint => 'Vifaa vingapi vitatumia programu?';
+
+  @override
+  String get provideReason => 'Tafadhali toa sababu ya kuomba ufikiaji wa simu';
+
+  @override
+  String get requestSubmitted =>
+      'Ombi la ufikiaji wa simu limetumwa kwa mafanikio';
+
+  @override
+  String get failedToSubmitRequest =>
+      'Imeshindwa kutuma ombi. Tafadhali jaribu tena.';
+
+  @override
+  String get failedToRegisterDevice =>
+      'Imeshindwa kusajili kifaa. Tafadhali jaribu tena.';
+
+  @override
+  String get approvedSubtitle =>
+      'Kampuni yako ina ufikiaji wa simu. Sajili kifaa hiki kuendelea.';
+
+  @override
+  String get pendingSubtitle => 'Ombi lako linakaguliwa.';
+
+  @override
+  String get rejectedSubtitle => 'Ombi lako halikuidhinishwa.';
+
+  @override
+  String get revokedSubtitle => 'Wasiliana na msaada kwa usaidizi.';
+
+  @override
+  String get ownerSubtitle =>
+      'Omba ufikiaji wa kutumia programu ya POS ya simu.';
+
+  @override
+  String get nonOwnerSubtitle =>
+      'Wasiliana na mmiliki wa kampuni yako kwa ufikiaji.';
+
+  @override
+  String get comingSoon => 'Inakuja Hivi Karibuni';
+
+  @override
+  String get whatsappComingSoon => 'Risiti za WhatsApp zinakuja hivi karibuni';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
+import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
 import '../../../shared/models/user.dart';
@@ -29,8 +30,9 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
   }
 
   Future<void> _requestAccess() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_reasonController.text.trim().isEmpty) {
-      setState(() => _error = 'Please provide a reason for requesting mobile access');
+      setState(() => _error = l10n.provideReason);
       return;
     }
 
@@ -51,14 +53,14 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mobile access request submitted successfully'),
+          SnackBar(
+            content: Text(l10n.requestSubmitted),
             backgroundColor: AppColors.success,
           ),
         );
       }
     } catch (e) {
-      setState(() => _error = 'Failed to submit request. Please try again.');
+      setState(() => _error = l10n.failedToSubmitRequest);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -108,7 +110,7 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
         context.go('/');
       }
     } catch (e) {
-      setState(() => _error = 'Failed to register device. Please try again.');
+      setState(() => _error = AppLocalizations.of(context)!.failedToRegisterDevice);
     } finally {
       setState(() => _isRegistering = false);
     }
@@ -129,6 +131,7 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final mobileAccess = authState.mobileAccess;
     final user = authState.user;
@@ -192,8 +195,8 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                 // Device Registration
                 _buildInfoCard(
                   icon: Icons.phone_android,
-                  title: 'Register This Device',
-                  subtitle: 'To use the POS on this device, you need to register it first.',
+                  title: l10n.registerThisDevice,
+                  subtitle: l10n.registerThisDeviceDesc,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -209,15 +212,15 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                               valueColor: AlwaysStoppedAnimation(Colors.white),
                             ),
                           )
-                        : const Text('Register Device'),
+                        : Text(l10n.registerDeviceBtn),
                   ),
                 ),
               ] else if (mobileAccess?.isPending == true) ...[
                 // Pending
                 _buildInfoCard(
                   icon: Icons.hourglass_empty,
-                  title: 'Request Pending',
-                  subtitle: 'Your request is being reviewed by the administrator. Please check back later.',
+                  title: l10n.requestPending,
+                  subtitle: l10n.requestPendingDesc,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -230,22 +233,22 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Check Status'),
+                        : Text(l10n.checkStatus),
                   ),
                 ),
               ] else if (mobileAccess?.isRejected == true) ...[
                 // Rejected
                 _buildInfoCard(
                   icon: Icons.cancel_outlined,
-                  title: 'Request Rejected',
-                  subtitle: mobileAccess?.rejectionReason ?? 'Your request was rejected. Please contact support.',
+                  title: l10n.requestRejected,
+                  subtitle: mobileAccess?.rejectionReason ?? l10n.requestRejectedDesc,
                   isError: true,
                 ),
                 if (isOwner) ...[
                   const SizedBox(height: 24),
-                  const Text(
-                    'You can submit a new request:',
-                    style: TextStyle(color: AppColors.textSecondary),
+                  Text(
+                    l10n.submitNewRequest,
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   _buildRequestForm(),
@@ -254,16 +257,16 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                 // Revoked
                 _buildInfoCard(
                   icon: Icons.block,
-                  title: 'Access Revoked',
-                  subtitle: mobileAccess?.revocationReason ?? 'Your mobile access has been revoked. Please contact support.',
+                  title: l10n.accessRevoked,
+                  subtitle: mobileAccess?.revocationReason ?? l10n.accessRevokedDesc,
                   isError: true,
                 ),
               ] else if (isOwner) ...[
                 // No request - Owner can request
                 _buildInfoCard(
                   icon: Icons.smartphone,
-                  title: 'Request Mobile Access',
-                  subtitle: 'Submit a request to use the mobile POS app for your business.',
+                  title: l10n.requestMobileAccess,
+                  subtitle: l10n.requestMobileAccessDesc,
                 ),
                 const SizedBox(height: 24),
                 _buildRequestForm(),
@@ -271,8 +274,8 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                 // No request - Not owner
                 _buildInfoCard(
                   icon: Icons.info_outline,
-                  title: 'Mobile Access Required',
-                  subtitle: 'Please ask your company owner to request mobile access.',
+                  title: l10n.mobileAccessRequired,
+                  subtitle: l10n.mobileAccessRequiredDesc,
                 ),
               ],
 
@@ -297,7 +300,7 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
               // Logout
               TextButton(
                 onPressed: _logout,
-                child: const Text('Sign Out'),
+                child: Text(l10n.signOut),
               ),
             ],
           ),
@@ -350,6 +353,7 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
   }
 
   Widget _buildRequestForm() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -363,12 +367,12 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
           child: TextFormField(
             controller: _reasonController,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Reason for Request',
-              hintText: 'Explain why you need mobile access...',
+            decoration: InputDecoration(
+              labelText: l10n.reasonForRequest,
+              hintText: l10n.reasonForRequestHint,
               alignLabelWithHint: true,
               border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(16),
             ),
           ),
         ),
@@ -383,11 +387,11 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
           child: TextFormField(
             controller: _devicesController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Expected Number of Devices',
-              hintText: 'How many devices will use the app?',
+            decoration: InputDecoration(
+              labelText: l10n.expectedDevices,
+              hintText: l10n.expectedDevicesHint,
               border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(16),
             ),
           ),
         ),
@@ -405,7 +409,7 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
                       valueColor: AlwaysStoppedAnimation(Colors.white),
                     ),
                   )
-                : const Text('Submit Request'),
+                : Text(l10n.submitRequest),
           ),
         ),
       ],
@@ -428,19 +432,21 @@ class _MobileAccessScreenState extends ConsumerState<MobileAccessScreen> {
   }
 
   String _getStatusTitle(MobileAccess? access) {
-    if (access?.isApproved == true) return 'Access Approved';
-    if (access?.isPending == true) return 'Pending Approval';
-    if (access?.isRejected == true) return 'Request Rejected';
-    if (access?.isRevoked == true) return 'Access Revoked';
-    return 'Mobile Access';
+    final l10n = AppLocalizations.of(context)!;
+    if (access?.isApproved == true) return l10n.accessApproved;
+    if (access?.isPending == true) return l10n.pendingApproval;
+    if (access?.isRejected == true) return l10n.requestRejected;
+    if (access?.isRevoked == true) return l10n.accessRevoked;
+    return l10n.mobileAccess;
   }
 
   String _getStatusSubtitle(MobileAccess? access, bool isOwner) {
-    if (access?.isApproved == true) return 'Your company has mobile access. Register this device to continue.';
-    if (access?.isPending == true) return 'Your request is being reviewed.';
-    if (access?.isRejected == true) return 'Your request was not approved.';
-    if (access?.isRevoked == true) return 'Contact support for assistance.';
-    if (isOwner) return 'Request access to use the mobile POS app.';
-    return 'Contact your company owner for access.';
+    final l10n = AppLocalizations.of(context)!;
+    if (access?.isApproved == true) return l10n.approvedSubtitle;
+    if (access?.isPending == true) return l10n.pendingSubtitle;
+    if (access?.isRejected == true) return l10n.rejectedSubtitle;
+    if (access?.isRevoked == true) return l10n.revokedSubtitle;
+    if (isOwner) return l10n.ownerSubtitle;
+    return l10n.nonOwnerSubtitle;
   }
 }

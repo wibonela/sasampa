@@ -59,14 +59,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final data = response.data;
       await storage.saveToken(data['token']);
 
-      // Navigate FIRST, then set auth state
-      // (setting state triggers router rebuild which would redirect away from /register)
+      // Cache user data first so it survives app restarts
+      await authNotifier.setRegisteredUser(data['user']);
+
+      // Navigate to verify email — router now knows user is onboarding
       if (mounted) {
         context.go('/verify-email');
       }
-
-      // Now set auth state — router will see user on onboarding route and allow it
-      authNotifier.setRegisteredUser(data['user']);
     } catch (e) {
       setState(() {
         _error = _extractError(e);
@@ -203,11 +202,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return l10n.pleaseEnterEmail;
                     }
-                    if (!value.contains('@')) {
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(value.trim())) {
                       return l10n.pleaseEnterValidEmail;
                     }
                     return null;
                   },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
 
                 const SizedBox(height: 16),
@@ -219,20 +219,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: l10n.phoneNumber,
-                    hintText: '+XXX XXXXXXXXX',
+                    hintText: '+255 7XX XXX XXX',
                     prefixIcon: const Icon(Icons.phone_outlined),
+                    helperText: 'Must start with country code (e.g. +255)',
+                    helperStyle: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.pleaseEnterPhoneNumber;
                     }
                     final phone = value.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
-                    // Must start with + and country code, minimum 8 digits total
-                    if (!RegExp(r'^\+?\d{8,15}$').hasMatch(phone)) {
-                      return l10n.invalidPhoneNumber;
+                    if (!phone.startsWith('+')) {
+                      return 'Phone number must start with country code (e.g. +255)';
+                    }
+                    if (!RegExp(r'^\+\d{10,15}$').hasMatch(phone)) {
+                      return 'Phone number is incomplete. Expected 10-15 digits after +';
                     }
                     return null;
                   },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
 
                 const SizedBox(height: 16),

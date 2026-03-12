@@ -1424,4 +1424,122 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalCosts => 'Total Costs';
+
+  @override
+  String get mobileAccess => 'Mobile Access';
+
+  @override
+  String get accessApproved => 'Access Approved';
+
+  @override
+  String get pendingApproval => 'Pending Approval';
+
+  @override
+  String get requestRejected => 'Request Rejected';
+
+  @override
+  String get accessRevoked => 'Access Revoked';
+
+  @override
+  String get registerThisDevice => 'Register This Device';
+
+  @override
+  String get registerThisDeviceDesc =>
+      'To use the POS on this device, you need to register it first.';
+
+  @override
+  String get requestPending => 'Request Pending';
+
+  @override
+  String get requestPendingDesc =>
+      'Your request is being reviewed by the administrator. Please check back later.';
+
+  @override
+  String get requestRejectedDesc =>
+      'Your request was rejected. Please contact support.';
+
+  @override
+  String get accessRevokedDesc =>
+      'Your mobile access has been revoked. Please contact support.';
+
+  @override
+  String get requestMobileAccess => 'Request Mobile Access';
+
+  @override
+  String get requestMobileAccessDesc =>
+      'Submit a request to use the mobile POS app for your business.';
+
+  @override
+  String get mobileAccessRequired => 'Mobile Access Required';
+
+  @override
+  String get mobileAccessRequiredDesc =>
+      'Please ask your company owner to request mobile access.';
+
+  @override
+  String get submitNewRequest => 'You can submit a new request:';
+
+  @override
+  String get registerDeviceBtn => 'Register Device';
+
+  @override
+  String get checkStatus => 'Check Status';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get submitRequest => 'Submit Request';
+
+  @override
+  String get reasonForRequest => 'Reason for Request';
+
+  @override
+  String get reasonForRequestHint => 'Explain why you need mobile access...';
+
+  @override
+  String get expectedDevices => 'Expected Number of Devices';
+
+  @override
+  String get expectedDevicesHint => 'How many devices will use the app?';
+
+  @override
+  String get provideReason =>
+      'Please provide a reason for requesting mobile access';
+
+  @override
+  String get requestSubmitted => 'Mobile access request submitted successfully';
+
+  @override
+  String get failedToSubmitRequest =>
+      'Failed to submit request. Please try again.';
+
+  @override
+  String get failedToRegisterDevice =>
+      'Failed to register device. Please try again.';
+
+  @override
+  String get approvedSubtitle =>
+      'Your company has mobile access. Register this device to continue.';
+
+  @override
+  String get pendingSubtitle => 'Your request is being reviewed.';
+
+  @override
+  String get rejectedSubtitle => 'Your request was not approved.';
+
+  @override
+  String get revokedSubtitle => 'Contact support for assistance.';
+
+  @override
+  String get ownerSubtitle => 'Request access to use the mobile POS app.';
+
+  @override
+  String get nonOwnerSubtitle => 'Contact your company owner for access.';
+
+  @override
+  String get comingSoon => 'Coming Soon';
+
+  @override
+  String get whatsappComingSoon => 'WhatsApp receipts coming soon';
 }

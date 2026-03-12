@@ -170,7 +170,7 @@ class OrderController extends Controller
 
         $order = Transaction::where('id', $id)
             ->where('company_id', $user->company_id)
-            ->where('type', 'order')
+            ->whereIn('type', ['order', 'sale'])
             ->with(['user', 'branch', 'items.product'])
             ->first();
 

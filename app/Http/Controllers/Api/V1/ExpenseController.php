@@ -168,7 +168,8 @@ class ExpenseController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
-        $validated['branch_id'] = auth()->user()->currentBranch?->id;
+        $validated['company_id'] = auth()->user()->company_id;
+        $validated['branch_id'] = auth()->user()->currentBranch()?->id ?? null;
 
         $expense = Expense::create($validated);
         $expense->load(['category', 'user']);
