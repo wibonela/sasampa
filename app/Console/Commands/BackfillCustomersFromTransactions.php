@@ -87,17 +87,22 @@ class BackfillCustomersFromTransactions extends Command
                 ->first();
 
             if (!$existing) {
-                $existing = Customer::withoutGlobalScope('company')->create([
-                    'company_id' => $row->company_id,
-                    'name' => $row->customer_name,
-                    'phone' => '',
-                    'tin' => $row->customer_tin,
-                    'credit_limit' => 0,
-                    'current_balance' => 0,
-                    'is_active' => true,
-                ]);
-                $created++;
-                $this->line("  Created (name only): {$row->customer_name} for company #{$row->company_id}");
+                try {
+                    $existing = Customer::withoutGlobalScope('company')->create([
+                        'company_id' => $row->company_id,
+                        'name' => $row->customer_name,
+                        'phone' => 'N/A-' . uniqid(),
+                        'tin' => $row->customer_tin,
+                        'credit_limit' => 0,
+                        'current_balance' => 0,
+                        'is_active' => true,
+                    ]);
+                    $created++;
+                    $this->line("  Created (name only): {$row->customer_name} for company #{$row->company_id}");
+                } catch (\Exception $e) {
+                    $skipped++;
+                    continue;
+                }
             }
 
             // Link transactions
