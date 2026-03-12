@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -195,6 +197,254 @@ class TransactionController extends Controller
                 'week_count' => $weekQuery->count(),
                 'month_total' => (float) $monthQuery->sum('total'),
                 'month_count' => $monthQuery->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get rich business intelligence insights.
+     *
+     * GET /api/v1/pos/transactions/insights
+     */
+    public function insights(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $companyId = $user->company_id;
+
+        $baseQuery = Transaction::where('company_id', $companyId)
+            ->sales()
+            ->where('status', 'completed');
+
+        // ---------------------------------------------------------------
+        // 1. Period comparison (today vs yesterday, week vs week, month vs month)
+        // ---------------------------------------------------------------
+        $todayTotal = (float) (clone $baseQuery)->whereDate('created_at', today())->sum('total');
+        $todayCount = (clone $baseQuery)->whereDate('created_at', today())->count();
+
+        $yesterdayTotal = (float) (clone $baseQuery)->whereDate('created_at', today()->subDay())->sum('total');
+        $yesterdayCount = (clone $baseQuery)->whereDate('created_at', today()->subDay())->count();
+
+        $thisWeekTotal = (float) (clone $baseQuery)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total');
+        $thisWeekCount = (clone $baseQuery)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
+
+        $lastWeekTotal = (float) (clone $baseQuery)->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])->sum('total');
+        $lastWeekCount = (clone $baseQuery)->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])->count();
+
+        $thisMonthTotal = (float) (clone $baseQuery)->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->sum('total');
+        $thisMonthCount = (clone $baseQuery)->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count();
+
+        $lastMonthTotal = (float) (clone $baseQuery)->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->sum('total');
+        $lastMonthCount = (clone $baseQuery)->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count();
+
+        $periodComparison = [
+            'today' => [
+                'total' => $todayTotal,
+                'count' => $todayCount,
+                'previous_total' => $yesterdayTotal,
+                'previous_count' => $yesterdayCount,
+                'total_change_pct' => $yesterdayTotal > 0 ? round((($todayTotal - $yesterdayTotal) / $yesterdayTotal) * 100, 1) : ($todayTotal > 0 ? 100.0 : 0.0),
+                'count_change_pct' => $yesterdayCount > 0 ? round((($todayCount - $yesterdayCount) / $yesterdayCount) * 100, 1) : ($todayCount > 0 ? 100.0 : 0.0),
+            ],
+            'this_week' => [
+                'total' => $thisWeekTotal,
+                'count' => $thisWeekCount,
+                'previous_total' => $lastWeekTotal,
+                'previous_count' => $lastWeekCount,
+                'total_change_pct' => $lastWeekTotal > 0 ? round((($thisWeekTotal - $lastWeekTotal) / $lastWeekTotal) * 100, 1) : ($thisWeekTotal > 0 ? 100.0 : 0.0),
+                'count_change_pct' => $lastWeekCount > 0 ? round((($thisWeekCount - $lastWeekCount) / $lastWeekCount) * 100, 1) : ($thisWeekCount > 0 ? 100.0 : 0.0),
+            ],
+            'this_month' => [
+                'total' => $thisMonthTotal,
+                'count' => $thisMonthCount,
+                'previous_total' => $lastMonthTotal,
+                'previous_count' => $lastMonthCount,
+                'total_change_pct' => $lastMonthTotal > 0 ? round((($thisMonthTotal - $lastMonthTotal) / $lastMonthTotal) * 100, 1) : ($thisMonthTotal > 0 ? 100.0 : 0.0),
+                'count_change_pct' => $lastMonthCount > 0 ? round((($thisMonthCount - $lastMonthCount) / $lastMonthCount) * 100, 1) : ($thisMonthCount > 0 ? 100.0 : 0.0),
+            ],
+        ];
+
+        // ---------------------------------------------------------------
+        // 2. Average transaction value
+        // ---------------------------------------------------------------
+        $avgTransaction = [
+            'today' => $todayCount > 0 ? round($todayTotal / $todayCount, 2) : 0.0,
+            'this_week' => $thisWeekCount > 0 ? round($thisWeekTotal / $thisWeekCount, 2) : 0.0,
+            'this_month' => $thisMonthCount > 0 ? round($thisMonthTotal / $thisMonthCount, 2) : 0.0,
+        ];
+
+        // ---------------------------------------------------------------
+        // 3. Top 5 selling products this month (by quantity and by revenue)
+        // ---------------------------------------------------------------
+        $monthTransactionIds = (clone $baseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->pluck('id');
+
+        $topByQuantity = TransactionItem::whereIn('transaction_id', $monthTransactionIds)
+            ->where('company_id', $companyId)
+            ->select('product_id', 'product_name', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_revenue'))
+            ->groupBy('product_id', 'product_name')
+            ->orderByDesc('total_quantity')
+            ->limit(5)
+            ->get()
+            ->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'total_quantity' => (int) $item->total_quantity,
+                'total_revenue' => (float) $item->total_revenue,
+            ]);
+
+        $topByRevenue = TransactionItem::whereIn('transaction_id', $monthTransactionIds)
+            ->where('company_id', $companyId)
+            ->select('product_id', 'product_name', DB::raw('SUM(subtotal) as total_revenue'), DB::raw('SUM(quantity) as total_quantity'))
+            ->groupBy('product_id', 'product_name')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get()
+            ->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'total_revenue' => (float) $item->total_revenue,
+                'total_quantity' => (int) $item->total_quantity,
+            ]);
+
+        // ---------------------------------------------------------------
+        // 4. Payment method breakdown this month
+        // ---------------------------------------------------------------
+        $paymentBreakdown = (clone $baseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->select('payment_method', DB::raw('COUNT(*) as count'), DB::raw('SUM(total) as total'))
+            ->groupBy('payment_method')
+            ->get();
+
+        $paymentTotal = $paymentBreakdown->sum('total');
+        $paymentMethods = $paymentBreakdown->map(fn ($row) => [
+            'method' => $row->payment_method,
+            'count' => (int) $row->count,
+            'total' => (float) $row->total,
+            'percentage' => $paymentTotal > 0 ? round(((float) $row->total / $paymentTotal) * 100, 1) : 0.0,
+        ])->values();
+
+        // ---------------------------------------------------------------
+        // 5. Discount stats this month
+        // ---------------------------------------------------------------
+        $monthDiscounted = (clone $baseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->where('discount_amount', '>', 0);
+
+        $totalDiscounts = (float) (clone $monthDiscounted)->sum('discount_amount');
+        $discountedCount = (clone $monthDiscounted)->count();
+
+        $discountStats = [
+            'total_discounts' => $totalDiscounts,
+            'discounted_sales_count' => $discountedCount,
+            'avg_discount_per_sale' => $discountedCount > 0 ? round($totalDiscounts / $discountedCount, 2) : 0.0,
+            'total_sales_this_month' => $thisMonthCount,
+            'discount_rate_pct' => $thisMonthCount > 0 ? round(($discountedCount / $thisMonthCount) * 100, 1) : 0.0,
+        ];
+
+        // ---------------------------------------------------------------
+        // 6. Peak hours today (sales count & total per hour)
+        // ---------------------------------------------------------------
+        $peakHours = (clone $baseQuery)
+            ->whereDate('created_at', today())
+            ->select(
+                DB::raw("CAST(strftime('%H', created_at) AS INTEGER) as hour"),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(total) as total')
+            )
+            ->groupBy('hour')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn ($row) => [
+                'hour' => (int) $row->hour,
+                'label' => sprintf('%02d:00 - %02d:59', $row->hour, $row->hour),
+                'count' => (int) $row->count,
+                'total' => (float) $row->total,
+            ]);
+
+        // ---------------------------------------------------------------
+        // 7. Customer stats this month
+        // ---------------------------------------------------------------
+        $monthCompleted = (clone $baseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+
+        $totalCustomerSales = (clone $monthCompleted)->count();
+        $registeredCustomerSales = (clone $monthCompleted)->whereNotNull('customer_id')->count();
+        $walkInSales = $totalCustomerSales - $registeredCustomerSales;
+
+        $topCustomers = (clone $baseQuery)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->whereNotNull('customer_id')
+            ->select(
+                'customer_id',
+                DB::raw('MAX(customer_name) as customer_name'),
+                DB::raw('COUNT(*) as transaction_count'),
+                DB::raw('SUM(total) as total_spent')
+            )
+            ->groupBy('customer_id')
+            ->orderByDesc('total_spent')
+            ->limit(3)
+            ->get()
+            ->map(fn ($row) => [
+                'customer_id' => $row->customer_id,
+                'customer_name' => $row->customer_name,
+                'transaction_count' => (int) $row->transaction_count,
+                'total_spent' => (float) $row->total_spent,
+            ]);
+
+        $customerStats = [
+            'total_sales' => $totalCustomerSales,
+            'registered_customer_sales' => $registeredCustomerSales,
+            'walk_in_sales' => $walkInSales,
+            'returning_customer_pct' => $totalCustomerSales > 0 ? round(($registeredCustomerSales / $totalCustomerSales) * 100, 1) : 0.0,
+            'top_customers' => $topCustomers,
+        ];
+
+        // ---------------------------------------------------------------
+        // 8. Low-margin alerts (products sold where unit_price <= cost_price)
+        // ---------------------------------------------------------------
+        $lowMarginAlerts = TransactionItem::whereIn('transaction_id', $monthTransactionIds)
+            ->where('company_id', $companyId)
+            ->whereNotNull('cost_price')
+            ->where('cost_price', '>', 0)
+            ->whereColumn('unit_price', '<=', 'cost_price')
+            ->select(
+                'product_id',
+                'product_name',
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('AVG(unit_price) as avg_selling_price'),
+                DB::raw('AVG(cost_price) as avg_cost_price'),
+                DB::raw('SUM((unit_price - cost_price) * quantity) as total_loss')
+            )
+            ->groupBy('product_id', 'product_name')
+            ->orderBy('total_loss')
+            ->limit(10)
+            ->get()
+            ->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'product_name' => $item->product_name,
+                'total_quantity_sold' => (int) $item->total_quantity,
+                'avg_selling_price' => round((float) $item->avg_selling_price, 2),
+                'avg_cost_price' => round((float) $item->avg_cost_price, 2),
+                'total_loss' => round((float) $item->total_loss, 2),
+            ]);
+
+        // ---------------------------------------------------------------
+        // Build response
+        // ---------------------------------------------------------------
+        return response()->json([
+            'data' => [
+                'period_comparison' => $periodComparison,
+                'average_transaction_value' => $avgTransaction,
+                'top_products' => [
+                    'by_quantity' => $topByQuantity,
+                    'by_revenue' => $topByRevenue,
+                ],
+                'payment_methods' => $paymentMethods,
+                'discount_stats' => $discountStats,
+                'peak_hours' => $peakHours,
+                'customer_stats' => $customerStats,
+                'low_margin_alerts' => $lowMarginAlerts,
             ],
         ]);
     }
