@@ -77,14 +77,21 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       final api = ref.read(apiClientProvider);
       final categoriesResponse = await api.getExpenseCategories();
 
-      // Load suppliers in parallel
-      final suppliersResponse = await api.getExpenseSuppliers();
       setState(() {
         _categories = List<Map<String, dynamic>>.from(
           categoriesResponse.data['data'] ?? [],
         );
-        _knownSuppliers = List<String>.from(suppliersResponse.data['data'] ?? []);
       });
+
+      // Load suppliers separately so it doesn't block the page
+      try {
+        final suppliersResponse = await api.getExpenseSuppliers();
+        if (mounted) {
+          setState(() {
+            _knownSuppliers = List<String>.from(suppliersResponse.data['data'] ?? []);
+          });
+        }
+      } catch (_) {}
 
       // If editing, load the expense data
       if (isEditing) {

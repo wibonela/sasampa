@@ -161,6 +161,14 @@ class ApiClient {
     });
   }
 
+  Future<Response> updateProfile(Map<String, dynamic> data) {
+    return _dio.put('/auth/user', data: data);
+  }
+
+  Future<Response> deleteAccount(String password) {
+    return _dio.delete('/auth/user', data: {'password': password});
+  }
+
   // Mobile Access
   Future<Response> getMobileAccessStatus() {
     return _dio.get('/mobile-access/status');
@@ -264,6 +272,11 @@ class ApiClient {
   // Transaction Summary
   Future<Response> getTransactionSummary() {
     return _dio.get('/pos/transactions/summary');
+  }
+
+  // Sales Insights
+  Future<Response> getSalesInsights() {
+    return _dio.get('/pos/transactions/insights');
   }
 
   // Orders
