@@ -30,6 +30,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   String _selectedPaymentMethod = 'cash';
   String? _error;
   Customer? _selectedCustomer;
+  double _lastSyncedTotal = 0;
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
 
@@ -38,6 +39,7 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cart = ref.read(cartProvider);
+      _lastSyncedTotal = cart.total;
       _amountPaidController.text = cart.total.toStringAsFixed(0);
     });
   }
@@ -821,6 +823,17 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cart = ref.watch(cartProvider);
+
+    // Auto-sync amount paid with total when cart changes via +/- buttons
+    if (cart.total != _lastSyncedTotal) {
+      final currentAmount = double.tryParse(_amountPaidController.text) ?? 0;
+      // Only auto-update if user hasn't manually changed the amount
+      if (currentAmount == _lastSyncedTotal || currentAmount == 0) {
+        _amountPaidController.text = cart.total.toStringAsFixed(0);
+      }
+      _lastSyncedTotal = cart.total;
+    }
+
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(

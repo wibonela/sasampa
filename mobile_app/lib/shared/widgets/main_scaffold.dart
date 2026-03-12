@@ -13,15 +13,15 @@ class MainScaffold extends StatelessWidget {
     if (location == '/') return 0;
     if (location == '/pos') return 1;
     if (location.startsWith('/transactions')) return 2;
-    if (location == '/menu') return 3;
-    if (location.startsWith('/expenses')) return 3;
-    if (location.startsWith('/inventory')) return 3;
     if (location.startsWith('/orders')) return 3;
-    if (location.startsWith('/customers')) return 3;
-    if (location == '/settings') return 4;
-    if (location.startsWith('/store-settings')) return 4;
-    if (location.startsWith('/dashboard-customization')) return 4;
-    if (location.startsWith('/printer-setup')) return 4;
+    if (location == '/menu') return 4;
+    if (location.startsWith('/expenses')) return 4;
+    if (location.startsWith('/inventory')) return 4;
+    if (location.startsWith('/customers')) return 4;
+    if (location == '/settings') return 5;
+    if (location.startsWith('/store-settings')) return 5;
+    if (location.startsWith('/dashboard-customization')) return 5;
+    if (location.startsWith('/printer-setup')) return 5;
     if (location.startsWith('/webview')) return 0;
     return 0;
   }
@@ -38,6 +38,7 @@ class MainScaffold extends StatelessWidget {
         ),
         child: BottomNavigationBar(
           currentIndex: _getCurrentIndex(context),
+          type: BottomNavigationBarType.fixed,
           onTap: (index) {
             switch (index) {
               case 0:
@@ -50,9 +51,12 @@ class MainScaffold extends StatelessWidget {
                 context.go('/transactions');
                 break;
               case 3:
-                context.go('/menu');
+                context.go('/orders');
                 break;
               case 4:
+                context.go('/menu');
+                break;
+              case 5:
                 context.go('/settings');
                 break;
             }
@@ -72,6 +76,11 @@ class MainScaffold extends StatelessWidget {
               icon: const Icon(Icons.receipt_long_outlined),
               activeIcon: const Icon(Icons.receipt_long),
               label: AppLocalizations.of(context)?.sales ?? 'Sales',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.assignment_outlined),
+              activeIcon: const Icon(Icons.assignment),
+              label: AppLocalizations.of(context)?.orders ?? 'Orders',
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.apps_outlined),

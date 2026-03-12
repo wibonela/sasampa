@@ -3121,6 +3121,132 @@ abstract class AppLocalizations {
   /// In sw, this message translates to:
   /// **'Risiti za WhatsApp zinakuja hivi karibuni'**
   String get whatsappComingSoon;
+
+  /// No description provided for @insights.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchanganuzi'**
+  String get insights;
+
+  /// No description provided for @vsYesterday.
+  ///
+  /// In sw, this message translates to:
+  /// **'dhidi ya jana'**
+  String get vsYesterday;
+
+  /// No description provided for @vsLastWeek.
+  ///
+  /// In sw, this message translates to:
+  /// **'dhidi ya wiki iliyopita'**
+  String get vsLastWeek;
+
+  /// No description provided for @vsLastMonth.
+  ///
+  /// In sw, this message translates to:
+  /// **'dhidi ya mwezi uliopita'**
+  String get vsLastMonth;
+
+  /// No description provided for @avgSale.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wastani wa Mauzo'**
+  String get avgSale;
+
+  /// No description provided for @topProducts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Bidhaa Bora'**
+  String get topProducts;
+
+  /// No description provided for @paymentBreakdown.
+  ///
+  /// In sw, this message translates to:
+  /// **'Mgawanyo wa Malipo'**
+  String get paymentBreakdown;
+
+  /// No description provided for @discounts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Punguzo'**
+  String get discounts;
+
+  /// No description provided for @discountedSales.
+  ///
+  /// In sw, this message translates to:
+  /// **'mauzo yenye punguzo'**
+  String get discountedSales;
+
+  /// No description provided for @avgDiscount.
+  ///
+  /// In sw, this message translates to:
+  /// **'wastani wa punguzo'**
+  String get avgDiscount;
+
+  /// No description provided for @givenAway.
+  ///
+  /// In sw, this message translates to:
+  /// **'punguzo jumla'**
+  String get givenAway;
+
+  /// No description provided for @peakHours.
+  ///
+  /// In sw, this message translates to:
+  /// **'Masaa ya Kilele'**
+  String get peakHours;
+
+  /// No description provided for @customerInsights.
+  ///
+  /// In sw, this message translates to:
+  /// **'Uchanganuzi wa Wateja'**
+  String get customerInsights;
+
+  /// No description provided for @returning.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wanaorudia'**
+  String get returning;
+
+  /// No description provided for @walkIns.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wageni'**
+  String get walkIns;
+
+  /// No description provided for @topCustomers.
+  ///
+  /// In sw, this message translates to:
+  /// **'Wateja Bora'**
+  String get topCustomers;
+
+  /// No description provided for @marginAlerts.
+  ///
+  /// In sw, this message translates to:
+  /// **'Tahadhari za Faida'**
+  String get marginAlerts;
+
+  /// No description provided for @soldBelowCost.
+  ///
+  /// In sw, this message translates to:
+  /// **'Imeuzwa chini ya gharama'**
+  String get soldBelowCost;
+
+  /// No description provided for @loss.
+  ///
+  /// In sw, this message translates to:
+  /// **'hasara'**
+  String get loss;
+
+  /// No description provided for @noInsightsYet.
+  ///
+  /// In sw, this message translates to:
+  /// **'Anza kuuza kuona uchanganuzi'**
+  String get noInsightsYet;
+
+  /// No description provided for @allTransactions.
+  ///
+  /// In sw, this message translates to:
+  /// **'Miamala Yote'**
+  String get allTransactions;
 }
 
 class _AppLocalizationsDelegate
