@@ -2,6 +2,7 @@ class User {
   final int id;
   final String name;
   final String email;
+  final String? phone;
   final String role;
   final bool hasPin;
   final bool emailVerified;
@@ -13,6 +14,7 @@ class User {
     required this.id,
     required this.name,
     required this.email,
+    this.phone,
     required this.role,
     required this.hasPin,
     this.emailVerified = false,
@@ -26,6 +28,7 @@ class User {
       id: json['id'],
       name: json['name'],
       email: json['email'],
+      phone: json['phone'],
       role: json['role'],
       hasPin: json['has_pin'] ?? false,
       emailVerified: json['email_verified'] ?? false,
@@ -42,6 +45,7 @@ class User {
       'id': id,
       'name': name,
       'email': email,
+      'phone': phone,
       'role': role,
       'has_pin': hasPin,
       'email_verified': emailVerified,

@@ -113,7 +113,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           _hasRedirectedToDefaultTab = true;
           final tabIndex = dashboardPrefsState.prefs.defaultTabIndex;
           if (tabIndex != 0) {
-            const tabRoutes = ['/', '/pos', '/transactions', '/menu', '/settings'];
+            const tabRoutes = ['/', '/pos', '/transactions', '/orders', '/menu', '/settings'];
             return tabRoutes[tabIndex];
           }
         }
@@ -138,7 +138,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         _hasRedirectedToDefaultTab = true;
         final tabIndex = dashboardPrefsState.prefs.defaultTabIndex;
         if (tabIndex != 0) {
-          const tabRoutes = ['/', '/pos', '/transactions', '/menu', '/settings'];
+          const tabRoutes = ['/', '/pos', '/transactions', '/orders', '/menu', '/settings'];
           return tabRoutes[tabIndex];
         }
       }

@@ -1542,4 +1542,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsappComingSoon => 'WhatsApp receipts coming soon';
+
+  @override
+  String get insights => 'Insights';
+
+  @override
+  String get vsYesterday => 'vs yesterday';
+
+  @override
+  String get vsLastWeek => 'vs last week';
+
+  @override
+  String get vsLastMonth => 'vs last month';
+
+  @override
+  String get avgSale => 'Avg Sale';
+
+  @override
+  String get topProducts => 'Top Products';
+
+  @override
+  String get paymentBreakdown => 'Payment Breakdown';
+
+  @override
+  String get discounts => 'Discounts';
+
+  @override
+  String get discountedSales => 'discounted sales';
+
+  @override
+  String get avgDiscount => 'avg discount';
+
+  @override
+  String get givenAway => 'given away';
+
+  @override
+  String get peakHours => 'Peak Hours';
+
+  @override
+  String get customerInsights => 'Customer Insights';
+
+  @override
+  String get returning => 'Returning';
+
+  @override
+  String get walkIns => 'Walk-ins';
+
+  @override
+  String get topCustomers => 'Top Customers';
+
+  @override
+  String get marginAlerts => 'Margin Alerts';
+
+  @override
+  String get soldBelowCost => 'Sold below cost';
+
+  @override
+  String get loss => 'loss';
+
+  @override
+  String get noInsightsYet => 'Start selling to see insights';
+
+  @override
+  String get allTransactions => 'All Transactions';
 }

@@ -1547,4 +1547,67 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get whatsappComingSoon => 'Risiti za WhatsApp zinakuja hivi karibuni';
+
+  @override
+  String get insights => 'Uchanganuzi';
+
+  @override
+  String get vsYesterday => 'dhidi ya jana';
+
+  @override
+  String get vsLastWeek => 'dhidi ya wiki iliyopita';
+
+  @override
+  String get vsLastMonth => 'dhidi ya mwezi uliopita';
+
+  @override
+  String get avgSale => 'Wastani wa Mauzo';
+
+  @override
+  String get topProducts => 'Bidhaa Bora';
+
+  @override
+  String get paymentBreakdown => 'Mgawanyo wa Malipo';
+
+  @override
+  String get discounts => 'Punguzo';
+
+  @override
+  String get discountedSales => 'mauzo yenye punguzo';
+
+  @override
+  String get avgDiscount => 'wastani wa punguzo';
+
+  @override
+  String get givenAway => 'punguzo jumla';
+
+  @override
+  String get peakHours => 'Masaa ya Kilele';
+
+  @override
+  String get customerInsights => 'Uchanganuzi wa Wateja';
+
+  @override
+  String get returning => 'Wanaorudia';
+
+  @override
+  String get walkIns => 'Wageni';
+
+  @override
+  String get topCustomers => 'Wateja Bora';
+
+  @override
+  String get marginAlerts => 'Tahadhari za Faida';
+
+  @override
+  String get soldBelowCost => 'Imeuzwa chini ya gharama';
+
+  @override
+  String get loss => 'hasara';
+
+  @override
+  String get noInsightsYet => 'Anza kuuza kuona uchanganuzi';
+
+  @override
+  String get allTransactions => 'Miamala Yote';
 }
