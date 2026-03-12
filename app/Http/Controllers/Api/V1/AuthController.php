@@ -298,12 +298,15 @@ class AuthController extends Controller
             'email' => $user->email,
             'role' => $user->role,
             'has_pin' => $user->hasPin(),
+            'email_verified' => $user->hasVerifiedEmail(),
             'company' => $user->company ? [
                 'id' => $user->company->id,
                 'name' => $user->company->name,
                 'logo' => $this->getCompanyLogo($user->company),
                 'status' => $user->company->status,
                 'branches_enabled' => $user->company->branches_enabled,
+                'onboarding_step' => $user->company->onboarding_step ?? 1,
+                'onboarding_completed' => (bool) ($user->company->onboarding_completed ?? false),
             ] : null,
             'current_branch' => $user->currentBranch() ? [
                 'id' => $user->currentBranch()->id,

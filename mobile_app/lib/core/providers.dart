@@ -168,11 +168,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Set user from registration response so onboarding routes work
-  void setRegisteredUser(Map<String, dynamic> userData) {
+  Future<void> setRegisteredUser(Map<String, dynamic> userData) async {
     final user = User.fromJson(userData);
+    final mobileAccess = MobileAccess(canUseMobile: false);
+    // Cache user data so the app survives restarts during onboarding
+    await _storage.saveUserData(jsonEncode({
+      'user': userData,
+      'mobile_access': {'status': null, 'can_use_mobile': false},
+    }));
     state = AuthState(
       user: user,
-      mobileAccess: MobileAccess(canUseMobile: false),
+      mobileAccess: mobileAccess,
       isInitialized: true,
     );
   }

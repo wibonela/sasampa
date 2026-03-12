@@ -410,8 +410,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   _buildSettingItem(
                     icon: Icons.chat_outlined,
                     title: l10n.whatsappReceipts,
-                    subtitle: l10n.whatsappSettings,
-                    onTap: () => context.push('/whatsapp-settings'),
+                    subtitle: l10n.whatsappComingSoon,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.whatsappComingSoon),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        l10n.comingSoon,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.warning),
+                      ),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildSettingItem(

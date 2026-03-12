@@ -16,7 +16,19 @@ class SmartVerifyController extends Controller
      */
     public function __invoke(Request $request, int $id, string $hash)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
+
+        if (!$user) {
+            if ($this->isMobileDevice($request)) {
+                return view('auth.verify-success', [
+                    'user' => null,
+                    'alreadyVerified' => false,
+                    'needsOnboarding' => false,
+                    'error' => 'This verification link is no longer valid. Please register again or resend the verification email from the app.',
+                ]);
+            }
+            return redirect()->route('login')->with('error', 'This verification link is no longer valid. Please register again.');
+        }
 
         // Validate the hash matches the user's email
         if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {

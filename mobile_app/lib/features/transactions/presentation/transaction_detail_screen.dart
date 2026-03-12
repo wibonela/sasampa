@@ -465,7 +465,7 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
 
                       const SizedBox(height: 16),
 
-                      // WhatsApp Receipt Section
+                      // WhatsApp Receipt Section - Coming Soon
                       if (_transaction!.isCompleted)
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -487,40 +487,24 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                  const Spacer(),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.warning.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      l10n.comingSoon,
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.warning),
+                                    ),
+                                  ),
                                 ],
                               ),
                               const Divider(height: 24),
-                              if (_whatsappStatus != null) ...[
-                                _buildDetailRow(
-                                  l10n.receiptStatus,
-                                  _whatsappStatusLabel(_whatsappStatus!, l10n),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                              SizedBox(
-                                width: double.infinity,
-                                height: 44,
-                                child: OutlinedButton.icon(
-                                  onPressed: _isSendingWhatsApp
-                                      ? null
-                                      : () => _sendWhatsAppReceipt(),
-                                  icon: _isSendingWhatsApp
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                        )
-                                      : const Icon(Icons.chat_outlined, size: 18),
-                                  label: Text(
-                                    _whatsappStatus != null
-                                        ? l10n.resendReceipt
-                                        : l10n.sendWhatsAppReceipt,
-                                  ),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: const Color(0xFF25D366),
-                                    side: const BorderSide(color: Color(0xFF25D366)),
-                                  ),
-                                ),
+                              Text(
+                                l10n.whatsappComingSoon,
+                                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                               ),
                             ],
                           ),
