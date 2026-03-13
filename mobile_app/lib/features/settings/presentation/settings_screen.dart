@@ -765,7 +765,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             Text(l10n.forAssistanceContact),
                             const SizedBox(height: 12),
                             const Text('Email: support@sasampa.com'),
-                            const Text('Phone: +255 123 456 789'),
                           ],
                         ),
                         actions: [

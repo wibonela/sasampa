@@ -350,7 +350,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   child: _buildStatCard(
                     title: l10n.avgSale,
                     value: _currencyFormat.format((avgTx['today'] ?? 0).toDouble()),
-                    subtitle: '${l10n.thisMonth}: ${_currencyFormat.format((avgTx['month'] ?? 0).toDouble())}',
+                    subtitle: '${l10n.thisMonth}: ${_currencyFormat.format((avgTx['this_month'] ?? 0).toDouble())}',
                   ),
                 ),
               ],
@@ -539,11 +539,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   // ──────────────────── PAYMENT BREAKDOWN ────────────────────
 
   Widget _buildPaymentBreakdown(AppLocalizations l10n) {
-    final methods = _insights!['payment_methods'] as Map<String, dynamic>?;
-    if (methods == null || methods.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    final methods = (_insights!['payment_methods'] as List?) ?? [];
+    if (methods.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
-    final entries = methods.entries.toList()
-      ..sort((a, b) => ((b.value['total'] ?? 0) as num).compareTo((a.value['total'] ?? 0) as num));
+    // Sort by total descending
+    final sorted = List<Map<String, dynamic>>.from(
+      methods.map((e) => Map<String, dynamic>.from(e as Map)),
+    )..sort((a, b) => ((b['total'] ?? 0) as num).compareTo((a['total'] ?? 0) as num));
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -564,9 +566,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               const SizedBox(height: 4),
               Text(l10n.thisMonth, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 14),
-              ...entries.map((entry) {
-                final method = entry.key;
-                final data = entry.value as Map<String, dynamic>;
+              ...sorted.map((data) {
+                final method = data['method'] ?? '';
                 final count = data['count'] ?? 0;
                 final pct = (data['percentage'] ?? 0).toDouble();
                 final color = _getPaymentMethodColor(method);
@@ -628,10 +629,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final stats = _insights!['discount_stats'] as Map<String, dynamic>?;
     if (stats == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
-    final totalDiscount = (stats['total_discount'] ?? 0).toDouble();
+    final totalDiscount = (stats['total_discounts'] ?? 0).toDouble();
     final discountedCount = stats['discounted_sales_count'] ?? 0;
-    final avgDiscount = (stats['average_discount'] ?? 0).toDouble();
-    final discountRate = (stats['discount_rate_percent'] ?? 0).toDouble();
+    final avgDiscount = (stats['avg_discount_per_sale'] ?? 0).toDouble();
+    final discountRate = (stats['discount_rate_pct'] ?? 0).toDouble();
 
     if (totalDiscount == 0) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
@@ -789,7 +790,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
     final registered = stats['registered_customer_sales'] ?? 0;
     final walkIns = stats['walk_in_sales'] ?? 0;
-    final returningPct = (stats['returning_customer_percent'] ?? 0).toDouble();
+    final returningPct = (stats['returning_customer_pct'] ?? 0).toDouble();
     final topCustomers = (stats['top_customers'] as List?) ?? [];
 
     return SliverToBoxAdapter(
@@ -921,7 +922,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 final avgSelling = (data['avg_selling_price'] ?? 0).toDouble();
                 final avgCost = (data['avg_cost_price'] ?? 0).toDouble();
                 final totalLoss = (data['total_loss'] ?? 0).toDouble();
-                final qty = data['quantity_sold'] ?? 0;
+                final qty = data['total_quantity_sold'] ?? 0;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
