@@ -36,6 +36,23 @@ class AdminDashboardController extends Controller
         $registrationTrends = $this->dashboardService->getRegistrationTrends(14);
         $revenueTrends = $this->dashboardService->getRevenueTrends('daily', 14);
 
+        // New analytics data
+        $customerStats = $this->dashboardService->getCustomerStats();
+        $customerBreakdown = $this->dashboardService->getCustomerTransactionBreakdown();
+        $customerGrowth = $this->dashboardService->getCustomerGrowthTrend(30);
+        $productCatalogStats = $this->dashboardService->getProductCatalogStats();
+        $trendingProducts = $this->dashboardService->getTrendingProducts(10);
+        $lowStockAlerts = $this->dashboardService->getLowStockAlerts(10);
+        $activeCompanyStats = $this->dashboardService->getActiveCompanyStats();
+        $featureAdoption = $this->dashboardService->getFeatureAdoptionRates();
+        $activeCompanyTrend = $this->dashboardService->getActiveCompanyTrend(14);
+        $revenuePerCompany = $this->dashboardService->getRevenuePerCompany();
+        $decliningCompanies = $this->dashboardService->getDecliningCompanies(5);
+        $mobileAppStats = $this->dashboardService->getMobileAppStats();
+        $sandukuSummary = $this->dashboardService->getSandukuSummary();
+        $companyAging = $this->dashboardService->getCompanyAgingDistribution();
+        $onboardingFunnel = $this->dashboardService->getOnboardingFunnel();
+
         return view('admin.dashboard.index', compact(
             'companyStats',
             'totalUsers',
@@ -49,21 +66,37 @@ class AdminDashboardController extends Controller
             'registrationTrends',
             'revenueTrends',
             'userLimitRequests',
-            'feedbackCount'
+            'feedbackCount',
+            'customerStats',
+            'customerBreakdown',
+            'customerGrowth',
+            'productCatalogStats',
+            'trendingProducts',
+            'lowStockAlerts',
+            'activeCompanyStats',
+            'featureAdoption',
+            'activeCompanyTrend',
+            'revenuePerCompany',
+            'decliningCompanies',
+            'mobileAppStats',
+            'sandukuSummary',
+            'companyAging',
+            'onboardingFunnel'
         ));
     }
 
     public function chartData(Request $request)
     {
         $period = $request->get('period', 'daily');
-        $limit = $request->get('limit', 14);
+        $limit = (int) $request->get('limit', 14);
         $type = $request->get('type', 'revenue');
 
-        if ($type === 'revenue') {
-            $data = $this->dashboardService->getRevenueTrends($period, $limit);
-        } else {
-            $data = $this->dashboardService->getRegistrationTrends($limit);
-        }
+        $data = match ($type) {
+            'revenue' => $this->dashboardService->getRevenueTrends($period, $limit),
+            'customer_growth' => $this->dashboardService->getCustomerGrowthTrend($limit),
+            'active_companies' => $this->dashboardService->getActiveCompanyTrend($limit),
+            default => $this->dashboardService->getRegistrationTrends($limit),
+        };
 
         return response()->json($data);
     }
