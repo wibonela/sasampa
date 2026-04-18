@@ -20,6 +20,10 @@ class MobileAppRequest extends Model
         'status',
         'request_reason',
         'expected_devices',
+        'is_suspicious',
+        'suspicious_reason',
+        'scheduled_approval_at',
+        'auto_approved',
         'approved_at',
         'rejected_at',
         'revoked_at',
@@ -32,7 +36,10 @@ class MobileAppRequest extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'revoked_at' => 'datetime',
+        'scheduled_approval_at' => 'datetime',
         'expected_devices' => 'integer',
+        'is_suspicious' => 'boolean',
+        'auto_approved' => 'boolean',
     ];
 
     /*
@@ -97,6 +104,16 @@ class MobileAppRequest extends Model
         ]);
     }
 
+    public function autoApprove(): void
+    {
+        $this->update([
+            'status' => self::STATUS_APPROVED,
+            'approved_at' => now(),
+            'auto_approved' => true,
+            'reviewed_by' => null,
+        ]);
+    }
+
     public function reject(User $reviewer, string $reason = null): void
     {
         $this->update([
@@ -141,5 +158,13 @@ class MobileAppRequest extends Model
     public function scopeRevoked($query)
     {
         return $query->where('status', self::STATUS_REVOKED);
+    }
+
+    public function scopeDueForAutoApproval($query)
+    {
+        return $query->where('status', self::STATUS_PENDING)
+            ->where('is_suspicious', false)
+            ->whereNotNull('scheduled_approval_at')
+            ->where('scheduled_approval_at', '<=', now());
     }
 }

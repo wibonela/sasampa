@@ -14,3 +14,9 @@ Schedule::command('companies:delete-stale-pending --days=3')
     ->at('00:00')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Auto-approve non-suspicious mobile access requests 10 minutes after creation
+Schedule::command('mobile-access:auto-approve')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground();
