@@ -83,10 +83,47 @@
                                 <th class="text-secondary">Reviewed By</th>
                                 <td>{{ $request->reviewer->name }}</td>
                             </tr>
+                            @elseif($request->auto_approved)
+                            <tr>
+                                <th class="text-secondary">Reviewed By</th>
+                                <td><span class="badge bg-info">Auto-approved</span></td>
+                            </tr>
                             @endif
                         </table>
 
                         @if($request->status === 'pending')
+                            @if($request->is_suspicious)
+                                <div class="alert alert-warning mb-3">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="bi bi-shield-exclamation fs-5"></i>
+                                        <div>
+                                            <strong>Flagged as suspicious</strong>
+                                            <div class="small">Reason: {{ str_replace('_', ' ', $request->suspicious_reason ?? 'unknown') }}. Auto-approval is disabled — manual review required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($request->scheduled_approval_at)
+                                @if($request->scheduled_approval_at->isFuture())
+                                    <div class="alert alert-info mb-3">
+                                        <div class="d-flex align-items-start gap-2">
+                                            <i class="bi bi-clock fs-5"></i>
+                                            <div>
+                                                <strong>Scheduled for auto-approval</strong>
+                                                <div class="small">
+                                                    Will be auto-approved {{ $request->scheduled_approval_at->diffForHumans() }}
+                                                    ({{ $request->scheduled_approval_at->format('M d, Y H:i') }}) unless reviewed first.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="alert alert-secondary mb-3">
+                                        <i class="bi bi-hourglass-split me-1"></i>
+                                        Auto-approval due — will run on next scheduler tick.
+                                    </div>
+                                @endif
+                            @endif
+
                         <div class="d-flex gap-2 mt-3">
                             <form action="{{ route('admin.mobile-access.approve', $request) }}" method="POST">
                                 @csrf

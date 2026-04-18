@@ -22,6 +22,9 @@
                 <p class="page-subtitle">Company details and management</p>
             </div>
             <div class="d-flex gap-2">
+                <a href="{{ route('admin.companies.edit', $company) }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Edit Details
+                </a>
                 @if($company->status === 'pending')
                     <form action="{{ route('admin.companies.approve', $company) }}" method="POST"
                           data-confirm='{"title":"Approve Company","message":"This will approve {{ $company->name }} and they will be able to use the system.","type":"success","confirmText":"Approve"}'>

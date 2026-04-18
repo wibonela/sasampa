@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewMobileAccessRequest;
 use App\Models\MobileAppRequest;
 use App\Models\MobileDevice;
+use App\Models\User;
+use App\Services\DisposableEmailChecker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class MobileAccessController extends Controller
 {
@@ -52,17 +56,42 @@ class MobileAccessController extends Controller
             'expected_devices' => 'required|integer|min:1|max:100',
         ]);
 
+        $ownerEmail = $user->company?->owner?->email ?? $user->email;
+        $suspicionReason = DisposableEmailChecker::suspicionReason($ownerEmail);
+        $isSuspicious = $suspicionReason !== null;
+
         $mobileRequest = MobileAppRequest::create([
             'company_id' => $user->company_id,
             'status' => MobileAppRequest::STATUS_PENDING,
             'request_reason' => $validated['request_reason'],
             'expected_devices' => $validated['expected_devices'],
+            'is_suspicious' => $isSuspicious,
+            'suspicious_reason' => $suspicionReason,
+            'scheduled_approval_at' => $isSuspicious ? null : now()->addMinutes(10),
         ]);
+
+        $mobileRequest->load('company');
+        $this->notifyPlatformAdmins($mobileRequest);
 
         return response()->json([
             'message' => 'Mobile access request submitted successfully.',
             'request' => $this->formatRequest($mobileRequest),
         ], 201);
+    }
+
+    protected function notifyPlatformAdmins(MobileAppRequest $mobileRequest): void
+    {
+        $admins = User::where('role', User::ROLE_PLATFORM_ADMIN)
+            ->whereNull('company_id')
+            ->whereNotNull('email')
+            ->pluck('email')
+            ->all();
+
+        if (empty($admins)) {
+            return;
+        }
+
+        Mail::to($admins)->send(new NewMobileAccessRequest($mobileRequest));
     }
 
     /**
