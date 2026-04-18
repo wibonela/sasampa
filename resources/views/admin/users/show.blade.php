@@ -19,6 +19,11 @@
                 </div>
                 <p class="page-subtitle">{{ $user->email }}</p>
             </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Edit Details
+                </a>
+            </div>
         </div>
 
         <!-- Status Diagnosis Banner -->

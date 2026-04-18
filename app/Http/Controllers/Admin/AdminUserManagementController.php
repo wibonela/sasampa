@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminUserManagementController extends Controller
@@ -123,6 +124,57 @@ class AdminUserManagementController extends Controller
             && ($diagnosis['invitation_accepted'] || $user->invitation_method === 'pin');
 
         return view('admin.users.show', compact('user', 'diagnosis'));
+    }
+
+    public function edit(User $user): View
+    {
+        if ($user->isPlatformAdmin()) {
+            abort(404);
+        }
+
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        if ($user->isPlatformAdmin()) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => 'nullable|string|max:30',
+        ]);
+
+        $emailChanged = strtolower(trim($validated['email'])) !== strtolower((string) $user->email);
+
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+        ]);
+
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        if ($emailChanged) {
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Throwable $e) {
+                return redirect()->route('admin.users.show', $user)
+                    ->with('success', "User details updated. Email changed but verification email could not be sent ({$e->getMessage()}).");
+            }
+
+            return redirect()->route('admin.users.show', $user)
+                ->with('success', "User details updated. A new verification email has been sent to {$user->email}.");
+        }
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', "User details updated for {$user->name}.");
     }
 
     public function verifyEmail(User $user): RedirectResponse

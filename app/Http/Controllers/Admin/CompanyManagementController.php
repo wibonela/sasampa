@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Services\AdminNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class CompanyManagementController extends Controller
 {
@@ -47,6 +48,69 @@ class CompanyManagementController extends Controller
     {
         $company->load(['users', 'owner']);
         return view('admin.companies.show', compact('company'));
+    }
+
+    public function edit(Company $company)
+    {
+        $company->load('owner');
+        return view('admin.companies.edit', compact('company'));
+    }
+
+    public function update(Request $request, Company $company)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('companies', 'email')->ignore($company->id)],
+            'phone' => 'nullable|string|max:30',
+            'address' => 'nullable|string|max:500',
+            'owner_name' => 'nullable|string|max:255',
+            'owner_email' => 'nullable|email|max:255',
+            'owner_phone' => 'nullable|string|max:30',
+        ]);
+
+        $company->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+        ]);
+
+        $owner = $company->owner;
+        if ($owner && ($request->filled('owner_name') || $request->filled('owner_email') || $request->filled('owner_phone'))) {
+            $ownerEmailInput = $validated['owner_email'] ?? $owner->email;
+            $request->validate([
+                'owner_email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($owner->id)],
+            ]);
+
+            $ownerEmailChanged = strtolower(trim($ownerEmailInput)) !== strtolower((string) $owner->email);
+
+            $owner->fill([
+                'name' => $validated['owner_name'] ?? $owner->name,
+                'email' => $ownerEmailInput,
+                'phone' => $validated['owner_phone'] ?? $owner->phone,
+            ]);
+
+            if ($ownerEmailChanged) {
+                $owner->email_verified_at = null;
+            }
+
+            $owner->save();
+
+            if ($ownerEmailChanged) {
+                try {
+                    $owner->sendEmailVerificationNotification();
+                } catch (\Throwable $e) {
+                    return redirect()->route('admin.companies.show', $company)
+                        ->with('success', "Company updated. Owner email changed but verification email could not be sent ({$e->getMessage()}).");
+                }
+
+                return redirect()->route('admin.companies.show', $company)
+                    ->with('success', "Company and owner updated. A new verification email has been sent to {$owner->email}.");
+            }
+        }
+
+        return redirect()->route('admin.companies.show', $company)
+            ->with('success', "Company '{$company->name}' has been updated.");
     }
 
     public function approve(Company $company)

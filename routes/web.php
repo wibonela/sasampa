@@ -182,6 +182,10 @@ Route::middleware('auth')->group(function () {
                 ->name('companies.index');
             Route::get('/companies/{company}', [CompanyManagementController::class, 'show'])
                 ->name('companies.show');
+            Route::get('/companies/{company}/edit', [CompanyManagementController::class, 'edit'])
+                ->name('companies.edit');
+            Route::patch('/companies/{company}', [CompanyManagementController::class, 'update'])
+                ->name('companies.update');
             Route::post('/companies/{company}/approve', [CompanyManagementController::class, 'approve'])
                 ->name('companies.approve');
             Route::post('/companies/{company}/reject', [CompanyManagementController::class, 'reject'])
@@ -219,6 +223,8 @@ Route::middleware('auth')->group(function () {
             Route::prefix('users')->name('users.')->group(function () {
                 Route::get('/', [AdminUserManagementController::class, 'index'])->name('index');
                 Route::get('/{user}', [AdminUserManagementController::class, 'show'])->name('show');
+                Route::get('/{user}/edit', [AdminUserManagementController::class, 'edit'])->name('edit');
+                Route::patch('/{user}', [AdminUserManagementController::class, 'update'])->name('update');
                 Route::post('/{user}/verify-email', [AdminUserManagementController::class, 'verifyEmail'])->name('verify-email');
                 Route::post('/{user}/resend-verification', [AdminUserManagementController::class, 'resendVerification'])->name('resend-verification');
                 Route::post('/{user}/regenerate-invitation', [AdminUserManagementController::class, 'regenerateInvitation'])->name('regenerate-invitation');
