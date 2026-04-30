@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import '../network/api_client.dart';
 import 'bluetooth_printer_service.dart';
 import 'escpos_commands.dart';
 import 'printer_preferences.dart';
@@ -12,6 +13,41 @@ import 'printer_providers.dart';
 
 class ReceiptService {
   static final _currencyFormat = NumberFormat('#,###');
+
+  /// Fetch the server-rendered receipt PDF.
+  /// Server is the single source of truth for receipt design — same bytes
+  /// the web download produces. Use this for share/system-print flows so
+  /// receipts look identical across web and mobile.
+  static Future<Uint8List> fetchServerReceiptPdf(ApiClient api, int transactionId) async {
+    final response = await api.getReceiptPdf(transactionId);
+    return Uint8List.fromList(response.data!);
+  }
+
+  /// Print the server-rendered receipt PDF via the system print dialog.
+  static Future<void> printServerReceiptPdf({
+    required ApiClient api,
+    required int transactionId,
+    required String txNumber,
+  }) async {
+    final bytes = await fetchServerReceiptPdf(api, transactionId);
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => bytes,
+      name: 'Receipt_$txNumber',
+    );
+  }
+
+  /// Share the server-rendered receipt PDF.
+  static Future<void> shareServerReceiptPdf({
+    required ApiClient api,
+    required int transactionId,
+    required String txNumber,
+  }) async {
+    final bytes = await fetchServerReceiptPdf(api, transactionId);
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: 'Receipt_$txNumber.pdf',
+    );
+  }
 
   /// Generate PDF receipt from API receipt data format
   /// This expects the format returned by /pos/transactions/{id}/receipt
@@ -791,6 +827,8 @@ class ReceiptService {
   static Future<bool> printWithPreferredMethod({
     required Map<String, dynamic> receiptData,
     required WidgetRef ref,
+    ApiClient? api,
+    int? transactionId,
   }) async {
     final prefsState = ref.read(printerPrefsProvider);
     final prefs = prefsState.prefs;
@@ -804,11 +842,16 @@ class ReceiptService {
           paperSize: prefs.paperSize == 'mm58' ? PaperSize.mm58 : PaperSize.mm80,
         );
       }
-      // Fall through to AirPrint if not connected
+      // Fall through to system-print if not connected
     }
 
-    // AirPrint fallback
-    await printReceiptFromApi(receiptData);
+    // System-print fallback — prefer server-rendered PDF (one design across platform).
+    if (api != null && transactionId != null) {
+      final txNumber = receiptData['transaction']?['number']?.toString() ?? 'receipt';
+      await printServerReceiptPdf(api: api, transactionId: transactionId, txNumber: txNumber);
+    } else {
+      await printReceiptFromApi(receiptData);
+    }
     return true;
   }
 

@@ -8,7 +8,6 @@ use App\Models\Product;
 use App\Models\StockAdjustment;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -194,45 +193,11 @@ class POSController extends Controller
         return view('pos.receipt', compact('transaction'));
     }
 
-    public function receiptPdf(Transaction $transaction): Response
+    public function receiptPdf(Transaction $transaction, \App\Services\ReceiptPdfRenderer $renderer): Response
     {
-        $transaction->load('items.product', 'user');
-
-        // Calculate dynamic height based on content (mm)
-        $baseHeight = 175; // Header, footer (incl. welcome line, receipt-box, powered), totals, payment, dividers, margins
-        $itemHeight = 14;  // Per item row (item-name + price line + padding)
-        $totalHeight = $baseHeight + ($transaction->items->count() * $itemHeight);
-
-        // Add extra for optional rows
-        if ($transaction->discount_amount > 0) $totalHeight += 8;
-        if ($transaction->tax_amount > 0) $totalHeight += 8;
-        if ($transaction->customer_name) $totalHeight += 8;
-        if ($transaction->change_given > 0) $totalHeight += 8;
-        if ($transaction->company?->tin) $totalHeight += 5;
-        if ($transaction->company?->vrn) $totalHeight += 5;
-
-        // Add logo height if exists
-        $logo = \App\Models\Setting::get('store_logo') ?: $transaction->company?->logo;
-        if ($logo) $totalHeight += 25;
-
-        // Fiscal block (title + 2 info rows + QR + divider)
-        if ($transaction->fiscal_receipt_number) {
-            $totalHeight += 30;
-            if ($transaction->fiscal_qr_code) $totalHeight += 45;
-        }
-
-        // Small bottom padding
-        $totalHeight += 12;
-
-        // Convert mm to points (1mm = 2.83465 points)
-        $widthPoints = 80 * 2.83465;  // 80mm width
-        $heightPoints = $totalHeight * 2.83465;
-
-        $pdf = Pdf::loadView('pos.receipt-pdf', compact('transaction'));
-        $pdf->setPaper([0, 0, $widthPoints, $heightPoints], 'portrait');
-        $pdf->setOption('isRemoteEnabled', true);
-        $pdf->setOption('dpi', 96);
-
-        return $pdf->download('receipt-' . $transaction->transaction_number . '.pdf');
+        return response($renderer->render($transaction), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $renderer->filename($transaction) . '"',
+        ]);
     }
 }
