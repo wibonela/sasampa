@@ -25,6 +25,18 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   DateTime _selectedDate = DateTime.now();
   String _selectedPaymentMethod = 'cash';
   String? _selectedUnit;
+  String _selectedFrequency = 'one_time';
+  DateTime? _periodStart;
+  DateTime? _periodEnd;
+
+  static const List<Map<String, String>> _frequencies = [
+    {'value': 'one_time', 'label': 'One-time'},
+    {'value': 'daily', 'label': 'Daily'},
+    {'value': 'weekly', 'label': 'Weekly'},
+    {'value': 'monthly', 'label': 'Monthly'},
+    {'value': 'quarterly', 'label': 'Quarterly'},
+    {'value': 'yearly', 'label': 'Yearly'},
+  ];
 
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
@@ -109,6 +121,13 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           _referenceController.text = expense['reference_number'] ?? '';
           _selectedPaymentMethod = expense['payment_method'];
           _notesController.text = expense['notes'] ?? '';
+          _selectedFrequency = (expense['frequency'] as String?) ?? 'one_time';
+          _periodStart = expense['period_start'] != null
+              ? DateTime.parse(expense['period_start'])
+              : null;
+          _periodEnd = expense['period_end'] != null
+              ? DateTime.parse(expense['period_end'])
+              : null;
         });
       }
 
@@ -217,6 +236,14 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     try {
       final api = ref.read(apiClientProvider);
 
+      final isRecurring = _selectedFrequency != 'one_time';
+      final periodStartStr = isRecurring && _periodStart != null
+          ? DateFormat('yyyy-MM-dd').format(_periodStart!)
+          : null;
+      final periodEndStr = isRecurring && _periodEnd != null
+          ? DateFormat('yyyy-MM-dd').format(_periodEnd!)
+          : null;
+
       if (isEditing) {
         await api.updateExpense(widget.expenseId!, {
           'expense_category_id': _selectedCategoryId,
@@ -225,6 +252,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           'quantity': double.parse(_quantityController.text),
           'unit': _selectedUnit,
           'expense_date': DateFormat('yyyy-MM-dd').format(_selectedDate),
+          'frequency': _selectedFrequency,
+          'period_start': periodStartStr,
+          'period_end': periodEndStr,
           'reference_number': _referenceController.text.isEmpty
               ? null
               : _referenceController.text,
@@ -241,6 +271,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
           quantity: double.parse(_quantityController.text),
           unit: _selectedUnit,
           expenseDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+          frequency: _selectedFrequency,
+          periodStart: periodStartStr,
+          periodEnd: periodEndStr,
           referenceNumber: _referenceController.text.isEmpty
               ? null
               : _referenceController.text,
@@ -575,6 +608,152 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                             ],
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Frequency & period
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Frequency',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedFrequency,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                          ),
+                          items: _frequencies.map((f) {
+                            return DropdownMenuItem<String>(
+                              value: f['value']!,
+                              child: Text(f['label']!),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            if (v != null) setState(() => _selectedFrequency = v);
+                          },
+                        ),
+                        if (_selectedFrequency != 'one_time') ...[
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Recurring expenses are spread across the period in profit reports.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Period starts',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: _periodStart ?? _selectedDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) setState(() => _periodStart = picked);
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
+                                ),
+                              ),
+                              child: Text(
+                                _periodStart != null
+                                    ? DateFormat('d MMM yyyy').format(_periodStart!)
+                                    : 'Defaults to date above',
+                                style: TextStyle(
+                                  color: _periodStart != null
+                                      ? AppColors.textPrimary
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Period ends (optional)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: _periodEnd ?? DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) setState(() => _periodEnd = picked);
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
+                                ),
+                                suffixIcon: _periodEnd != null
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear, size: 18),
+                                        onPressed: () => setState(() => _periodEnd = null),
+                                      )
+                                    : null,
+                              ),
+                              child: Text(
+                                _periodEnd != null
+                                    ? DateFormat('d MMM yyyy').format(_periodEnd!)
+                                    : 'Leave empty if still ongoing',
+                                style: TextStyle(
+                                  color: _periodEnd != null
+                                      ? AppColors.textPrimary
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
