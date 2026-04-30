@@ -124,6 +124,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/transactions/insights', [TransactionController::class, 'insights']);
                 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
                 Route::get('/transactions/{id}/receipt', [POSController::class, 'receipt']);
+                Route::get('/transactions/{id}/receipt-pdf', [POSController::class, 'receiptPdf']);
                 Route::post('/transactions/{id}/void', [POSController::class, 'voidTransaction']);
                 Route::post('/transactions/{id}/whatsapp', [WhatsAppReceiptController::class, 'send']);
                 Route::get('/transactions/{id}/whatsapp/status', [WhatsAppReceiptController::class, 'status']);

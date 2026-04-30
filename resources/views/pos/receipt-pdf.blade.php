@@ -6,7 +6,7 @@
     <title>Receipt - {{ $transaction->transaction_number }}</title>
     <style>
         @page {
-            margin: 5mm;
+            margin: 0;
         }
         * {
             margin: 0;
@@ -16,7 +16,6 @@
         }
         html, body {
             margin: 0;
-            padding: 0;
             height: auto !important;
         }
         body {
@@ -25,6 +24,7 @@
             line-height: 1.5;
             color: #1a2942;
             background: #fff;
+            padding: 6mm 6mm;
         }
 
         .receipt {
