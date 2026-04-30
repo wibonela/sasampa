@@ -31,7 +31,8 @@ class CacheService
     protected function calculateDashboardStats(int $companyId, ?int $branchId): array
     {
         $query = Transaction::where('company_id', $companyId)
-            ->where('status', 'completed');
+            ->where('status', 'completed')
+            ->sales();
 
         if ($branchId) {
             $query->where('branch_id', $branchId);
@@ -72,7 +73,8 @@ class CacheService
         $lowStockQuery = Product::where('company_id', $companyId)
             ->where('is_active', true)
             ->whereHas('inventory', function ($q) {
-                $q->whereColumn('quantity', '<=', 'low_stock_threshold');
+                $q->whereColumn('quantity', '<=', 'low_stock_threshold')
+                    ->where('quantity', '>', 0);
             });
 
         if ($branchId) {

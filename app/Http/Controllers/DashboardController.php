@@ -48,7 +48,7 @@ class DashboardController extends Controller
 
         // === PROFIT METRICS ===
         // Today's profit calculation
-        $todayTransactionIds = Transaction::completed()
+        $todayTransactionIds = Transaction::completed()->sales()
             ->whereDate('created_at', today())
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->pluck('id');
@@ -64,11 +64,11 @@ class DashboardController extends Controller
             ->selectRaw('SUM(amount * quantity) as total')
             ->value('total') ?? 0;
 
-        $todayNetProfit = $todayGrossProfit - $todayExpenses;
+        $todayNetProfit = $todayGrossProfit;
 
         // This Month metrics
         $monthStart = now()->startOfMonth();
-        $monthTransactions = Transaction::completed()
+        $monthTransactions = Transaction::completed()->sales()
             ->where('created_at', '>=', $monthStart)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
 
@@ -87,11 +87,11 @@ class DashboardController extends Controller
             ->selectRaw('SUM(amount * quantity) as total')
             ->value('total') ?? 0;
 
-        $monthNetProfit = $monthGrossProfit - $monthExpenses;
+        $monthNetProfit = $monthGrossProfit;
         $monthProfitMargin = $monthSales > 0 ? ($monthNetProfit / $monthSales) * 100 : 0;
 
         // Yesterday comparison
-        $yesterdaySales = Transaction::completed()
+        $yesterdaySales = Transaction::completed()->sales()
             ->whereDate('created_at', now()->subDay())
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->sum('total');
@@ -101,7 +101,7 @@ class DashboardController extends Controller
         // Last month comparison
         $lastMonthStart = now()->subMonth()->startOfMonth();
         $lastMonthEnd = now()->subMonth()->endOfMonth();
-        $lastMonthSales = Transaction::completed()
+        $lastMonthSales = Transaction::completed()->sales()
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->sum('total');

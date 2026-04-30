@@ -55,8 +55,8 @@
             <div class="col-6 col-md-3">
                 <div class="card">
                     <div class="card-body py-3 text-center">
-                        <div class="text-secondary small">Total Expenses</div>
-                        <h4 class="mb-0 text-danger">TZS {{ number_format($totalExpenses) }}</h4>
+                        <div class="text-secondary small">Cost of Goods</div>
+                        <h4 class="mb-0 text-danger">TZS {{ number_format($totalCogs) }}</h4>
                     </div>
                 </div>
             </div>
@@ -158,8 +158,8 @@
                                 </div>
                                 <div class="col-6">
                                     <div class="p-2 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
-                                        <div class="small text-secondary">Expenses</div>
-                                        <div class="fw-bold text-danger">{{ number_format($data['expenses'] / 1000) }}K</div>
+                                        <div class="small text-secondary">COGS</div>
+                                        <div class="fw-bold text-danger">{{ number_format($data['cogs'] / 1000) }}K</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -207,7 +207,7 @@
                         <tr>
                             <th>Branch</th>
                             <th class="text-end">Sales</th>
-                            <th class="text-end">Expenses</th>
+                            <th class="text-end">COGS</th>
                             <th class="text-end">Profit/Loss</th>
                             <th class="text-end">Margin</th>
                             <th class="text-end">Transactions</th>
@@ -224,7 +224,7 @@
                                     @endif
                                 </td>
                                 <td class="text-end text-primary">TZS {{ number_format($data['sales']) }}</td>
-                                <td class="text-end text-danger">TZS {{ number_format($data['expenses']) }}</td>
+                                <td class="text-end text-danger">TZS {{ number_format($data['cogs']) }}</td>
                                 <td class="text-end {{ $data['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     <strong>TZS {{ number_format($data['profit']) }}</strong>
                                 </td>
@@ -240,7 +240,7 @@
                         <tr>
                             <th>Total</th>
                             <th class="text-end text-primary">TZS {{ number_format($totalSales) }}</th>
-                            <th class="text-end text-danger">TZS {{ number_format($totalExpenses) }}</th>
+                            <th class="text-end text-danger">TZS {{ number_format($totalCogs) }}</th>
                             <th class="text-end {{ $totalProfit >= 0 ? 'text-success' : 'text-danger' }}">TZS {{ number_format($totalProfit) }}</th>
                             <th class="text-end">{{ $totalSales > 0 ? number_format(($totalProfit / $totalSales) * 100, 1) : 0 }}%</th>
                             <th class="text-end">{{ number_format($totalTransactions) }}</th>

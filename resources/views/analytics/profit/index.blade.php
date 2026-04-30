@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h1 class="page-title">Profit Analytics</h1>
-                <p class="page-subtitle">Revenue, Cost of Goods, Expenses & Profit Analysis</p>
+                <p class="page-subtitle">Revenue, Cost of Goods & Profit Analysis</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('analytics.profit.branches') }}" class="btn btn-outline-secondary">
@@ -260,7 +260,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th class="text-end">Sales</th>
-                                    <th class="text-end">Expenses</th>
+                                    <th class="text-end">COGS</th>
                                     <th class="text-end">Profit</th>
                                 </tr>
                             </thead>
@@ -269,7 +269,7 @@
                                     <tr>
                                         <td>{{ $period == 'today' ? $data['period'] : \Carbon\Carbon::parse($data['period'])->format('D, d M') }}</td>
                                         <td class="text-end text-primary">{{ number_format($data['sales']) }}</td>
-                                        <td class="text-end text-danger">{{ number_format($data['expenses']) }}</td>
+                                        <td class="text-end text-danger">{{ number_format($data['cogs']) }}</td>
                                         <td class="text-end {{ $data['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                             <strong>{{ number_format($data['profit']) }}</strong>
                                         </td>
@@ -357,7 +357,7 @@
                         <tr>
                             <th>Branch</th>
                             <th class="text-end">Sales</th>
-                            <th class="text-end">Expenses</th>
+                            <th class="text-end">COGS</th>
                             <th class="text-end">Profit</th>
                         </tr>
                     </thead>
@@ -366,7 +366,7 @@
                             <tr>
                                 <td>{{ $branch['name'] }}</td>
                                 <td class="text-end">TZS {{ number_format($branch['sales']) }}</td>
-                                <td class="text-end text-danger">TZS {{ number_format($branch['expenses']) }}</td>
+                                <td class="text-end text-danger">TZS {{ number_format($branch['cogs']) }}</td>
                                 <td class="text-end {{ $branch['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     <strong>TZS {{ number_format($branch['profit']) }}</strong>
                                 </td>
