@@ -194,7 +194,7 @@
         };
 
         $company = $transaction->company;
-        $logo = \App\Models\Setting::get('store_logo');
+        $logo = \App\Models\Setting::get('store_logo') ?: $company?->logo;
         $storeName = $stripEmojis(\App\Models\Setting::get('store_name') ?: $company->name);
         $storeAddress = $stripEmojis(\App\Models\Setting::get('store_address') ?: $company->address);
         $storePhone = $stripEmojis(\App\Models\Setting::get('store_phone') ?: $company->phone);
