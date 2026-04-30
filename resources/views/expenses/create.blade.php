@@ -95,6 +95,49 @@
                                 <strong>Total:</strong> TZS <span id="total-display">0</span>
                             </div>
 
+                            <div class="card border-info mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="frequency" class="form-label">Frequency <span class="text-danger">*</span></label>
+                                            <select class="form-select @error('frequency') is-invalid @enderror"
+                                                    id="frequency" name="frequency" required>
+                                                <option value="one_time" {{ old('frequency', 'one_time') == 'one_time' ? 'selected' : '' }}>One-time (default)</option>
+                                                <option value="daily" {{ old('frequency') == 'daily' ? 'selected' : '' }}>Daily</option>
+                                                <option value="weekly" {{ old('frequency') == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                                                <option value="monthly" {{ old('frequency') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                                <option value="quarterly" {{ old('frequency') == 'quarterly' ? 'selected' : '' }}>Quarterly</option>
+                                                <option value="yearly" {{ old('frequency') == 'yearly' ? 'selected' : '' }}>Yearly (e.g., annual rent)</option>
+                                            </select>
+                                            @error('frequency')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="text-secondary">Recurring expenses are spread across the period in profit reports.</small>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="period-fields" style="display: none;">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="period_start" class="form-label">Period Starts</label>
+                                            <input type="date" class="form-control @error('period_start') is-invalid @enderror"
+                                                   id="period_start" name="period_start" value="{{ old('period_start') }}">
+                                            <small class="text-secondary">Defaults to the date above.</small>
+                                            @error('period_start')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="period_end" class="form-label">Period Ends (optional)</label>
+                                            <input type="date" class="form-control @error('period_end') is-invalid @enderror"
+                                                   id="period_end" name="period_end" value="{{ old('period_end') }}">
+                                            <small class="text-secondary">Leave empty if this is still ongoing.</small>
+                                            @error('period_end')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="supplier" class="form-label">Supplier</label>
@@ -165,6 +208,14 @@
         document.getElementById('amount').addEventListener('input', updateTotal);
         document.getElementById('quantity').addEventListener('input', updateTotal);
         updateTotal();
+
+        const frequencySelect = document.getElementById('frequency');
+        const periodFields = document.getElementById('period-fields');
+        function togglePeriodFields() {
+            periodFields.style.display = frequencySelect.value === 'one_time' ? 'none' : '';
+        }
+        frequencySelect.addEventListener('change', togglePeriodFields);
+        togglePeriodFields();
     </script>
     @endpush
 </x-app-layout>
