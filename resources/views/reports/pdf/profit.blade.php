@@ -40,8 +40,8 @@
                 <td class="text-end">TZS {{ number_format($totalSales) }}</td>
             </tr>
             <tr>
-                <td class="label">Total Expenses</td>
-                <td class="text-end">TZS {{ number_format($totalExpenses) }}</td>
+                <td class="label">Cost of Goods</td>
+                <td class="text-end">TZS {{ number_format($totalCogs) }}</td>
             </tr>
             <tr>
                 <td class="label">Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}</td>
@@ -60,7 +60,7 @@
             <tr>
                 <th>Date</th>
                 <th class="text-end">Sales</th>
-                <th class="text-end">Expenses</th>
+                <th class="text-end">COGS</th>
                 <th class="text-end">Profit/Loss</th>
             </tr>
         </thead>
@@ -69,7 +69,7 @@
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($day['date'])->format('D, d M Y') }}</td>
                     <td class="text-end">TZS {{ number_format($day['sales']) }}</td>
-                    <td class="text-end">TZS {{ number_format($day['expenses']) }}</td>
+                    <td class="text-end">TZS {{ number_format($day['cogs']) }}</td>
                     <td class="text-end {{ $day['profit'] >= 0 ? 'profit' : 'loss' }}">TZS {{ number_format($day['profit']) }}</td>
                 </tr>
             @endforeach
@@ -79,7 +79,7 @@
                 <tr>
                     <td>Total</td>
                     <td class="text-end">TZS {{ number_format($dailyProfit->sum('sales')) }}</td>
-                    <td class="text-end">TZS {{ number_format($dailyProfit->sum('expenses')) }}</td>
+                    <td class="text-end">TZS {{ number_format($dailyProfit->sum('cogs')) }}</td>
                     <td class="text-end">TZS {{ number_format($dailyProfit->sum('profit')) }}</td>
                 </tr>
             </tfoot>

@@ -26,6 +26,7 @@ class ReportController extends Controller
         $todayTransactions = Transaction::where('company_id', $user->company_id)
             ->whereDate('created_at', today())
             ->where('status', 'completed')
+            ->sales()
             ->get();
 
         // This month's data
@@ -33,12 +34,14 @@ class ReportController extends Controller
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->where('status', 'completed')
+            ->sales()
             ->get();
 
         // Low stock count
         $lowStockCount = Product::active()
             ->whereHas('inventory', function ($q) {
-                $q->whereRaw('quantity <= low_stock_threshold');
+                $q->whereRaw('quantity <= low_stock_threshold')
+                    ->where('quantity', '>', 0);
             })->count();
 
         // Recent transactions
@@ -58,7 +61,7 @@ class ReportController extends Controller
         $monthExpenses = Expense::where('expense_date', '>=', now()->startOfMonth())
             ->selectRaw('SUM(amount * quantity) as total')
             ->value('total') ?? 0;
-        $monthNetProfit = $monthGrossProfit - $monthExpenses;
+        $monthNetProfit = $monthGrossProfit;
 
         // Today profit
         $todayCogs = TransactionItem::whereIn('transaction_id', $todayTransactions->pluck('id'))
@@ -68,13 +71,14 @@ class ReportController extends Controller
         $todayExpenses = Expense::whereDate('expense_date', today())
             ->selectRaw('SUM(amount * quantity) as total')
             ->value('total') ?? 0;
-        $todayNetProfit = $todayGrossProfit - $todayExpenses;
+        $todayNetProfit = $todayGrossProfit;
 
         // Top products today
         $topProductsToday = TransactionItem::whereHas('transaction', function ($q) use ($user) {
             $q->where('company_id', $user->company_id)
                 ->whereDate('created_at', today())
-                ->where('status', 'completed');
+                ->where('status', 'completed')
+                ->sales();
         })
             ->select('product_id', 'product_name', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_sales'))
             ->groupBy('product_id', 'product_name')
@@ -91,6 +95,8 @@ class ReportController extends Controller
                         ? (float) ($todayTransactions->sum('total') / $todayTransactions->count())
                         : 0,
                     'items_sold' => $todayTransactions->sum(fn ($t) => $t->items->sum('quantity')),
+                    'revenue' => (float) $todayTransactions->sum('total'),
+                    'cogs' => (float) $todayCogs,
                     'gross_profit' => (float) $todayGrossProfit,
                     'expenses' => (float) $todayExpenses,
                     'net_profit' => (float) $todayNetProfit,
@@ -176,6 +182,7 @@ class ReportController extends Controller
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
             ->where('status', 'completed')
+            ->sales()
             ->get();
 
         // Daily breakdown
@@ -192,7 +199,8 @@ class ReportController extends Controller
             $q->where('company_id', $user->company_id)
                 ->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate)
-                ->where('status', 'completed');
+                ->where('status', 'completed')
+                ->sales();
         })
             ->select('product_id', 'product_name', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_sales'))
             ->groupBy('product_id', 'product_name')

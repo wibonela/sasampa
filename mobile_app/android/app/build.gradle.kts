@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.sasampa.sasampa_pos"
+    namespace = "com.sasampa.pos"
     compileSdk = 36
     ndkVersion = "27.1.12297006"
 
@@ -29,9 +29,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sasampa.sasampa_pos"
+        applicationId = "com.sasampa.pos"
         minSdk = flutter.minSdkVersion
-        targetSdk = 34
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
