@@ -145,6 +145,10 @@ class OnboardingController extends Controller
 
         $company->update($updateData);
 
+        if (isset($updateData['logo'])) {
+            \App\Models\Setting::set('store_logo', $updateData['logo'], 'string');
+        }
+
         return redirect()->route('onboarding.step4');
     }
 
