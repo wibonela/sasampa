@@ -61,6 +61,10 @@ class ExpenseController extends Controller
                     'unit' => $expense->unit,
                     'expense_date' => $expense->expense_date->format('Y-m-d'),
                     'expense_date_human' => $expense->expense_date->format('d M Y'),
+                    'frequency' => $expense->frequency,
+                    'period_start' => $expense->period_start?->format('Y-m-d'),
+                    'period_end' => $expense->period_end?->format('Y-m-d'),
+                    'is_recurring' => $expense->isRecurring(),
                     'payment_method' => $expense->payment_method,
                     'payment_method_label' => $expense->payment_method_label,
                     'supplier' => $expense->supplier,
@@ -161,11 +165,22 @@ class ExpenseController extends Controller
             'quantity' => 'required|numeric|min:0.01',
             'unit' => 'nullable|string|max:50',
             'expense_date' => 'required|date',
+            'frequency' => 'nullable|in:' . implode(',', Expense::FREQUENCIES),
+            'period_start' => 'nullable|date',
+            'period_end' => 'nullable|date|after_or_equal:period_start',
             'reference_number' => 'nullable|string|max:100',
             'supplier' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,card,mobile,bank',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['frequency'] = $validated['frequency'] ?? Expense::FREQUENCY_ONE_TIME;
+        if ($validated['frequency'] === Expense::FREQUENCY_ONE_TIME) {
+            $validated['period_start'] = $validated['expense_date'];
+            $validated['period_end'] = $validated['expense_date'];
+        } else {
+            $validated['period_start'] = $validated['period_start'] ?? $validated['expense_date'];
+        }
 
         $validated['user_id'] = auth()->id();
         $validated['company_id'] = auth()->user()->company_id;
@@ -248,11 +263,21 @@ class ExpenseController extends Controller
             'quantity' => 'sometimes|numeric|min:0.01',
             'unit' => 'nullable|string|max:50',
             'expense_date' => 'sometimes|date',
+            'frequency' => 'sometimes|in:' . implode(',', Expense::FREQUENCIES),
+            'period_start' => 'nullable|date',
+            'period_end' => 'nullable|date|after_or_equal:period_start',
             'reference_number' => 'nullable|string|max:100',
             'supplier' => 'nullable|string|max:255',
             'payment_method' => 'sometimes|in:cash,card,mobile,bank',
             'notes' => 'nullable|string',
         ]);
+
+        $frequency = $validated['frequency'] ?? $expense->frequency;
+        $expenseDate = $validated['expense_date'] ?? $expense->expense_date->toDateString();
+        if ($frequency === Expense::FREQUENCY_ONE_TIME) {
+            $validated['period_start'] = $expenseDate;
+            $validated['period_end'] = $expenseDate;
+        }
 
         $expense->update($validated);
         $expense->load(['category', 'user']);
@@ -296,33 +321,61 @@ class ExpenseController extends Controller
     {
         $dateFrom = $request->input('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
+        $from = \Illuminate\Support\Carbon::parse($dateFrom)->startOfDay();
+        $to = \Illuminate\Support\Carbon::parse($dateTo)->endOfDay();
 
-        // Total expenses by category
-        $byCategory = Expense::inDateRange($dateFrom, $dateTo)
-            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
-            ->selectRaw('expense_categories.id, expense_categories.name as category_name, SUM(expenses.amount * expenses.quantity) as total')
-            ->groupBy('expense_categories.id', 'expense_categories.name')
-            ->orderByDesc('total')
-            ->get();
+        $expenses = Expense::with('category')->overlappingPeriod($from, $to)->get();
 
-        // Daily breakdown
-        $dailyExpenses = Expense::inDateRange($dateFrom, $dateTo)
-            ->selectRaw('DATE(expense_date) as date, SUM(amount * quantity) as total, COUNT(*) as count')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        $byCategoryMap = [];
+        $byPaymentMap = [];
+        $totalAmount = 0.0;
+        foreach ($expenses as $expense) {
+            $allocated = $expense->proratedAmount($from, $to);
+            if ($allocated <= 0) continue;
+            $totalAmount += $allocated;
 
-        // Payment method breakdown
-        $byPaymentMethod = Expense::inDateRange($dateFrom, $dateTo)
-            ->selectRaw('payment_method, SUM(amount * quantity) as total, COUNT(*) as count')
-            ->groupBy('payment_method')
-            ->orderByDesc('total')
-            ->get();
+            $catId = $expense->expense_category_id;
+            if (!isset($byCategoryMap[$catId])) {
+                $byCategoryMap[$catId] = [
+                    'id' => $catId,
+                    'name' => $expense->category?->name ?? 'Uncategorized',
+                    'total' => 0.0,
+                ];
+            }
+            $byCategoryMap[$catId]['total'] += $allocated;
 
-        // Total summary
-        $totalExpenses = Expense::inDateRange($dateFrom, $dateTo)
-            ->selectRaw('SUM(amount * quantity) as total, COUNT(*) as count')
-            ->first();
+            $method = $expense->payment_method;
+            if (!isset($byPaymentMap[$method])) {
+                $byPaymentMap[$method] = ['method' => $method, 'total' => 0.0, 'count' => 0];
+            }
+            $byPaymentMap[$method]['total'] += $allocated;
+            $byPaymentMap[$method]['count'] += 1;
+        }
+
+        $daily = [];
+        for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
+            $dayStart = $d->copy()->startOfDay();
+            $dayEnd = $d->copy()->endOfDay();
+            $dayTotal = 0.0;
+            $dayCount = 0;
+            foreach ($expenses as $expense) {
+                $share = $expense->proratedAmount($dayStart, $dayEnd);
+                if ($share > 0) {
+                    $dayTotal += $share;
+                    $dayCount += 1;
+                }
+            }
+            if ($dayTotal > 0) {
+                $daily[] = ['date' => $d->toDateString(), 'total' => round($dayTotal, 2), 'count' => $dayCount];
+            }
+        }
+
+        $byCategory = collect($byCategoryMap)->values()
+            ->map(fn ($v) => ['id' => $v['id'], 'name' => $v['name'], 'total' => round($v['total'], 2)])
+            ->sortByDesc('total')->values();
+        $byPaymentMethod = collect($byPaymentMap)->values()
+            ->map(fn ($v) => ['method' => $v['method'], 'total' => round($v['total'], 2), 'count' => $v['count']])
+            ->sortByDesc('total')->values();
 
         return response()->json([
             'data' => [
@@ -331,30 +384,12 @@ class ExpenseController extends Controller
                     'to' => $dateTo,
                 ],
                 'totals' => [
-                    'amount' => (float) ($totalExpenses->total ?? 0),
-                    'count' => (int) ($totalExpenses->count ?? 0),
+                    'amount' => round($totalAmount, 2),
+                    'count' => $expenses->count(),
                 ],
-                'by_category' => $byCategory->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->category_name,
-                        'total' => (float) $item->total,
-                    ];
-                }),
-                'by_payment_method' => $byPaymentMethod->map(function ($item) {
-                    return [
-                        'method' => $item->payment_method,
-                        'total' => (float) $item->total,
-                        'count' => (int) $item->count,
-                    ];
-                }),
-                'daily' => $dailyExpenses->map(function ($item) {
-                    return [
-                        'date' => $item->date,
-                        'total' => (float) $item->total,
-                        'count' => (int) $item->count,
-                    ];
-                }),
+                'by_category' => $byCategory,
+                'by_payment_method' => $byPaymentMethod,
+                'daily' => $daily,
             ],
         ]);
     }

@@ -104,7 +104,17 @@
                                     <small class="text-secondary">{{ $expense->user->name }}</small>
                                 </td>
                                 <td>
-                                    <div style="font-weight: 500;">{{ $expense->description }}</div>
+                                    <div style="font-weight: 500;">
+                                        {{ $expense->description }}
+                                        @if($expense->isRecurring())
+                                            @php
+                                                $freqLabel = ['daily' => 'daily', 'weekly' => 'weekly', 'monthly' => 'monthly', 'quarterly' => 'quarterly', 'yearly' => 'yearly'][$expense->frequency] ?? $expense->frequency;
+                                            @endphp
+                                            <span class="badge bg-info ms-1" title="Recurring {{ $freqLabel }}{{ $expense->period_end ? ' until ' . $expense->period_end->format('d M Y') : ' (ongoing)' }}">
+                                                <i class="bi bi-arrow-repeat"></i> {{ ucfirst($freqLabel) }}
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if($expense->supplier)
                                         <small class="text-secondary">{{ $expense->supplier }}</small>
                                     @endif
