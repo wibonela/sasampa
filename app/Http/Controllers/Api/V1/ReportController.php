@@ -7,12 +7,17 @@ use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Services\ProfitBreakdownService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    public function __construct(private ProfitBreakdownService $profit)
+    {
+    }
+
     /**
      * Get dashboard summary.
      *
@@ -251,5 +256,46 @@ class ReportController extends Controller
                 ])->toArray(),
             ],
         ]);
+    }
+
+    /**
+     * Customizable Profit Breakdown report.
+     *
+     * GET /api/v1/reports/profit-breakdown
+     */
+    public function profitBreakdown(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->isCompanyOwner() && !$user->hasPermission('view_reports')) {
+            return response()->json([
+                'message' => 'You do not have permission to view reports.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'period' => 'nullable|in:today,week,month,quarter,year,custom',
+            'date_from' => 'required_if:period,custom|date',
+            'date_to' => 'required_if:period,custom|date|after_or_equal:date_from',
+            'branch_id' => 'nullable|integer|exists:branches,id',
+            'include_expenses' => 'nullable|boolean',
+            'expense_category_ids' => 'nullable|array',
+            'expense_category_ids.*' => 'integer|exists:expense_categories,id',
+            'top_products_limit' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        $report = $this->profit->fullReport(
+            period: $validated['period'] ?? 'month',
+            filters: [
+                'date_from' => $validated['date_from'] ?? null,
+                'date_to' => $validated['date_to'] ?? null,
+            ],
+            branchId: $validated['branch_id'] ?? null,
+            includeExpenses: (bool) ($validated['include_expenses'] ?? true),
+            expenseCategoryIds: $validated['expense_category_ids'] ?? [],
+            topProductsLimit: (int) ($validated['top_products_limit'] ?? 10),
+        );
+
+        return response()->json(['data' => $report]);
     }
 }

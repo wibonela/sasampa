@@ -1,20 +1,25 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../../app/theme/colors.dart';
+import '../../../../core/providers.dart';
 
-class ProfitBreakdownWidget extends StatefulWidget {
+class ProfitBreakdownWidget extends ConsumerStatefulWidget {
   final Map<String, dynamic>? dashboardData;
 
   const ProfitBreakdownWidget({super.key, required this.dashboardData});
 
   @override
-  State<ProfitBreakdownWidget> createState() => _ProfitBreakdownWidgetState();
+  ConsumerState<ProfitBreakdownWidget> createState() =>
+      _ProfitBreakdownWidgetState();
 }
 
-class _ProfitBreakdownWidgetState extends State<ProfitBreakdownWidget>
+class _ProfitBreakdownWidgetState extends ConsumerState<ProfitBreakdownWidget>
     with SingleTickerProviderStateMixin {
+  bool _includeExpenses = true;
   static final _currencyFormat =
       NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
   static final _compactFormat =
@@ -36,6 +41,25 @@ class _ProfitBreakdownWidgetState extends State<ProfitBreakdownWidget>
       curve: Curves.easeOutCubic,
     );
     _animController.forward();
+    _loadIncludeExpensesPref();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh the toggle pref when this widget rebuilds (e.g. user returned
+    // from the comprehensive Profit Breakdown screen).
+    _loadIncludeExpensesPref();
+  }
+
+  Future<void> _loadIncludeExpensesPref() async {
+    final storage = ref.read(secureStorageProvider);
+    final raw = await storage.getString('profit_include_expenses');
+    if (raw == null || !mounted) return;
+    final include = raw == '1' || raw.toLowerCase() == 'true';
+    if (include != _includeExpenses) {
+      setState(() => _includeExpenses = include);
+    }
   }
 
   @override
@@ -64,10 +88,12 @@ class _ProfitBreakdownWidgetState extends State<ProfitBreakdownWidget>
     final expenses = (data['expenses'] ?? 0).toDouble();
     final cogs = (data['cogs'] ?? 0).toDouble();
     final grossProfit = _showToday ? revenue - cogs : (data['gross_profit'] ?? 0).toDouble();
-    final netProfit = (data['net_profit'] ?? 0).toDouble();
-    final profitMargin = _showToday
-        ? (revenue > 0 ? (netProfit / revenue * 100) : 0.0)
-        : (data['profit_margin'] ?? 0).toDouble();
+    // Server returns net_profit = gross_profit (no expenses subtracted).
+    // Honor the user's preference from the comprehensive screen.
+    final netProfit = _includeExpenses
+        ? grossProfit - expenses
+        : grossProfit;
+    final profitMargin = revenue > 0 ? (netProfit / revenue * 100) : 0.0;
 
     // For the stacked bar: total outflow = cogs + expenses
     final totalOutflow = cogs + expenses;
@@ -75,67 +101,79 @@ class _ProfitBreakdownWidgetState extends State<ProfitBreakdownWidget>
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        elevation: 0,
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with toggle
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n?.profitBreakdown ?? 'Profit Breakdown',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+          onTap: () => context.push('/reports/profit-breakdown'),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                _buildPeriodToggle(l10n),
               ],
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          l10n?.profitBreakdown ?? 'Profit Breakdown',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.chevron_right_rounded,
+                            size: 20, color: AppColors.textSecondary),
+                      ],
+                    ),
+                    _buildPeriodToggle(l10n),
+                  ],
+                ),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-            // Net Profit Hero
-            _buildNetProfitHero(netProfit, profitMargin, l10n),
+                _buildNetProfitHero(netProfit, profitMargin, l10n),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-            // Visual bar breakdown
-            _buildVisualBreakdown(
-              revenue: revenue,
-              cogs: cogs,
-              expenses: expenses,
-              maxBar: maxBar,
-              l10n: l10n,
+                _buildVisualBreakdown(
+                  revenue: revenue,
+                  cogs: cogs,
+                  expenses: expenses,
+                  maxBar: maxBar,
+                  l10n: l10n,
+                ),
+
+                const SizedBox(height: 16),
+
+                _buildBreakdownDetails(
+                  revenue: revenue,
+                  cogs: cogs,
+                  grossProfit: grossProfit,
+                  expenses: expenses,
+                  netProfit: netProfit,
+                  l10n: l10n,
+                  showCogs: !_showToday || cogs > 0,
+                ),
+              ],
             ),
-
-            const SizedBox(height: 16),
-
-            // Breakdown legend/details
-            _buildBreakdownDetails(
-              revenue: revenue,
-              cogs: cogs,
-              grossProfit: grossProfit,
-              expenses: expenses,
-              netProfit: netProfit,
-              l10n: l10n,
-              showCogs: !_showToday || cogs > 0,
-            ),
-          ],
+          ),
         ),
       ),
     );
