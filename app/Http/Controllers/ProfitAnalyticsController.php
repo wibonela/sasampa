@@ -63,8 +63,8 @@ class ProfitAnalyticsController extends Controller
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
             ->count();
 
-        // Profit = Gross Profit (expenses not subtracted)
-        $netProfit = $grossProfit;
+        // Net Profit = Gross Profit - Operating Expenses
+        $netProfit = $grossProfit - $operatingExpenses;
         $netMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 
         $avgTransactionValue = $transactionCount > 0 ? $totalRevenue / $transactionCount : 0;
@@ -79,7 +79,7 @@ class ProfitAnalyticsController extends Controller
         $prevExpenses = Expense::proratedSum($previousFrom, $previousTo, function ($q) use ($branchId) {
             if ($branchId) $q->where('branch_id', $branchId);
         });
-        $prevNetProfit = $prevGrossProfit;
+        $prevNetProfit = $prevGrossProfit - $prevExpenses;
 
         // Calculate growth percentages
         $revenueGrowth = $prevRevenue > 0 ? (($totalRevenue - $prevRevenue) / $prevRevenue) * 100 : ($totalRevenue > 0 ? 100 : 0);

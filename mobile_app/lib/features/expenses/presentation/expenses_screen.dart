@@ -505,6 +505,31 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                       ),
                     ),
                   ),
+                  if (expense['is_recurring'] == true) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.repeat, size: 11, color: AppColors.primary),
+                          const SizedBox(width: 3),
+                          Text(
+                            (expense['frequency'] ?? '').toString().replaceAll('_', ' '),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
               if (expense['supplier'] != null) ...[
