@@ -380,6 +380,31 @@ class POSController extends Controller
     }
 
     /**
+     * Get the rendered receipt PDF for a transaction.
+     * Mirrors the web download so mobile and web share one design.
+     *
+     * GET /api/v1/pos/transactions/{id}/receipt-pdf
+     */
+    public function receiptPdf(Request $request, int $id, \App\Services\ReceiptPdfRenderer $renderer)
+    {
+        $user = $request->user();
+
+        $transaction = Transaction::where('id', $id)
+            ->where('company_id', $user->company_id)
+            ->with(['items.product', 'user', 'branch', 'company'])
+            ->first();
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Transaction not found.'], 404);
+        }
+
+        return response($renderer->render($transaction), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $renderer->filename($transaction) . '"',
+        ]);
+    }
+
+    /**
      * Format transaction for API response.
      */
     protected function formatTransaction(Transaction $transaction): array

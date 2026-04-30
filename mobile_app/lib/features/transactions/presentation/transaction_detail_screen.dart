@@ -101,6 +101,8 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
       await ReceiptService.printWithPreferredMethod(
         receiptData: receiptData,
         ref: ref,
+        api: api,
+        transactionId: widget.transactionId,
       );
     } catch (e) {
       if (mounted) {
@@ -195,12 +197,12 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
     if (_transaction == null) return;
 
     try {
-      // Fetch full receipt data from API (includes company logo, etc.)
       final api = ref.read(apiClientProvider);
-      final response = await api.getReceipt(widget.transactionId);
-      final receiptData = response.data['data'];
-
-      await ReceiptService.shareReceiptFromApi(receiptData);
+      await ReceiptService.shareServerReceiptPdf(
+        api: api,
+        transactionId: widget.transactionId,
+        txNumber: _transaction!.transactionNumber,
+      );
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;

@@ -468,10 +468,11 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                               return;
                             }
                           }
-                          await ReceiptService.printReceipt(
-                            transaction: transaction,
-                            companyName: authState.user?.company?.name,
-                            cashierName: authState.user?.name,
+                          final api = ref.read(apiClientProvider);
+                          await ReceiptService.printServerReceiptPdf(
+                            api: api,
+                            transactionId: transaction['id'] as int,
+                            txNumber: transaction['transaction_number']?.toString() ?? 'receipt',
                           );
                         },
                         icon: const Icon(Icons.print, size: 18),
@@ -482,11 +483,11 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () async {
-                          final authState = ref.read(authProvider);
-                          await ReceiptService.shareReceipt(
-                            transaction: transaction,
-                            companyName: authState.user?.company?.name,
-                            cashierName: authState.user?.name,
+                          final api = ref.read(apiClientProvider);
+                          await ReceiptService.shareServerReceiptPdf(
+                            api: api,
+                            transactionId: transaction['id'] as int,
+                            txNumber: transaction['transaction_number']?.toString() ?? 'receipt',
                           );
                         },
                         icon: const Icon(Icons.share, size: 18),

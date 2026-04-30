@@ -82,8 +82,6 @@ class _ConvertOrderSheetState extends ConsumerState<ConvertOrderSheet> {
   Future<void> _showReceiptOptions(Map<String, dynamic> transaction) async {
     try {
       final api = ref.read(apiClientProvider);
-      final response = await api.getReceipt(transaction['id']);
-      final receiptData = response.data['data'];
 
       if (mounted) {
         await showDialog(
@@ -98,7 +96,11 @@ class _ConvertOrderSheetState extends ConsumerState<ConvertOrderSheet> {
                   title: Text(AppLocalizations.of(context)!.printReceipt),
                   onTap: () async {
                     Navigator.pop(ctx);
-                    await ReceiptService.printReceiptFromApi(receiptData);
+                    await ReceiptService.printServerReceiptPdf(
+                      api: api,
+                      transactionId: transaction['id'],
+                      txNumber: transaction['transaction_number']?.toString() ?? 'receipt',
+                    );
                   },
                 ),
                 ListTile(
@@ -106,7 +108,11 @@ class _ConvertOrderSheetState extends ConsumerState<ConvertOrderSheet> {
                   title: Text(AppLocalizations.of(context)!.shareReceipt),
                   onTap: () async {
                     Navigator.pop(ctx);
-                    await ReceiptService.shareReceiptFromApi(receiptData);
+                    await ReceiptService.shareServerReceiptPdf(
+                      api: api,
+                      transactionId: transaction['id'],
+                      txNumber: transaction['transaction_number']?.toString() ?? 'receipt',
+                    );
                   },
                 ),
               ],

@@ -269,6 +269,13 @@ class ApiClient {
     return _dio.get('/pos/transactions/$transactionId/receipt');
   }
 
+  Future<Response<List<int>>> getReceiptPdf(int transactionId) {
+    return _dio.get<List<int>>(
+      '/pos/transactions/$transactionId/receipt-pdf',
+      options: Options(responseType: ResponseType.bytes),
+    );
+  }
+
   // Transaction Summary
   Future<Response> getTransactionSummary() {
     return _dio.get('/pos/transactions/summary');
