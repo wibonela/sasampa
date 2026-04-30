@@ -29,19 +29,15 @@ class ProfitAnalyticsController extends Controller
         $branches = Branch::active()->orderBy('name')->get();
 
         // Build queries with optional branch filter
-        $salesQuery = Transaction::completed()
+        $salesQuery = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
-        $expenseQuery = Expense::whereBetween('expense_date', [$dateFrom, $dateTo]);
 
-        $prevSalesQuery = Transaction::completed()
+        $prevSalesQuery = Transaction::completed()->sales()
             ->whereBetween('created_at', [$previousFrom, $previousTo . ' 23:59:59']);
-        $prevExpenseQuery = Expense::whereBetween('expense_date', [$previousFrom, $previousTo]);
 
         if ($branchId) {
             $salesQuery->where('branch_id', $branchId);
-            $expenseQuery->where('branch_id', $branchId);
             $prevSalesQuery->where('branch_id', $branchId);
-            $prevExpenseQuery->where('branch_id', $branchId);
         }
 
         // Current period metrics
@@ -58,12 +54,17 @@ class ProfitAnalyticsController extends Controller
         $grossProfit = $totalRevenue - $cogs;
         $grossMargin = $totalRevenue > 0 ? ($grossProfit / $totalRevenue) * 100 : 0;
 
-        // Operating Expenses (Matumizi)
-        $operatingExpenses = (clone $expenseQuery)->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
-        $expenseCount = (clone $expenseQuery)->count();
+        // Operating Expenses — prorated across the window so a yearly rent
+        // recorded on Jan 1 doesn't show up as a January spike.
+        $operatingExpenses = Expense::proratedSum($dateFrom, $dateTo, function ($q) use ($branchId) {
+            if ($branchId) $q->where('branch_id', $branchId);
+        });
+        $expenseCount = Expense::overlappingPeriod($dateFrom, $dateTo)
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->count();
 
-        // Net Profit = Gross Profit - Operating Expenses
-        $netProfit = $grossProfit - $operatingExpenses;
+        // Profit = Gross Profit (expenses not subtracted)
+        $netProfit = $grossProfit;
         $netMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 
         $avgTransactionValue = $transactionCount > 0 ? $totalRevenue / $transactionCount : 0;
@@ -75,8 +76,10 @@ class ProfitAnalyticsController extends Controller
             ->selectRaw('SUM(cost_price * quantity) as total')
             ->value('total') ?? 0;
         $prevGrossProfit = $prevRevenue - $prevCogs;
-        $prevExpenses = (clone $prevExpenseQuery)->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
-        $prevNetProfit = $prevGrossProfit - $prevExpenses;
+        $prevExpenses = Expense::proratedSum($previousFrom, $previousTo, function ($q) use ($branchId) {
+            if ($branchId) $q->where('branch_id', $branchId);
+        });
+        $prevNetProfit = $prevGrossProfit;
 
         // Calculate growth percentages
         $revenueGrowth = $prevRevenue > 0 ? (($totalRevenue - $prevRevenue) / $prevRevenue) * 100 : ($totalRevenue > 0 ? 100 : 0);
@@ -144,28 +147,25 @@ class ProfitAnalyticsController extends Controller
         $branches = Branch::active()->orderBy('name')->get();
 
         $branchData = $branches->map(function ($branch) use ($dateFrom, $dateTo) {
-            $sales = Transaction::completed()
+            $salesQuery = Transaction::completed()->sales()
                 ->where('branch_id', $branch->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-                ->sum('total');
+                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
 
-            $expenses = Expense::where('branch_id', $branch->id)
-                ->whereBetween('expense_date', [$dateFrom, $dateTo])
-                ->selectRaw('SUM(amount * quantity) as total')
+            $sales = (clone $salesQuery)->sum('total');
+            $transactions = (clone $salesQuery)->count();
+
+            $transactionIds = (clone $salesQuery)->pluck('id');
+            $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+                ->selectRaw('SUM(cost_price * quantity) as total')
                 ->value('total') ?? 0;
 
-            $transactions = Transaction::completed()
-                ->where('branch_id', $branch->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-                ->count();
-
-            $profit = $sales - $expenses;
+            $profit = $sales - $cogs;
             $margin = $sales > 0 ? ($profit / $sales) * 100 : 0;
 
             return [
                 'branch' => $branch,
                 'sales' => $sales,
-                'expenses' => $expenses,
+                'cogs' => $cogs,
                 'profit' => $profit,
                 'margin' => $margin,
                 'transactions' => $transactions,
@@ -175,7 +175,7 @@ class ProfitAnalyticsController extends Controller
 
         // Calculate totals
         $totalSales = $branchData->sum('sales');
-        $totalExpenses = $branchData->sum('expenses');
+        $totalCogs = $branchData->sum('cogs');
         $totalProfit = $branchData->sum('profit');
         $totalTransactions = $branchData->sum('transactions');
 
@@ -190,7 +190,7 @@ class ProfitAnalyticsController extends Controller
             'dateFrom',
             'dateTo',
             'totalSales',
-            'totalExpenses',
+            'totalCogs',
             'totalProfit',
             'totalTransactions',
             'bestBranch',
@@ -297,19 +297,33 @@ class ProfitAnalyticsController extends Controller
         };
     }
 
+    /**
+     * Build a COGS query grouped by period using a join.
+     */
+    private function buildCogsQuery(string $dateFrom, string $dateTo, ?int $branchId = null): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = TransactionItem::join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->where('transactions.status', 'completed')
+            ->where(fn ($q) => $q->where('transactions.type', 'sale')->orWhereNull('transactions.type'))
+            ->whereBetween('transactions.created_at', [$dateFrom, $dateTo . ' 23:59:59']);
+
+        if ($branchId) {
+            $query->where('transactions.branch_id', $branchId);
+        }
+
+        return $query;
+    }
+
     private function getTrendData(string $dateFrom, string $dateTo, string $period, ?int $branchId): array
     {
-        $salesQuery = Transaction::completed()
+        $salesQuery = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
-        $expenseQuery = Expense::whereBetween('expense_date', [$dateFrom, $dateTo]);
 
         if ($branchId) {
             $salesQuery->where('branch_id', $branchId);
-            $expenseQuery->where('branch_id', $branchId);
         }
 
         $groupBy = $period === 'today' ? 'HOUR' : 'DATE';
-        $format = $period === 'today' ? '%H:00' : '%Y-%m-%d';
 
         $dailySales = (clone $salesQuery)
             ->selectRaw("{$groupBy}(created_at) as period, SUM(total) as amount")
@@ -317,46 +331,56 @@ class ProfitAnalyticsController extends Controller
             ->pluck('amount', 'period')
             ->toArray();
 
-        $dailyExpenses = (clone $expenseQuery)
-            ->selectRaw("{$groupBy}(expense_date) as period, SUM(amount * quantity) as amount")
+        $dailyCogs = $this->buildCogsQuery($dateFrom, $dateTo, $branchId)
+            ->selectRaw("{$groupBy}(transactions.created_at) as period, SUM(transaction_items.cost_price * transaction_items.quantity) as amount")
             ->groupBy('period')
             ->pluck('amount', 'period')
             ->toArray();
 
-        $allPeriods = array_unique(array_merge(array_keys($dailySales), array_keys($dailyExpenses)));
+        $allPeriods = array_unique(array_merge(array_keys($dailySales), array_keys($dailyCogs)));
         sort($allPeriods);
 
-        return collect($allPeriods)->map(function ($p) use ($dailySales, $dailyExpenses) {
+        return collect($allPeriods)->map(function ($p) use ($dailySales, $dailyCogs) {
             $sales = $dailySales[$p] ?? 0;
-            $expenses = $dailyExpenses[$p] ?? 0;
+            $cogs = $dailyCogs[$p] ?? 0;
             return [
                 'period' => $p,
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ];
         })->toArray();
     }
 
     private function getTopExpenseCategories(string $dateFrom, string $dateTo, ?int $branchId): \Illuminate\Support\Collection
     {
-        $query = Expense::whereBetween('expense_date', [$dateFrom, $dateTo])
-            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
-            ->selectRaw('expense_categories.name as category, SUM(expenses.amount * expenses.quantity) as total')
-            ->groupBy('expense_categories.id', 'expense_categories.name')
-            ->orderByDesc('total')
-            ->limit(5);
+        $from = \Illuminate\Support\Carbon::parse($dateFrom)->startOfDay();
+        $to = \Illuminate\Support\Carbon::parse($dateTo)->endOfDay();
 
-        if ($branchId) {
-            $query->where('expenses.branch_id', $branchId);
+        $expenses = Expense::with('category')
+            ->overlappingPeriod($from, $to)
+            ->when($branchId, fn ($q) => $q->where('expenses.branch_id', $branchId))
+            ->get();
+
+        $byCategory = [];
+        foreach ($expenses as $expense) {
+            $allocated = $expense->proratedAmount($from, $to);
+            if ($allocated <= 0) continue;
+            $name = $expense->category?->name ?? 'Uncategorized';
+            $byCategory[$name] = ($byCategory[$name] ?? 0) + $allocated;
         }
 
-        return $query->get();
+        return collect($byCategory)
+            ->map(fn ($total, $name) => (object) ['category' => $name, 'total' => round($total, 2)])
+            ->values()
+            ->sortByDesc('total')
+            ->take(5)
+            ->values();
     }
 
     private function getPaymentBreakdown(string $dateFrom, string $dateTo, ?int $branchId): \Illuminate\Support\Collection
     {
-        $query = Transaction::completed()
+        $query = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->selectRaw('payment_method, COUNT(*) as count, SUM(total) as total')
             ->groupBy('payment_method')
@@ -374,34 +398,33 @@ class ProfitAnalyticsController extends Controller
         $branches = Branch::active()->get();
 
         return $branches->map(function ($branch) use ($dateFrom, $dateTo) {
-            $sales = Transaction::completed()
+            $salesQuery = Transaction::completed()->sales()
                 ->where('branch_id', $branch->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-                ->sum('total');
+                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
 
-            $expenses = Expense::where('branch_id', $branch->id)
-                ->whereBetween('expense_date', [$dateFrom, $dateTo])
-                ->selectRaw('SUM(amount * quantity) as total')
+            $sales = (clone $salesQuery)->sum('total');
+
+            $transactionIds = (clone $salesQuery)->pluck('id');
+            $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+                ->selectRaw('SUM(cost_price * quantity) as total')
                 ->value('total') ?? 0;
 
             return [
                 'name' => $branch->name,
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ];
         })->sortByDesc('profit')->values();
     }
 
     private function getPerformanceData(string $dateFrom, string $dateTo, ?int $branchId): array
     {
-        $salesQuery = Transaction::completed()
+        $salesQuery = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
-        $expenseQuery = Expense::whereBetween('expense_date', [$dateFrom, $dateTo]);
 
         if ($branchId) {
             $salesQuery->where('branch_id', $branchId);
-            $expenseQuery->where('branch_id', $branchId);
         }
 
         $dailySales = (clone $salesQuery)
@@ -410,22 +433,22 @@ class ProfitAnalyticsController extends Controller
             ->pluck('amount', 'date')
             ->toArray();
 
-        $dailyExpenses = (clone $expenseQuery)
-            ->selectRaw('DATE(expense_date) as date, SUM(amount * quantity) as amount')
+        $dailyCogs = $this->buildCogsQuery($dateFrom, $dateTo, $branchId)
+            ->selectRaw('DATE(transactions.created_at) as date, SUM(transaction_items.cost_price * transaction_items.quantity) as amount')
             ->groupBy('date')
             ->pluck('amount', 'date')
             ->toArray();
 
-        $allDates = array_unique(array_merge(array_keys($dailySales), array_keys($dailyExpenses)));
+        $allDates = array_unique(array_merge(array_keys($dailySales), array_keys($dailyCogs)));
 
-        $dailyProfit = collect($allDates)->map(function ($date) use ($dailySales, $dailyExpenses) {
+        $dailyProfit = collect($allDates)->map(function ($date) use ($dailySales, $dailyCogs) {
             $sales = $dailySales[$date] ?? 0;
-            $expenses = $dailyExpenses[$date] ?? 0;
+            $cogs = $dailyCogs[$date] ?? 0;
             return [
                 'date' => $date,
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ];
         });
 
@@ -452,24 +475,26 @@ class ProfitAnalyticsController extends Controller
             $from = $date->copy()->startOfMonth()->format('Y-m-d');
             $to = $date->copy()->endOfMonth()->format('Y-m-d');
 
-            $salesQuery = Transaction::completed()
+            $salesQuery = Transaction::completed()->sales()
                 ->whereBetween('created_at', [$from, $to . ' 23:59:59']);
-            $expenseQuery = Expense::whereBetween('expense_date', [$from, $to]);
 
             if ($branchId) {
                 $salesQuery->where('branch_id', $branchId);
-                $expenseQuery->where('branch_id', $branchId);
             }
 
-            $sales = $salesQuery->sum('total');
-            $expenses = $expenseQuery->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
+            $sales = (clone $salesQuery)->sum('total');
+
+            $transactionIds = (clone $salesQuery)->pluck('id');
+            $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+                ->selectRaw('SUM(cost_price * quantity) as total')
+                ->value('total') ?? 0;
 
             $months->push([
                 'month' => $date->format('M Y'),
                 'month_short' => $date->format('M'),
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ]);
         }
 
@@ -485,24 +510,26 @@ class ProfitAnalyticsController extends Controller
             $from = $date->copy()->startOfWeek()->format('Y-m-d');
             $to = $date->copy()->endOfWeek()->format('Y-m-d');
 
-            $salesQuery = Transaction::completed()
+            $salesQuery = Transaction::completed()->sales()
                 ->whereBetween('created_at', [$from, $to . ' 23:59:59']);
-            $expenseQuery = Expense::whereBetween('expense_date', [$from, $to]);
 
             if ($branchId) {
                 $salesQuery->where('branch_id', $branchId);
-                $expenseQuery->where('branch_id', $branchId);
             }
 
-            $sales = $salesQuery->sum('total');
-            $expenses = $expenseQuery->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
+            $sales = (clone $salesQuery)->sum('total');
+
+            $transactionIds = (clone $salesQuery)->pluck('id');
+            $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+                ->selectRaw('SUM(cost_price * quantity) as total')
+                ->value('total') ?? 0;
 
             $weeks->push([
                 'week' => 'Week ' . $date->weekOfMonth,
                 'period' => $from . ' - ' . $to,
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ]);
         }
 
@@ -514,39 +541,40 @@ class ProfitAnalyticsController extends Controller
         $currentYear = now()->year;
         $lastYear = $currentYear - 1;
 
-        $currentYearSalesQuery = Transaction::completed()
+        $currentYearSalesQuery = Transaction::completed()->sales()
             ->whereYear('created_at', $currentYear);
-        $currentYearExpenseQuery = Expense::whereYear('expense_date', $currentYear);
-
-        $lastYearSalesQuery = Transaction::completed()
+        $lastYearSalesQuery = Transaction::completed()->sales()
             ->whereYear('created_at', $lastYear);
-        $lastYearExpenseQuery = Expense::whereYear('expense_date', $lastYear);
 
         if ($branchId) {
             $currentYearSalesQuery->where('branch_id', $branchId);
-            $currentYearExpenseQuery->where('branch_id', $branchId);
             $lastYearSalesQuery->where('branch_id', $branchId);
-            $lastYearExpenseQuery->where('branch_id', $branchId);
         }
 
-        $currentSales = $currentYearSalesQuery->sum('total');
-        $currentExpenses = $currentYearExpenseQuery->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
+        $currentSales = (clone $currentYearSalesQuery)->sum('total');
+        $currentTransactionIds = (clone $currentYearSalesQuery)->pluck('id');
+        $currentCogs = TransactionItem::whereIn('transaction_id', $currentTransactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
 
-        $lastSales = $lastYearSalesQuery->sum('total');
-        $lastExpenses = $lastYearExpenseQuery->selectRaw('SUM(amount * quantity) as total')->value('total') ?? 0;
+        $lastSales = (clone $lastYearSalesQuery)->sum('total');
+        $lastTransactionIds = (clone $lastYearSalesQuery)->pluck('id');
+        $lastCogs = TransactionItem::whereIn('transaction_id', $lastTransactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
 
         return [
             'current' => [
                 'year' => $currentYear,
                 'sales' => $currentSales,
-                'expenses' => $currentExpenses,
-                'profit' => $currentSales - $currentExpenses,
+                'cogs' => $currentCogs,
+                'profit' => $currentSales - $currentCogs,
             ],
             'last' => [
                 'year' => $lastYear,
                 'sales' => $lastSales,
-                'expenses' => $lastExpenses,
-                'profit' => $lastSales - $lastExpenses,
+                'cogs' => $lastCogs,
+                'profit' => $lastSales - $lastCogs,
             ],
             'growth' => $lastSales > 0 ? (($currentSales - $lastSales) / $lastSales) * 100 : 0,
         ];

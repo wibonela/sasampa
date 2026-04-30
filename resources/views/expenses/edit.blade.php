@@ -93,6 +93,47 @@
                                 <strong>Total:</strong> TZS <span id="total-display">0</span>
                             </div>
 
+                            <div class="card border-info mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="frequency" class="form-label">Frequency <span class="text-danger">*</span></label>
+                                            <select class="form-select @error('frequency') is-invalid @enderror"
+                                                    id="frequency" name="frequency" required>
+                                                @foreach(['one_time' => 'One-time (default)', 'daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'yearly' => 'Yearly (e.g., annual rent)'] as $val => $label)
+                                                    <option value="{{ $val }}" {{ old('frequency', $expense->frequency) == $val ? 'selected' : '' }}>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('frequency')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="text-secondary">Recurring expenses are spread across the period in profit reports.</small>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="period-fields" style="display: none;">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="period_start" class="form-label">Period Starts</label>
+                                            <input type="date" class="form-control @error('period_start') is-invalid @enderror"
+                                                   id="period_start" name="period_start"
+                                                   value="{{ old('period_start', $expense->period_start?->format('Y-m-d')) }}">
+                                            @error('period_start')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="period_end" class="form-label">Period Ends (optional)</label>
+                                            <input type="date" class="form-control @error('period_end') is-invalid @enderror"
+                                                   id="period_end" name="period_end"
+                                                   value="{{ old('period_end', $expense->period_end?->format('Y-m-d')) }}">
+                                            <small class="text-secondary">Leave empty if still ongoing.</small>
+                                            @error('period_end')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="supplier" class="form-label">Supplier</label>
@@ -163,6 +204,14 @@
         document.getElementById('amount').addEventListener('input', updateTotal);
         document.getElementById('quantity').addEventListener('input', updateTotal);
         updateTotal();
+
+        const frequencySelect = document.getElementById('frequency');
+        const periodFields = document.getElementById('period-fields');
+        function togglePeriodFields() {
+            periodFields.style.display = frequencySelect.value === 'one_time' ? 'none' : '';
+        }
+        frequencySelect.addEventListener('change', togglePeriodFields);
+        togglePeriodFields();
     </script>
     @endpush
 </x-app-layout>
