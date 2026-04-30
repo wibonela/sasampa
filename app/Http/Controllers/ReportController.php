@@ -28,24 +28,24 @@ class ReportController extends Controller
         $dateFrom = $request->input('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-        $salesData = Transaction::completed()
+        $salesData = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(total) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
-        $totalSales = Transaction::completed()
+        $totalSales = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->sum('total');
 
-        $totalTransactions = Transaction::completed()
+        $totalTransactions = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->count();
 
         $averageTransaction = $totalTransactions > 0 ? $totalSales / $totalTransactions : 0;
 
-        $paymentBreakdown = Transaction::completed()
+        $paymentBreakdown = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->selectRaw('payment_method, COUNT(*) as count, SUM(total) as total')
             ->groupBy('payment_method')
@@ -106,6 +106,7 @@ class ReportController extends Controller
 
         $topProducts = TransactionItem::join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
             ->where('transactions.status', 'completed')
+            ->where(fn ($q) => $q->where('transactions.type', 'sale')->orWhereNull('transactions.type'))
             ->whereBetween('transactions.created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->selectRaw('transaction_items.product_id, transaction_items.product_name, SUM(transaction_items.quantity) as total_quantity, SUM(transaction_items.subtotal) as total_revenue')
             ->groupBy('transaction_items.product_id', 'transaction_items.product_name')
@@ -226,47 +227,57 @@ class ReportController extends Controller
         $dateFrom = $request->input('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo = $request->input('date_to', now()->format('Y-m-d'));
 
-        $totalSales = Transaction::completed()
-            ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-            ->sum('total');
+        $salesQuery = Transaction::completed()->sales()
+            ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
 
-        $totalTransactions = Transaction::completed()
-            ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-            ->count();
+        $totalSales = (clone $salesQuery)->sum('total');
+        $totalTransactions = (clone $salesQuery)->count();
 
+        // Calculate COGS from transaction items
+        $transactionIds = (clone $salesQuery)->pluck('id');
+        $totalCogs = TransactionItem::whereIn('transaction_id', $transactionIds)
+            ->selectRaw('SUM(cost_price * quantity) as total')
+            ->value('total') ?? 0;
+
+        // Expenses shown separately, not subtracted from profit
         $totalExpenses = Expense::inDateRange($dateFrom, $dateTo)
             ->selectRaw('SUM(amount * quantity) as total')
             ->value('total') ?? 0;
 
         $totalExpenseRecords = Expense::inDateRange($dateFrom, $dateTo)->count();
 
-        $netProfit = $totalSales - $totalExpenses;
+        // Profit = Sales - COGS (expenses not subtracted)
+        $netProfit = $totalSales - $totalCogs;
         $profitMargin = $totalSales > 0 ? ($netProfit / $totalSales) * 100 : 0;
 
-        $dailySales = Transaction::completed()
+        $dailySales = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->selectRaw('DATE(created_at) as date, SUM(total) as sales')
             ->groupBy('date')
             ->pluck('sales', 'date')
             ->toArray();
 
-        $dailyExpenses = Expense::inDateRange($dateFrom, $dateTo)
-            ->selectRaw('DATE(expense_date) as date, SUM(amount * quantity) as expenses')
+        // Daily COGS for profit breakdown
+        $dailyCogs = TransactionItem::join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->where('transactions.status', 'completed')
+            ->where(fn ($q) => $q->where('transactions.type', 'sale')->orWhereNull('transactions.type'))
+            ->whereBetween('transactions.created_at', [$dateFrom, $dateTo . ' 23:59:59'])
+            ->selectRaw('DATE(transactions.created_at) as date, SUM(transaction_items.cost_price * transaction_items.quantity) as cogs')
             ->groupBy('date')
-            ->pluck('expenses', 'date')
+            ->pluck('cogs', 'date')
             ->toArray();
 
-        $allDates = array_unique(array_merge(array_keys($dailySales), array_keys($dailyExpenses)));
+        $allDates = array_unique(array_merge(array_keys($dailySales), array_keys($dailyCogs)));
         sort($allDates);
 
-        $dailyProfit = collect($allDates)->map(function ($date) use ($dailySales, $dailyExpenses) {
+        $dailyProfit = collect($allDates)->map(function ($date) use ($dailySales, $dailyCogs) {
             $sales = $dailySales[$date] ?? 0;
-            $expenses = $dailyExpenses[$date] ?? 0;
+            $cogs = $dailyCogs[$date] ?? 0;
             return [
                 'date' => $date,
                 'sales' => $sales,
-                'expenses' => $expenses,
-                'profit' => $sales - $expenses,
+                'cogs' => $cogs,
+                'profit' => $sales - $cogs,
             ];
         });
 
@@ -278,7 +289,7 @@ class ReportController extends Controller
             ->get();
 
         return compact(
-            'totalSales', 'totalTransactions', 'totalExpenses', 'totalExpenseRecords',
+            'totalSales', 'totalTransactions', 'totalCogs', 'totalExpenses', 'totalExpenseRecords',
             'netProfit', 'profitMargin', 'dailyProfit', 'expensesByCategory', 'dateFrom', 'dateTo'
         );
     }
@@ -307,13 +318,13 @@ class ReportController extends Controller
             fputcsv($handle, []);
             fputcsv($handle, ['Summary']);
             fputcsv($handle, ['Total Sales (TZS)', $data['totalSales']]);
-            fputcsv($handle, ['Total Expenses (TZS)', $data['totalExpenses']]);
-            fputcsv($handle, ['Net Profit (TZS)', $data['netProfit']]);
+            fputcsv($handle, ['Cost of Goods (TZS)', $data['totalCogs']]);
+            fputcsv($handle, ['Profit (TZS)', $data['netProfit']]);
             fputcsv($handle, ['Profit Margin (%)', round($data['profitMargin'], 1)]);
             fputcsv($handle, []);
-            fputcsv($handle, ['Date', 'Sales (TZS)', 'Expenses (TZS)', 'Profit/Loss (TZS)']);
+            fputcsv($handle, ['Date', 'Sales (TZS)', 'COGS (TZS)', 'Profit/Loss (TZS)']);
             foreach ($data['dailyProfit'] as $day) {
-                fputcsv($handle, [$day['date'], $day['sales'], $day['expenses'], $day['profit']]);
+                fputcsv($handle, [$day['date'], $day['sales'], $day['cogs'], $day['profit']]);
             }
             fputcsv($handle, []);
             fputcsv($handle, ['Expense Category', 'Amount (TZS)']);
@@ -343,22 +354,22 @@ class ReportController extends Controller
             ->orderBy('name')
             ->get();
 
-        $totalSales = Transaction::completed()
+        $totalSales = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->sum('total');
 
-        $totalTransactions = Transaction::completed()
+        $totalTransactions = Transaction::completed()->sales()
             ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
             ->count();
 
         // Per-staff breakdown
         $staffData = $companyUsers->map(function ($user) use ($dateFrom, $dateTo, $totalSales) {
-            $userSales = Transaction::completed()
+            $userSales = Transaction::completed()->sales()
                 ->where('user_id', $user->id)
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
                 ->sum('total');
 
-            $userTransactions = Transaction::completed()
+            $userTransactions = Transaction::completed()->sales()
                 ->where('user_id', $user->id)
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
                 ->count();
@@ -382,7 +393,7 @@ class ReportController extends Controller
             $selectedStaffName = $selectedUser?->name;
 
             if ($selectedUser) {
-                $dailyBreakdown = Transaction::completed()
+                $dailyBreakdown = Transaction::completed()->sales()
                     ->where('user_id', $userId)
                     ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
                     ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(total) as total')

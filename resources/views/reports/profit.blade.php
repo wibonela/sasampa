@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h1 class="page-title">Profit Report</h1>
-                <p class="page-subtitle">Sales - Expenses = Profit</p>
+                <p class="page-subtitle">Sales - Cost of Goods = Profit</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('reports.profit.pdf', ['date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="btn btn-sm btn-outline-danger">
@@ -66,9 +66,9 @@
                         <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff; border: 1px solid var(--apple-border); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
                             <i class="bi bi-wallet2" style="font-size: 20px; color: var(--apple-red);"></i>
                         </div>
-                        <h4 class="mb-1">TZS {{ number_format($totalExpenses) }}</h4>
-                        <p class="text-secondary mb-0 small">Total Expenses</p>
-                        <span class="badge bg-secondary mt-1">{{ $totalExpenseRecords }} records</span>
+                        <h4 class="mb-1">TZS {{ number_format($totalCogs) }}</h4>
+                        <p class="text-secondary mb-0 small">Cost of Goods</p>
+                        <span class="badge bg-secondary mt-1">{{ $totalTransactions }} sales</span>
                     </div>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th class="text-end">Sales</th>
-                                    <th class="text-end">Expenses</th>
+                                    <th class="text-end">COGS</th>
                                     <th class="text-end">Profit/Loss</th>
                                 </tr>
                             </thead>
@@ -118,7 +118,7 @@
                                     <tr>
                                         <td>{{ \Carbon\Carbon::parse($day['date'])->format('D, d M Y') }}</td>
                                         <td class="text-end text-primary">TZS {{ number_format($day['sales']) }}</td>
-                                        <td class="text-end text-danger">TZS {{ number_format($day['expenses']) }}</td>
+                                        <td class="text-end text-danger">TZS {{ number_format($day['cogs']) }}</td>
                                         <td class="text-end {{ $day['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                             <strong>TZS {{ number_format($day['profit']) }}</strong>
                                         </td>
@@ -136,7 +136,7 @@
                                     <tr class="table-light">
                                         <th>Total</th>
                                         <th class="text-end text-primary">TZS {{ number_format($dailyProfit->sum('sales')) }}</th>
-                                        <th class="text-end text-danger">TZS {{ number_format($dailyProfit->sum('expenses')) }}</th>
+                                        <th class="text-end text-danger">TZS {{ number_format($dailyProfit->sum('cogs')) }}</th>
                                         <th class="text-end {{ $dailyProfit->sum('profit') >= 0 ? 'text-success' : 'text-danger' }}">
                                             TZS {{ number_format($dailyProfit->sum('profit')) }}
                                         </th>

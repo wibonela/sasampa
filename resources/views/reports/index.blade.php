@@ -56,7 +56,7 @@
                             <i class="bi bi-calculator" style="font-size: 28px; color: #AF52DE;"></i>
                         </div>
                         <h5 style="font-weight: 600; margin-bottom: 8px;">Profit Report</h5>
-                        <p class="text-secondary mb-4" style="font-size: 13px;">Sales minus expenses equals profit/loss analysis.</p>
+                        <p class="text-secondary mb-4" style="font-size: 13px;">Sales minus cost of goods equals profit/loss analysis.</p>
                         <a href="{{ route('reports.profit') }}" class="btn text-white" style="background: #AF52DE;">
                             View Report
                         </a>

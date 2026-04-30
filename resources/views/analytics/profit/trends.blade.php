@@ -51,8 +51,8 @@
                                 <h5 class="text-primary mb-0">{{ number_format($yearComparison['current']['sales'] / 1000000, 1) }}M</h5>
                             </div>
                             <div class="col-4">
-                                <div class="text-secondary small">Expenses</div>
-                                <h5 class="text-danger mb-0">{{ number_format($yearComparison['current']['expenses'] / 1000000, 1) }}M</h5>
+                                <div class="text-secondary small">COGS</div>
+                                <h5 class="text-danger mb-0">{{ number_format($yearComparison['current']['cogs'] / 1000000, 1) }}M</h5>
                             </div>
                             <div class="col-4">
                                 <div class="text-secondary small">Profit</div>
@@ -82,8 +82,8 @@
                                 <h5 class="text-primary mb-0">{{ number_format($yearComparison['last']['sales'] / 1000000, 1) }}M</h5>
                             </div>
                             <div class="col-4">
-                                <div class="text-secondary small">Expenses</div>
-                                <h5 class="text-danger mb-0">{{ number_format($yearComparison['last']['expenses'] / 1000000, 1) }}M</h5>
+                                <div class="text-secondary small">COGS</div>
+                                <h5 class="text-danger mb-0">{{ number_format($yearComparison['last']['cogs'] / 1000000, 1) }}M</h5>
                             </div>
                             <div class="col-4">
                                 <div class="text-secondary small">Profit</div>
@@ -152,7 +152,7 @@
                         <tr>
                             <th>Month</th>
                             <th class="text-end">Sales</th>
-                            <th class="text-end">Expenses</th>
+                            <th class="text-end">COGS</th>
                             <th class="text-end">Profit/Loss</th>
                             <th class="text-end">Margin</th>
                             <th style="width: 200px;">Performance</th>
@@ -172,7 +172,7 @@
                             <tr>
                                 <td><strong>{{ $month['month'] }}</strong></td>
                                 <td class="text-end">TZS {{ number_format($month['sales']) }}</td>
-                                <td class="text-end text-danger">TZS {{ number_format($month['expenses']) }}</td>
+                                <td class="text-end text-danger">TZS {{ number_format($month['cogs']) }}</td>
                                 <td class="text-end {{ $month['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     <strong>TZS {{ number_format($month['profit']) }}</strong>
                                 </td>
@@ -199,7 +199,7 @@
                         <tr>
                             <th>Total (12 Months)</th>
                             <th class="text-end text-primary">TZS {{ number_format($monthlyTrends->sum('sales')) }}</th>
-                            <th class="text-end text-danger">TZS {{ number_format($monthlyTrends->sum('expenses')) }}</th>
+                            <th class="text-end text-danger">TZS {{ number_format($monthlyTrends->sum('cogs')) }}</th>
                             <th class="text-end {{ $monthlyTrends->sum('profit') >= 0 ? 'text-success' : 'text-danger' }}">
                                 TZS {{ number_format($monthlyTrends->sum('profit')) }}
                             </th>
@@ -226,7 +226,7 @@
                             <th>Week</th>
                             <th>Period</th>
                             <th class="text-end">Sales</th>
-                            <th class="text-end">Expenses</th>
+                            <th class="text-end">COGS</th>
                             <th class="text-end">Profit/Loss</th>
                         </tr>
                     </thead>
@@ -236,7 +236,7 @@
                                 <td><strong>{{ $week['week'] }}</strong></td>
                                 <td class="text-secondary small">{{ $week['period'] }}</td>
                                 <td class="text-end">TZS {{ number_format($week['sales']) }}</td>
-                                <td class="text-end text-danger">TZS {{ number_format($week['expenses']) }}</td>
+                                <td class="text-end text-danger">TZS {{ number_format($week['cogs']) }}</td>
                                 <td class="text-end {{ $week['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     <strong>TZS {{ number_format($week['profit']) }}</strong>
                                 </td>
@@ -247,7 +247,7 @@
                         <tr>
                             <th colspan="2">Total (4 Weeks)</th>
                             <th class="text-end text-primary">TZS {{ number_format($weeklyTrends->sum('sales')) }}</th>
-                            <th class="text-end text-danger">TZS {{ number_format($weeklyTrends->sum('expenses')) }}</th>
+                            <th class="text-end text-danger">TZS {{ number_format($weeklyTrends->sum('cogs')) }}</th>
                             <th class="text-end {{ $weeklyTrends->sum('profit') >= 0 ? 'text-success' : 'text-danger' }}">
                                 TZS {{ number_format($weeklyTrends->sum('profit')) }}
                             </th>
