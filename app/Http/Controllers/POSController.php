@@ -20,7 +20,7 @@ class POSController extends Controller
 {
     public function index(): View
     {
-        $categories = Category::withCount('products')->orderBy('name')->get();
+        $categories = Category::withCount(['products' => fn ($q) => $q->active()])->orderBy('name')->get();
         $products = Product::active()
             ->with(['category', 'inventory'])
             ->orderBy('name')
@@ -210,7 +210,7 @@ class POSController extends Controller
         if ($transaction->change_given > 0) $totalHeight += 8;
 
         // Add logo height if exists
-        $logo = \App\Models\Setting::get('store_logo');
+        $logo = \App\Models\Setting::get('store_logo') ?: $transaction->company?->logo;
         if ($logo) $totalHeight += 20;
 
         // Small bottom padding
