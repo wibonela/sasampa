@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Services\ProfitBreakdownService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,97 +15,94 @@ use Illuminate\View\View;
 
 class ProfitAnalyticsController extends Controller
 {
+    public function __construct(private ProfitBreakdownService $profit)
+    {
+    }
+
     public function index(Request $request): View
     {
         $period = $request->input('period', 'month');
-        $branchId = $request->input('branch');
+        $branchId = $request->input('branch') ? (int) $request->input('branch') : null;
+        $includeExpenses = $request->boolean('include_expenses', true);
+        $expenseCategoryIds = array_map('intval', (array) $request->input('expense_category_ids', []));
 
-        // Calculate date range based on period
-        $dateRange = $this->getDateRange($period, $request);
-        $dateFrom = $dateRange['from'];
-        $dateTo = $dateRange['to'];
-        $previousFrom = $dateRange['previous_from'];
-        $previousTo = $dateRange['previous_to'];
+        $window = $this->profit->resolvePeriod($period, [
+            'date_from' => $request->input('date_from'),
+            'date_to' => $request->input('date_to'),
+        ]);
+        /** @var Carbon $from */ $from = $window['from'];
+        /** @var Carbon $to */ $to = $window['to'];
+        /** @var Carbon $previousFrom */ $previousFrom = $window['previous_from'];
+        /** @var Carbon $previousTo */ $previousTo = $window['previous_to'];
 
-        // Get branches for filter
+        $dateFrom = $from->toDateString();
+        $dateTo = $to->toDateString();
+
         $branches = Branch::active()->orderBy('name')->get();
+        $expenseCategories = ExpenseCategory::where('is_active', true)->orderBy('name')->get();
 
-        // Build queries with optional branch filter
-        $salesQuery = Transaction::completed()->sales()
-            ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
+        // Current + previous period summaries via service
+        $current = $this->profit->summary($from, $to, $branchId, $includeExpenses, $expenseCategoryIds);
+        $previous = $this->profit->summary($previousFrom, $previousTo, $branchId, $includeExpenses, $expenseCategoryIds);
 
-        $prevSalesQuery = Transaction::completed()->sales()
-            ->whereBetween('created_at', [$previousFrom, $previousTo . ' 23:59:59']);
+        $totalRevenue = $current['revenue'];
+        $cogs = $current['cogs'];
+        $grossProfit = $current['gross_profit'];
+        $grossMargin = $current['gross_margin'];
+        $operatingExpenses = $current['operating_expenses'];
+        $netProfit = $current['net_profit'];
+        $netMargin = $current['net_margin'];
+        $transactionCount = $current['transactions_count'];
 
-        if ($branchId) {
-            $salesQuery->where('branch_id', $branchId);
-            $prevSalesQuery->where('branch_id', $branchId);
-        }
-
-        // Current period metrics
-        $totalRevenue = (clone $salesQuery)->sum('total');
-        $transactionCount = (clone $salesQuery)->count();
-
-        // Calculate COGS from transaction items
-        $transactionIds = (clone $salesQuery)->pluck('id');
-        $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
-            ->selectRaw('SUM(cost_price * quantity) as total')
-            ->value('total') ?? 0;
-
-        // Gross Profit = Revenue - COGS
-        $grossProfit = $totalRevenue - $cogs;
-        $grossMargin = $totalRevenue > 0 ? ($grossProfit / $totalRevenue) * 100 : 0;
-
-        // Operating Expenses — prorated across the window so a yearly rent
-        // recorded on Jan 1 doesn't show up as a January spike.
-        $operatingExpenses = Expense::proratedSum($dateFrom, $dateTo, function ($q) use ($branchId) {
-            if ($branchId) $q->where('branch_id', $branchId);
-        });
-        $expenseCount = Expense::overlappingPeriod($dateFrom, $dateTo)
+        $expenseCount = Expense::overlappingPeriod($from, $to)
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->when(!empty($expenseCategoryIds), fn ($q) => $q->whereIn('expense_category_id', $expenseCategoryIds))
             ->count();
-
-        // Net Profit = Gross Profit - Operating Expenses
-        $netProfit = $grossProfit - $operatingExpenses;
-        $netMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 
         $avgTransactionValue = $transactionCount > 0 ? $totalRevenue / $transactionCount : 0;
 
-        // Previous period metrics for comparison
-        $prevRevenue = (clone $prevSalesQuery)->sum('total');
-        $prevTransactionIds = (clone $prevSalesQuery)->pluck('id');
-        $prevCogs = TransactionItem::whereIn('transaction_id', $prevTransactionIds)
-            ->selectRaw('SUM(cost_price * quantity) as total')
-            ->value('total') ?? 0;
-        $prevGrossProfit = $prevRevenue - $prevCogs;
-        $prevExpenses = Expense::proratedSum($previousFrom, $previousTo, function ($q) use ($branchId) {
-            if ($branchId) $q->where('branch_id', $branchId);
-        });
-        $prevNetProfit = $prevGrossProfit - $prevExpenses;
+        $prevRevenue = $previous['revenue'];
+        $prevGrossProfit = $previous['gross_profit'];
+        $prevExpenses = $previous['operating_expenses'];
+        $prevNetProfit = $previous['net_profit'];
 
-        // Calculate growth percentages
         $revenueGrowth = $prevRevenue > 0 ? (($totalRevenue - $prevRevenue) / $prevRevenue) * 100 : ($totalRevenue > 0 ? 100 : 0);
         $grossProfitGrowth = $prevGrossProfit != 0 ? (($grossProfit - $prevGrossProfit) / abs($prevGrossProfit)) * 100 : ($grossProfit > 0 ? 100 : 0);
         $expenseGrowth = $prevExpenses > 0 ? (($operatingExpenses - $prevExpenses) / $prevExpenses) * 100 : ($operatingExpenses > 0 ? 100 : 0);
         $netProfitGrowth = $prevNetProfit != 0 ? (($netProfit - $prevNetProfit) / abs($prevNetProfit)) * 100 : ($netProfit > 0 ? 100 : ($netProfit < 0 ? -100 : 0));
 
-        // Daily/Weekly/Monthly trend data
-        $trendData = $this->getTrendData($dateFrom, $dateTo, $period, $branchId);
+        // Trend data (daily, hourly when period=today). Map service keys to
+        // legacy view shape so existing template keeps working.
+        $trendRaw = $this->profit->trend($from, $to, $branchId, $includeExpenses, $expenseCategoryIds, $period === 'today');
+        $trendData = array_map(fn ($t) => [
+            'period' => $t['bucket'],
+            'sales' => $t['revenue'],
+            'cogs' => $t['cogs'],
+            'expenses' => $t['expenses'],
+            'profit' => $includeExpenses ? $t['net_profit'] : $t['gross_profit'],
+        ], $trendRaw);
 
-        // Top expense categories
-        $topExpenseCategories = $this->getTopExpenseCategories($dateFrom, $dateTo, $branchId);
+        // Expense breakdown by category
+        $topExpenseCategories = collect($this->profit->expensesByCategory($from, $to, $branchId, $expenseCategoryIds))
+            ->take(5)
+            ->map(fn ($c) => (object) ['category' => $c['name'], 'total' => $c['amount']]);
 
-        // Payment method breakdown
         $paymentBreakdown = $this->getPaymentBreakdown($dateFrom, $dateTo, $branchId);
 
-        // Branch comparison (only if no specific branch selected)
         $branchComparison = null;
         if (!$branchId && $branches->count() > 1) {
-            $branchComparison = $this->getBranchComparison($dateFrom, $dateTo);
+            $branchComparison = collect($this->profit->branchComparison($from, $to, $includeExpenses, $expenseCategoryIds))
+                ->map(fn ($b) => [
+                    'name' => $b['name'],
+                    'sales' => $b['revenue'],
+                    'cogs' => $b['revenue'] - $b['gross_profit'],
+                    'profit' => $b['net_profit'],
+                ]);
         }
 
-        // Best and worst performing days
         $performanceData = $this->getPerformanceData($dateFrom, $dateTo, $branchId);
+
+        $topProductsByProfit = $this->profit->topProductsByProfit($from, $to, $branchId, 10);
 
         return view('analytics.profit.index', compact(
             'branches',
@@ -111,6 +110,9 @@ class ProfitAnalyticsController extends Controller
             'period',
             'dateFrom',
             'dateTo',
+            'includeExpenses',
+            'expenseCategories',
+            'expenseCategoryIds',
             'totalRevenue',
             'cogs',
             'grossProfit',
@@ -133,7 +135,8 @@ class ProfitAnalyticsController extends Controller
             'topExpenseCategories',
             'paymentBreakdown',
             'branchComparison',
-            'performanceData'
+            'performanceData',
+            'topProductsByProfit'
         ));
     }
 
@@ -314,70 +317,6 @@ class ProfitAnalyticsController extends Controller
         return $query;
     }
 
-    private function getTrendData(string $dateFrom, string $dateTo, string $period, ?int $branchId): array
-    {
-        $salesQuery = Transaction::completed()->sales()
-            ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
-
-        if ($branchId) {
-            $salesQuery->where('branch_id', $branchId);
-        }
-
-        $groupBy = $period === 'today' ? 'HOUR' : 'DATE';
-
-        $dailySales = (clone $salesQuery)
-            ->selectRaw("{$groupBy}(created_at) as period, SUM(total) as amount")
-            ->groupBy('period')
-            ->pluck('amount', 'period')
-            ->toArray();
-
-        $dailyCogs = $this->buildCogsQuery($dateFrom, $dateTo, $branchId)
-            ->selectRaw("{$groupBy}(transactions.created_at) as period, SUM(transaction_items.cost_price * transaction_items.quantity) as amount")
-            ->groupBy('period')
-            ->pluck('amount', 'period')
-            ->toArray();
-
-        $allPeriods = array_unique(array_merge(array_keys($dailySales), array_keys($dailyCogs)));
-        sort($allPeriods);
-
-        return collect($allPeriods)->map(function ($p) use ($dailySales, $dailyCogs) {
-            $sales = $dailySales[$p] ?? 0;
-            $cogs = $dailyCogs[$p] ?? 0;
-            return [
-                'period' => $p,
-                'sales' => $sales,
-                'cogs' => $cogs,
-                'profit' => $sales - $cogs,
-            ];
-        })->toArray();
-    }
-
-    private function getTopExpenseCategories(string $dateFrom, string $dateTo, ?int $branchId): \Illuminate\Support\Collection
-    {
-        $from = \Illuminate\Support\Carbon::parse($dateFrom)->startOfDay();
-        $to = \Illuminate\Support\Carbon::parse($dateTo)->endOfDay();
-
-        $expenses = Expense::with('category')
-            ->overlappingPeriod($from, $to)
-            ->when($branchId, fn ($q) => $q->where('expenses.branch_id', $branchId))
-            ->get();
-
-        $byCategory = [];
-        foreach ($expenses as $expense) {
-            $allocated = $expense->proratedAmount($from, $to);
-            if ($allocated <= 0) continue;
-            $name = $expense->category?->name ?? 'Uncategorized';
-            $byCategory[$name] = ($byCategory[$name] ?? 0) + $allocated;
-        }
-
-        return collect($byCategory)
-            ->map(fn ($total, $name) => (object) ['category' => $name, 'total' => round($total, 2)])
-            ->values()
-            ->sortByDesc('total')
-            ->take(5)
-            ->values();
-    }
-
     private function getPaymentBreakdown(string $dateFrom, string $dateTo, ?int $branchId): \Illuminate\Support\Collection
     {
         $query = Transaction::completed()->sales()
@@ -391,31 +330,6 @@ class ProfitAnalyticsController extends Controller
         }
 
         return $query->get();
-    }
-
-    private function getBranchComparison(string $dateFrom, string $dateTo): \Illuminate\Support\Collection
-    {
-        $branches = Branch::active()->get();
-
-        return $branches->map(function ($branch) use ($dateFrom, $dateTo) {
-            $salesQuery = Transaction::completed()->sales()
-                ->where('branch_id', $branch->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59']);
-
-            $sales = (clone $salesQuery)->sum('total');
-
-            $transactionIds = (clone $salesQuery)->pluck('id');
-            $cogs = TransactionItem::whereIn('transaction_id', $transactionIds)
-                ->selectRaw('SUM(cost_price * quantity) as total')
-                ->value('total') ?? 0;
-
-            return [
-                'name' => $branch->name,
-                'sales' => $sales,
-                'cogs' => $cogs,
-                'profit' => $sales - $cogs,
-            ];
-        })->sortByDesc('profit')->values();
     }
 
     private function getPerformanceData(string $dateFrom, string $dateTo, ?int $branchId): array

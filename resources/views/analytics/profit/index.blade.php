@@ -40,7 +40,7 @@
                         <input type="date" name="date_to" class="form-control" value="{{ request('date_to', $dateTo) }}">
                     </div>
                     @if($branches->count() > 0)
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Branch</label>
                         <select name="branch" class="form-select">
                             <option value="">All Branches</option>
@@ -52,6 +52,29 @@
                         </select>
                     </div>
                     @endif
+                    @if($expenseCategories->count() > 0)
+                    <div class="col-md-3">
+                        <label class="form-label">Expense Categories</label>
+                        <select name="expense_category_ids[]" class="form-select" multiple size="1">
+                            @foreach($expenseCategories as $cat)
+                                <option value="{{ $cat->id }}" {{ in_array($cat->id, $expenseCategoryIds) ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-secondary">Hold Cmd/Ctrl to select multiple</small>
+                    </div>
+                    @endif
+                    <div class="col-md-2">
+                        <label class="form-label">Net Profit</label>
+                        <input type="hidden" name="include_expenses" value="0">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="include_expenses" value="1" id="includeExpensesToggle" {{ $includeExpenses ? 'checked' : '' }}>
+                            <label class="form-check-label small" for="includeExpensesToggle">
+                                Subtract expenses
+                            </label>
+                        </div>
+                    </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-funnel me-1"></i>Apply
@@ -370,6 +393,46 @@
                                 <td class="text-end {{ $branch['profit'] >= 0 ? 'text-success' : 'text-danger' }}">
                                     <strong>TZS {{ number_format($branch['profit']) }}</strong>
                                 </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        <!-- Top Products by Profit -->
+        @if(count($topProductsByProfit) > 0)
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Top Products by Profit</h5>
+                <small class="text-secondary">Ranked by gross profit (revenue − COGS)</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">#</th>
+                            <th>Product</th>
+                            <th class="text-end">Qty Sold</th>
+                            <th class="text-end">Revenue</th>
+                            <th class="text-end">COGS</th>
+                            <th class="text-end">Gross Profit</th>
+                            <th class="text-end">Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($topProductsByProfit as $i => $p)
+                            <tr>
+                                <td class="text-secondary">{{ $i + 1 }}</td>
+                                <td><strong>{{ $p['name'] }}</strong></td>
+                                <td class="text-end">{{ number_format($p['quantity']) }}</td>
+                                <td class="text-end text-primary">{{ number_format($p['revenue']) }}</td>
+                                <td class="text-end text-warning">{{ number_format($p['cogs']) }}</td>
+                                <td class="text-end {{ $p['gross_profit'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <strong>{{ number_format($p['gross_profit']) }}</strong>
+                                </td>
+                                <td class="text-end small text-secondary">{{ number_format($p['margin'], 1) }}%</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -450,6 +450,27 @@ class ApiClient {
     });
   }
 
+  Future<Response> getProfitBreakdown({
+    String period = 'month',
+    String? dateFrom,
+    String? dateTo,
+    int? branchId,
+    bool includeExpenses = true,
+    List<int> expenseCategoryIds = const [],
+    int topProductsLimit = 10,
+  }) {
+    return _dio.get('/reports/profit-breakdown', queryParameters: {
+      'period': period,
+      if (dateFrom != null) 'date_from': dateFrom,
+      if (dateTo != null) 'date_to': dateTo,
+      if (branchId != null) 'branch_id': branchId,
+      'include_expenses': includeExpenses ? 1 : 0,
+      if (expenseCategoryIds.isNotEmpty)
+        'expense_category_ids[]': expenseCategoryIds,
+      'top_products_limit': topProductsLimit,
+    });
+  }
+
   // Sync
   Future<Response> pullSync({String? since, List<String>? include}) {
     return _dio.get('/sync/pull', queryParameters: {

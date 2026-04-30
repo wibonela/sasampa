@@ -25,6 +25,7 @@ import '../../features/inventory/presentation/inventory_screen.dart';
 import '../../features/menu/presentation/menu_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/reports/presentation/profit_breakdown_screen.dart';
 import '../../features/settings/presentation/efd_settings_screen.dart';
 import '../../features/settings/presentation/printer_setup_screen.dart';
 import '../../features/settings/presentation/whatsapp_settings_screen.dart';
@@ -270,6 +271,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/expenses/summary',
             builder: (context, state) => const ExpenseSummaryScreen(),
+          ),
+          GoRoute(
+            path: '/reports/profit-breakdown',
+            builder: (context, state) => const ProfitBreakdownScreen(),
           ),
           GoRoute(
             path: '/printer-setup',

@@ -159,6 +159,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('reports')->group(function () {
                 Route::get('/dashboard', [ReportController::class, 'dashboard']);
                 Route::get('/sales', [ReportController::class, 'sales']);
+                Route::get('/profit-breakdown', [ReportController::class, 'profitBreakdown']);
             });
 
             /*
