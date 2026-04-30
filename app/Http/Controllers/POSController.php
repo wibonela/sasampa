@@ -198,9 +198,9 @@ class POSController extends Controller
     {
         $transaction->load('items.product', 'user');
 
-        // Calculate dynamic height based on content
-        $baseHeight = 135; // Header, footer, totals, payment, dividers, margins
-        $itemHeight = 12;  // Per item row
+        // Calculate dynamic height based on content (mm)
+        $baseHeight = 175; // Header, footer (incl. welcome line, receipt-box, powered), totals, payment, dividers, margins
+        $itemHeight = 14;  // Per item row (item-name + price line + padding)
         $totalHeight = $baseHeight + ($transaction->items->count() * $itemHeight);
 
         // Add extra for optional rows
@@ -208,13 +208,21 @@ class POSController extends Controller
         if ($transaction->tax_amount > 0) $totalHeight += 8;
         if ($transaction->customer_name) $totalHeight += 8;
         if ($transaction->change_given > 0) $totalHeight += 8;
+        if ($transaction->company?->tin) $totalHeight += 5;
+        if ($transaction->company?->vrn) $totalHeight += 5;
 
         // Add logo height if exists
         $logo = \App\Models\Setting::get('store_logo') ?: $transaction->company?->logo;
-        if ($logo) $totalHeight += 20;
+        if ($logo) $totalHeight += 25;
+
+        // Fiscal block (title + 2 info rows + QR + divider)
+        if ($transaction->fiscal_receipt_number) {
+            $totalHeight += 30;
+            if ($transaction->fiscal_qr_code) $totalHeight += 45;
+        }
 
         // Small bottom padding
-        $totalHeight += 10;
+        $totalHeight += 12;
 
         // Convert mm to points (1mm = 2.83465 points)
         $widthPoints = 80 * 2.83465;  // 80mm width

@@ -15,7 +15,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             font-size: 12px;
             line-height: 1.5;
             color: #1a2942;
@@ -331,6 +331,10 @@
             <span class="info-label">Payment:</span>
             <span class="info-value">{{ ucfirst($transaction->payment_method) }}</span>
         </div>
+        <div class="info-row">
+            <span class="info-label">Amount Paid:</span>
+            <span class="info-value">{{ $currency }} {{ number_format($transaction->amount_paid, 0) }}</span>
+        </div>
         @if($transaction->change_given > 0)
         <div class="info-row">
             <span class="info-label">Change:</span>
@@ -364,12 +368,12 @@
         <!-- Footer -->
         <div class="footer">
             <div class="thank-you">{{ $receiptFooter }}</div>
-            <div class="welcome">Karibu tena / Welcome again</div>
+            <div class="welcome">Welcome again</div>
             @if($storePhone)
                 <div class="enquiries">For enquiries: {{ $storePhone }}</div>
             @endif
             <div class="receipt-box">{{ $transaction->transaction_number }}</div>
-            <div class="powered">Powered by Sasampa POS | <span class="brand-link">sasampa.com</span></div>
+            <div class="powered">Powered by Sasampa POS</div>
         </div>
     </div>
 
