@@ -39,7 +39,8 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/login/pin', [AuthController::class, 'loginWithPin']);
-        Route::post('/register', [OnboardingApiController::class, 'register']);
+        Route::post('/register', [OnboardingApiController::class, 'register'])
+            ->middleware('throttle:3,60'); // 3 registrations per IP per hour
         Route::get('/verify-email/{id}/{hash}', [OnboardingApiController::class, 'verifyEmailFromApp']);
     });
 
