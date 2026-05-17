@@ -119,7 +119,8 @@ Route::post('/invitation/{token}', [InvitationController::class, 'accept'])->nam
 // Onboarding - Step 1 (guests only)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [OnboardingController::class, 'showStep1'])->name('onboarding.step1');
-    Route::post('/register', [OnboardingController::class, 'processStep1']);
+    Route::post('/register', [OnboardingController::class, 'processStep1'])
+        ->middleware('throttle:3,60'); // 3 registrations per IP per hour
     // Keep alias for old route
     Route::get('/onboarding', fn() => redirect()->route('onboarding.step1'))->name('company.register');
 

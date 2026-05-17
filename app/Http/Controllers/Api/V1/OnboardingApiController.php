@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use App\Rules\NotDisposableEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 
 class OnboardingApiController extends Controller
@@ -20,9 +22,23 @@ class OnboardingApiController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
+        // Honeypot: mobile app never sends 'website'. If it's present, a bot
+        // is replaying the form fields blindly — return a generic success-looking
+        // error so the bot doesn't know it was caught.
+        if (filled($request->input('website'))) {
+            Log::warning('API registration honeypot triggered', [
+                'ip' => $request->ip(),
+                'ua' => $request->userAgent(),
+                'website' => $request->input('website'),
+            ]);
+            return response()->json([
+                'message' => 'Registration failed. Please try again.',
+            ], 422);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', 'unique:users,email', new NotDisposableEmail],
             'phone' => ['required', 'string', 'max:20', 'regex:/^\+?\d{8,15}$/'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'device_name' => 'required|string',

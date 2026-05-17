@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\User;
+use App\Rules\NotDisposableEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -29,9 +31,21 @@ class OnboardingController extends Controller
      */
     public function processStep1(Request $request): RedirectResponse
     {
+        // Honeypot: real users never fill this hidden field. Pretend success so
+        // bots don't learn they were caught.
+        if (filled($request->input('website'))) {
+            Log::warning('Registration honeypot triggered', [
+                'ip' => $request->ip(),
+                'ua' => $request->userAgent(),
+                'website' => $request->input('website'),
+            ]);
+            return redirect()->route('onboarding.step1')
+                ->with('status', 'Something went wrong. Please try again.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', 'unique:users,email', new NotDisposableEmail],
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 

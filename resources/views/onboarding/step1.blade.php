@@ -21,6 +21,12 @@
     <form method="POST" action="{{ route('onboarding.step1') }}">
         @csrf
 
+        {{-- Honeypot: real users never see this; bots fill every field --}}
+        <div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">
+            <label>Website</label>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
+        </div>
+
         <div class="form-group">
             <label class="form-label">Full Name <span class="required">*</span></label>
             <input type="text" class="form-control @error('name') is-invalid @enderror"
