@@ -1,7 +1,7 @@
 name: sasampa_pos
 description: "Sasampa POS - Premium Point of Sale Mobile App"
 publish_to: 'none'
-version: 1.0.2+5
+version: 1.0.2+6
 
 environment:
   sdk: ^3.10.4
@@ -43,7 +43,7 @@ dependencies:
   http: ^1.2.1
 
   # Hardware
-  mobile_scanner: ^5.1.1
+  mobile_scanner: 7.3.0
   local_auth: ^2.2.0
 
   # Printing & PDF
