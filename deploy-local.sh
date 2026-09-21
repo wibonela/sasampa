@@ -67,9 +67,7 @@ if [[ -n $(git status --porcelain) ]]; then
         echo ""
         echo -e "${BLUE}Committing changes...${NC}"
         git add -A
-        git commit -m "$COMMIT_MSG
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+        git commit -m "$COMMIT_MSG"
         echo -e "${GREEN}✓${NC} Changes committed"
     else
         echo ""
