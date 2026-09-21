@@ -42,6 +42,11 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (!auth()->user()->company->withinLimit('products')) {
+            return redirect()->route('products.index')
+                ->with('error', 'You have reached the product limit for your account.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'sku' => 'nullable|string|max:100|unique:products',

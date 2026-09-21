@@ -20,3 +20,19 @@ Schedule::command('mobile-access:auto-approve')
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground();
+
+// Subscription lifecycle: status changes and renewal reminders (reminders only send when billing is enforced)
+Schedule::command('subscriptions:expire')
+    ->daily()
+    ->at('00:10')
+    ->withoutOverlapping();
+
+Schedule::command('subscriptions:remind')
+    ->daily()
+    ->at('08:00')
+    ->withoutOverlapping();
+
+// Catch payments whose webhook never arrived (does nothing until Selcom credentials are set)
+Schedule::command('payments:verify-pending')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();

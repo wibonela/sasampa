@@ -26,6 +26,11 @@ class BranchController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (!auth()->user()->company->withinLimit('branches')) {
+            return redirect()->route('branches.index')
+                ->with('error', 'You have reached the branch limit for your account.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:20|unique:branches,code,NULL,id,company_id,' . auth()->user()->company_id,

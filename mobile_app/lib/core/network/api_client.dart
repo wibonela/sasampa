@@ -55,7 +55,14 @@ class ApiClient {
         }
         // On 403, trigger access denied callback to refresh user state
         // This handles mid-session revocations
-        if (error.response?.statusCode == 403 && onAccessDenied != null) {
+        // A single unavailable feature or reached limit is not a revoked session.
+        final errorData = error.response?.data;
+        final errorCode = errorData is Map ? errorData['error_code'] : null;
+        final isFeatureError =
+            errorCode == 'feature_unavailable' || errorCode == 'limit_reached';
+        if (error.response?.statusCode == 403 &&
+            !isFeatureError &&
+            onAccessDenied != null) {
           onAccessDenied!();
         }
         handler.next(error);

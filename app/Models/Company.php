@@ -112,6 +112,16 @@ class Company extends Model
         return $this->hasMany(MobileDevice::class);
     }
 
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | User Limit Helpers
@@ -141,6 +151,103 @@ class Company extends Model
     public function hasPendingLimitRequest(): bool
     {
         return $this->userLimitRequests()->pending()->exists();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Billing Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    // Per-instance memo: the layout asks several times per page render.
+    private ?Plan $effectivePlanCache = null;
+    private bool $effectivePlanResolved = false;
+
+    public function billingEnforced(): bool
+    {
+        return (bool) config('billing.enforced');
+    }
+
+    /**
+     * The plan whose features and limits apply right now. When the paid or trial
+     * period has lapsed (or there is no subscription) the company drops to the
+     * fallback plan instead of being locked out.
+     */
+    /**
+     * Banner for the company owner when renewal is near or the period has lapsed.
+     * Null when billing is off, the viewer isn't the owner, or nothing needs saying.
+     */
+    public function billingNotice(User $viewer, int $warnDays = 7): ?array
+    {
+        if (!$this->billingEnforced() || !$viewer->isCompanyOwner() || !$this->subscription?->current_period_end) {
+            return null;
+        }
+
+        $end = $this->subscription->current_period_end;
+
+        if ($end->isPast()) {
+            return ['type' => 'danger', 'message' => 'Your plan has ended. Some features are hidden until you renew.'];
+        }
+
+        if ($end->lte(now()->addDays($warnDays))) {
+            $days = max(1, (int) ceil(now()->diffInDays($end, false)));
+            return ['type' => 'warning', 'message' => "Your plan ends in {$days} day" . ($days > 1 ? 's' : '') . '.'];
+        }
+
+        return null;
+    }
+
+    public function effectivePlan(): ?Plan
+    {
+        if ($this->effectivePlanResolved) {
+            return $this->effectivePlanCache;
+        }
+
+        $subscription = $this->subscription;
+
+        $plan = $subscription && $subscription->hasAccess()
+            ? $subscription->plan
+            : Plan::where('key', config('billing.fallback_plan'))->first();
+
+        $this->effectivePlanResolved = true;
+
+        return $this->effectivePlanCache = $plan;
+    }
+
+    public function hasFeature(string $feature): bool
+    {
+        if (!$this->billingEnforced()) {
+            return true;
+        }
+
+        return $this->effectivePlan()?->hasFeature($feature) ?? false;
+    }
+
+    /**
+     * Whether one more of $resource (users, branches, products) may be created.
+     */
+    public function withinLimit(string $resource): bool
+    {
+        if (!$this->billingEnforced()) {
+            return true;
+        }
+
+        $limit = $this->effectivePlan()?->limitFor($resource);
+
+        if ($limit === null) {
+            return true;
+        }
+
+        return $this->resourceCount($resource) < $limit;
+    }
+
+    public function resourceCount(string $resource): int
+    {
+        return match ($resource) {
+            'users' => $this->getUserCount(),
+            'branches' => $this->branches()->count(),
+            'products' => $this->products()->count(),
+        };
     }
 
     /*
