@@ -268,6 +268,67 @@
                     </div>
                 @endif
 
+                <!-- Subscription -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-credit-card me-2"></i>Subscription
+                    </div>
+                    <div class="card-body">
+                        @php $sub = $company->subscription; @endphp
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-secondary">Plan</span>
+                            <span class="fw-medium">{{ $sub?->plan?->name ?? 'None' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-secondary">Ends</span>
+                            <span class="fw-medium {{ $sub && !$sub->isCurrent() ? 'text-danger' : '' }}">
+                                {{ $sub?->current_period_end?->format('d M Y') ?? '-' }}
+                                @if($sub)<span class="badge bg-secondary">{{ $sub->status }}</span>@endif
+                            </span>
+                        </div>
+                        <form action="{{ route('admin.companies.subscription.update', $company) }}" method="POST" class="mb-3">
+                            @csrf
+                            @method('PATCH')
+                            <label class="form-label small text-secondary">Plan &amp; end date</label>
+                            <select name="plan_id" class="form-select form-select-sm mb-2">
+                                @foreach($plans as $plan)
+                                    <option value="{{ $plan->id }}" @selected($sub?->plan_id === $plan->id)>{{ $plan->name }}</option>
+                                @endforeach
+                            </select>
+                            <input type="date" name="current_period_end" class="form-control form-control-sm mb-2" value="{{ $sub?->current_period_end?->format('Y-m-d') }}">
+                            <button class="btn btn-outline-primary btn-sm w-100">Save</button>
+                        </form>
+                        <hr>
+                        <form action="{{ route('admin.companies.payments.store', $company) }}" method="POST">
+                            @csrf
+                            <label class="form-label small text-secondary">Record payment received</label>
+                            <select name="plan_id" class="form-select form-select-sm mb-2">
+                                @foreach($plans as $plan)
+                                    <option value="{{ $plan->id }}" @selected($sub?->plan_id === $plan->id)>{{ $plan->name }} (TZS {{ number_format($plan->price_tzs) }}/mo)</option>
+                                @endforeach
+                            </select>
+                            <select name="months" class="form-select form-select-sm mb-2">
+                                @foreach(array_keys(config('billing.discounts')) as $m)
+                                    <option value="{{ $m }}">{{ $m }} month{{ $m > 1 ? 's' : '' }}</option>
+                                @endforeach
+                            </select>
+                            <input type="number" name="amount_tzs" class="form-control form-control-sm mb-2" placeholder="Amount (TZS)" min="0" required>
+                            <input type="text" name="reference" class="form-control form-control-sm mb-2" placeholder="Receipt / transaction ref (optional)">
+                            <input type="text" name="note" class="form-control form-control-sm mb-2" placeholder="Note (optional)">
+                            <button class="btn btn-primary btn-sm w-100"><i class="bi bi-check-lg me-1"></i>Record payment</button>
+                        </form>
+                        @if($payments->isNotEmpty())
+                            <hr>
+                            @foreach($payments as $payment)
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>{{ ($payment->paid_at ?? $payment->created_at)->format('d M Y') }} · {{ $payment->months }}m · {{ $payment->gateway }}</span>
+                                    <span>TZS {{ number_format($payment->amount_tzs) }}</span>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+
                 <!-- User Limit Management -->
                 <div class="card mb-4">
                     <div class="card-header">

@@ -40,7 +40,7 @@ class UserManagementController extends Controller
         $company = auth()->user()->company;
 
         // Check if company can create more users
-        if (!$company->canCreateMoreUsers()) {
+        if (!$company->canCreateMoreUsers() || !$company->withinLimit('users')) {
             return redirect()->route('users.index')
                 ->with('error', 'You have reached your user limit. Please request more user slots from admin.');
         }

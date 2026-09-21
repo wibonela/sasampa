@@ -46,8 +46,10 @@ class CompanyManagementController extends Controller
 
     public function show(Company $company)
     {
-        $company->load(['users', 'owner']);
-        return view('admin.companies.show', compact('company'));
+        $company->load(['users', 'owner', 'subscription.plan']);
+        $plans = \App\Models\Plan::orderBy('sort_order')->get();
+        $payments = $company->payments()->with('plan')->latest()->limit(20)->get();
+        return view('admin.companies.show', compact('company', 'plans', 'payments'));
     }
 
     public function edit(Company $company)
@@ -119,6 +121,8 @@ class CompanyManagementController extends Controller
             'status' => Company::STATUS_APPROVED,
             'approved_at' => now(),
         ]);
+
+        app(\App\Services\BillingService::class)->startTrial($company);
 
         // Create notification
         $this->notificationService->notifyCompanyApproved($company);

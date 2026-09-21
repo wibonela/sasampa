@@ -196,6 +196,8 @@ class OnboardingController extends Controller
             'onboarding_step' => 4,
         ]);
 
+        app(\App\Services\BillingService::class)->startTrial($company);
+
         return redirect()->route('dashboard')
             ->with('success', 'Welcome to Sasampa POS! Your account is ready to use.');
     }

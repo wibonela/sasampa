@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'company.approved' => \App\Http\Middleware\EnsureCompanyApproved::class,
             'platform.admin' => \App\Http\Middleware\PlatformAdmin::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'feature' => \App\Http\Middleware\EnsurePlanFeature::class,
             // Mobile API middleware
             'mobile.approved' => \App\Http\Middleware\EnsureMobileAccessApproved::class,
             'device.registered' => \App\Http\Middleware\EnsureDeviceRegistered::class,

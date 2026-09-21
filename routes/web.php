@@ -19,6 +19,8 @@ use App\Http\Controllers\CompanyRegistrationController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\Admin\CompanyBillingController;
 use App\Http\Controllers\ProfitAnalyticsController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\DashboardController;
@@ -199,6 +201,10 @@ Route::middleware('auth')->group(function () {
                 ->name('companies.update-limit');
             Route::delete('/companies/{company}', [CompanyManagementController::class, 'destroy'])
                 ->name('companies.destroy');
+            Route::patch('/companies/{company}/subscription', [CompanyBillingController::class, 'update'])
+                ->name('companies.subscription.update');
+            Route::post('/companies/{company}/payments', [CompanyBillingController::class, 'recordPayment'])
+                ->name('companies.payments.store');
 
             // Sanduku Feedback
             Route::get('/sanduku', [AdminSandukuController::class, 'index'])
@@ -343,35 +349,51 @@ Route::middleware('auth')->group(function () {
         Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
         Route::patch('/transactions/{transaction}/void', [TransactionController::class, 'void'])->name('transactions.void');
 
-        // Reports
+        // Reports (basic sales/products/inventory views are on every plan)
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
-        Route::get('/reports/sales/pdf', [ReportController::class, 'salesPdf'])->name('reports.sales.pdf');
-        Route::get('/reports/sales/csv', [ReportController::class, 'salesCsv'])->name('reports.sales.csv');
         Route::get('/reports/products', [ReportController::class, 'products'])->name('reports.products');
-        Route::get('/reports/products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
-        Route::get('/reports/products/csv', [ReportController::class, 'productsCsv'])->name('reports.products.csv');
         Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
-        Route::get('/reports/inventory/pdf', [ReportController::class, 'inventoryPdf'])->name('reports.inventory.pdf');
-        Route::get('/reports/inventory/csv', [ReportController::class, 'inventoryCsv'])->name('reports.inventory.csv');
-        Route::get('/reports/profit', [ReportController::class, 'profit'])->name('reports.profit');
-        Route::get('/reports/profit/pdf', [ReportController::class, 'profitPdf'])->name('reports.profit.pdf');
-        Route::get('/reports/profit/csv', [ReportController::class, 'profitCsv'])->name('reports.profit.csv');
-        Route::get('/reports/staff', [ReportController::class, 'staff'])->name('reports.staff');
-        Route::get('/reports/staff/pdf', [ReportController::class, 'staffPdf'])->name('reports.staff.pdf');
-        Route::get('/reports/staff/csv', [ReportController::class, 'staffCsv'])->name('reports.staff.csv');
+
+        // Report exports (PDF/CSV)
+        Route::middleware('feature:export')->group(function () {
+            Route::get('/reports/sales/pdf', [ReportController::class, 'salesPdf'])->name('reports.sales.pdf');
+            Route::get('/reports/sales/csv', [ReportController::class, 'salesCsv'])->name('reports.sales.csv');
+            Route::get('/reports/products/pdf', [ReportController::class, 'productsPdf'])->name('reports.products.pdf');
+            Route::get('/reports/products/csv', [ReportController::class, 'productsCsv'])->name('reports.products.csv');
+            Route::get('/reports/inventory/pdf', [ReportController::class, 'inventoryPdf'])->name('reports.inventory.pdf');
+            Route::get('/reports/inventory/csv', [ReportController::class, 'inventoryCsv'])->name('reports.inventory.csv');
+        });
+
+        // Full reports: profit and staff
+        Route::middleware('feature:full_reports')->group(function () {
+            Route::get('/reports/profit', [ReportController::class, 'profit'])->name('reports.profit');
+            Route::get('/reports/profit/pdf', [ReportController::class, 'profitPdf'])->name('reports.profit.pdf');
+            Route::get('/reports/profit/csv', [ReportController::class, 'profitCsv'])->name('reports.profit.csv');
+            Route::get('/reports/staff', [ReportController::class, 'staff'])->name('reports.staff');
+            Route::get('/reports/staff/pdf', [ReportController::class, 'staffPdf'])->name('reports.staff.pdf');
+            Route::get('/reports/staff/csv', [ReportController::class, 'staffCsv'])->name('reports.staff.csv');
+        });
 
         // Expenses (Matumizi)
-        Route::resource('expenses', ExpenseController::class);
-        Route::get('/expenses-summary', [ExpenseController::class, 'summary'])->name('expenses.summary');
-        Route::resource('expense-categories', ExpenseCategoryController::class)->except(['show']);
+        Route::middleware('feature:expenses')->group(function () {
+            Route::resource('expenses', ExpenseController::class);
+            Route::get('/expenses-summary', [ExpenseController::class, 'summary'])->name('expenses.summary');
+            Route::resource('expense-categories', ExpenseCategoryController::class)->except(['show']);
+        });
 
         // Profit Analytics
-        Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::prefix('analytics')->name('analytics.')->middleware('feature:full_reports')->group(function () {
             Route::get('/profit', [ProfitAnalyticsController::class, 'index'])->name('profit');
             Route::get('/profit/branches', [ProfitAnalyticsController::class, 'byBranch'])->name('profit.branches');
             Route::get('/profit/trends', [ProfitAnalyticsController::class, 'trends'])->name('profit.trends');
         });
+
+        // Billing (owner only). Never gated, so a lapsed company can always renew.
+        Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing/checkout', [BillingController::class, 'checkout'])
+            ->middleware('throttle:6,1')
+            ->name('billing.checkout');
 
         // Settings (company owner only)
         Route::middleware('permission:manage_settings')->group(function () {

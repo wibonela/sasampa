@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SettingsController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TransactionController;
+use App\Http\Controllers\Api\SelcomWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -127,8 +128,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('/transactions/{id}/receipt', [POSController::class, 'receipt']);
                 Route::get('/transactions/{id}/receipt-pdf', [POSController::class, 'receiptPdf']);
                 Route::post('/transactions/{id}/void', [POSController::class, 'voidTransaction']);
-                Route::post('/transactions/{id}/whatsapp', [WhatsAppReceiptController::class, 'send']);
-                Route::get('/transactions/{id}/whatsapp/status', [WhatsAppReceiptController::class, 'status']);
+                Route::post('/transactions/{id}/whatsapp', [WhatsAppReceiptController::class, 'send'])
+                    ->middleware('feature:whatsapp_receipts');
+                Route::get('/transactions/{id}/whatsapp/status', [WhatsAppReceiptController::class, 'status'])
+                    ->middleware('feature:whatsapp_receipts');
 
                 // Orders
                 Route::get('/orders', [OrderController::class, 'index']);
@@ -160,7 +163,8 @@ Route::prefix('v1')->group(function () {
             Route::prefix('reports')->group(function () {
                 Route::get('/dashboard', [ReportController::class, 'dashboard']);
                 Route::get('/sales', [ReportController::class, 'sales']);
-                Route::get('/profit-breakdown', [ReportController::class, 'profitBreakdown']);
+                Route::get('/profit-breakdown', [ReportController::class, 'profitBreakdown'])
+                    ->middleware('feature:full_reports');
             });
 
             /*
@@ -185,7 +189,7 @@ Route::prefix('v1')->group(function () {
             | Expenses (Matumizi)
             |--------------------------------------------------------------------------
             */
-            Route::prefix('expenses')->group(function () {
+            Route::prefix('expenses')->middleware('feature:expenses')->group(function () {
                 Route::get('/', [ExpenseController::class, 'index']);
                 Route::get('/today', [ExpenseController::class, 'today']);
                 Route::get('/categories', [ExpenseController::class, 'categories']);
@@ -235,6 +239,11 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
+
+// Payment gateway callback (public; authenticity is established by a server-side status lookup)
+Route::post('/webhooks/selcom', [SelcomWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
+    ->name('webhooks.selcom');
 
 /*
 |--------------------------------------------------------------------------

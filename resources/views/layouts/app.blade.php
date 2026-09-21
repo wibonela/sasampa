@@ -55,6 +55,10 @@
             @endif
         </div>
 
+        @php
+            $navCompany = auth()->user()->company;
+            $navHas = fn (string $feature) => !$navCompany || $navCompany->hasFeature($feature);
+        @endphp
         <div class="sidebar-nav">
             @if(auth()->user()->isPlatformAdmin())
                 <div class="nav-section">
@@ -211,6 +215,7 @@
                     </ul>
                 </div>
 
+@if($navHas('expenses'))
                 <div class="nav-section">
                     <p class="nav-section-title">{{ __('Expenses') }}</p>
                     <ul class="nav flex-column">
@@ -228,6 +233,7 @@
                         </li>
                     </ul>
                 </div>
+                @endif
 
                 <div class="nav-section">
                     <p class="nav-section-title">Reports</p>
@@ -247,6 +253,7 @@
                     </ul>
                 </div>
 
+@if($navHas('full_reports'))
                 <div class="nav-section">
                     <p class="nav-section-title">Analytics</p>
                     <ul class="nav flex-column">
@@ -270,6 +277,7 @@
                         </li>
                     </ul>
                 </div>
+                @endif
 
                 <div class="nav-section">
                     <p class="nav-section-title">Settings</p>
@@ -287,6 +295,14 @@
                                 <a class="nav-link {{ request()->routeIs('branches.*') ? 'active' : '' }}" href="{{ route('branches.index') }}">
                                     <i class="bi bi-building"></i>
                                     Branches
+                                </a>
+                            </li>
+                        @endif
+                        @if(auth()->user()->isCompanyOwner())
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('billing.*') ? 'active' : '' }}" href="{{ route('billing.index') }}">
+                                    <i class="bi bi-credit-card"></i>
+                                    Billing
                                 </a>
                             </li>
                         @endif
@@ -346,6 +362,12 @@
 
     <!-- Main -->
     <div class="main-content">
+        @if(($billingNotice = auth()->user()->company?->billingNotice(auth()->user())) !== null)
+            <div class="alert alert-{{ $billingNotice['type'] }} mb-4" role="alert">
+                {{ $billingNotice['message'] }}
+                <a href="{{ route('billing.index') }}" class="alert-link ms-1">View billing</a>
+            </div>
+        @endif
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                 <i class="bi bi-check-circle"></i>
