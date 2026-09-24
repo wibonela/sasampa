@@ -120,6 +120,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-primary">{{ $request->requested_limit }}</span>
+                                    @if($request->plan)<span class="badge bg-info">{{ $request->plan->name }}</span>@endif
                                     <span class="text-success">(+{{ $request->requested_limit - $request->current_limit }})</span>
                                 </td>
                                 <td>

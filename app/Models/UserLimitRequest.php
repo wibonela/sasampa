@@ -12,6 +12,7 @@ class UserLimitRequest extends Model
         'requested_by',
         'current_limit',
         'requested_limit',
+        'requested_plan_id',
         'reason',
         'status',
         'handled_by',
@@ -94,6 +95,11 @@ class UserLimitRequest extends Model
             'admin_notes' => $notes,
             'handled_at' => now(),
         ]);
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'requested_plan_id');
     }
 
     public function isPending(): bool

@@ -133,6 +133,42 @@ class Company extends Model
         return $this->user_limit ?? 3;
     }
 
+    /**
+     * The user limit that actually applies: the company's own limit, further capped
+     * by its plan while billing is enforced.
+     */
+    public function effectiveUserLimit(): int
+    {
+        $limit = $this->getUserLimit();
+
+        if ($this->billingEnforced()) {
+            $planLimit = $this->effectivePlan()?->limitFor('users');
+            if ($planLimit !== null) {
+                $limit = min($limit, $planLimit);
+            }
+        }
+
+        return $limit;
+    }
+
+    public function canAddUser(): bool
+    {
+        return $this->getUserCount() < $this->effectiveUserLimit();
+    }
+
+    /**
+     * Plans that allow more users than the company can have today.
+     */
+    public function plansWithMoreUsers()
+    {
+        $current = $this->effectiveUserLimit();
+
+        return Plan::where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('max_users')->orWhere('max_users', '>', $current))
+            ->orderBy('sort_order')
+            ->get();
+    }
+
     public function getUserCount(): int
     {
         return $this->users()->count();
