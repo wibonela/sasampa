@@ -38,7 +38,7 @@
                         @else
                             <span class="badge bg-danger">Limit reached</span>
                             <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#requestMoreModal">
-                                Request More
+                                Change Plan
                             </button>
                         @endif
                     </div>
@@ -153,7 +153,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-envelope me-2"></i>Request More User Slots
+                        <i class="bi bi-envelope me-2"></i>Request a Plan Change
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -168,28 +168,32 @@
                         @else
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle me-2"></i>
-                                Your current limit is <strong>{{ $userLimit }} users</strong>. Request more slots by filling out this form.
+                                Your account currently allows <strong>{{ $userLimit }} users</strong>. Choose the plan that fits your team and our team will review your request and contact you.
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">How many user slots do you need?</label>
-                                <select name="requested_limit" class="form-select" required>
-                                    @for($i = $userLimit + 1; $i <= min($userLimit + 20, 50); $i++)
-                                        <option value="{{ $i }}">{{ $i }} users (+{{ $i - $userLimit }} more)</option>
-                                    @endfor
-                                </select>
-                            </div>
+                            @forelse($plans as $plan)
+                                <label class="d-block border rounded p-3 mb-2" style="cursor: pointer;">
+                                    <input type="radio" name="plan_id" value="{{ $plan->id }}" class="form-check-input me-2" @checked($loop->first) required>
+                                    <strong>{{ $plan->name }}</strong>
+                                    <div class="text-secondary small ms-4">
+                                        Up to {{ $plan->max_users ?? 'unlimited' }} users
+                                        · {{ $plan->max_branches ?? 'unlimited' }} {{ ($plan->max_branches ?? 2) === 1 ? 'branch' : 'branches' }}
+                                    </div>
+                                </label>
+                            @empty
+                                <p class="text-secondary mb-3">You are already on the largest plan. Please contact support if you need more.</p>
+                            @endforelse
 
                             <div class="mb-3">
-                                <label class="form-label">Reason for request</label>
-                                <textarea name="reason" class="form-control" rows="3" required
-                                          placeholder="Please explain why you need additional user slots..."></textarea>
+                                <label class="form-label">Notes (optional)</label>
+                                <textarea name="reason" class="form-control" rows="2"
+                                          placeholder="Anything we should know about your team..."></textarea>
                             </div>
                         @endif
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        @if(!$hasPendingRequest)
+                        @if(!$hasPendingRequest && $plans->isNotEmpty())
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-send me-1"></i>Submit Request
                             </button>

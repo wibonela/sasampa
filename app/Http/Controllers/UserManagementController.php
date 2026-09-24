@@ -27,20 +27,21 @@ class UserManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        $userLimit = $company->getUserLimit();
+        $userLimit = $company->effectiveUserLimit();
         $userCount = $company->getUserCount();
-        $canCreateMore = $company->canCreateMoreUsers();
+        $canCreateMore = $company->canAddUser();
         $hasPendingRequest = $company->hasPendingLimitRequest();
+        $plans = $company->plansWithMoreUsers();
 
-        return view('users.index', compact('users', 'userLimit', 'userCount', 'canCreateMore', 'hasPendingRequest'));
+        return view('users.index', compact('users', 'userLimit', 'userCount', 'canCreateMore', 'hasPendingRequest', 'plans'));
     }
 
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
         $company = auth()->user()->company;
 
         // Check if company can create more users
-        if (!$company->canCreateMoreUsers() || !$company->withinLimit('users')) {
+        if (!$company->canAddUser()) {
             return redirect()->route('users.index')
                 ->with('error', 'You have reached your user limit. Please request more user slots from admin.');
         }
@@ -56,7 +57,7 @@ class UserManagementController extends Controller
         $company = auth()->user()->company;
 
         // Check if company can create more users
-        if (!$company->canCreateMoreUsers()) {
+        if (!$company->canAddUser()) {
             return redirect()->route('users.index')
                 ->with('error', 'You have reached your user limit. Please request more user slots from admin.');
         }
@@ -295,17 +296,22 @@ class UserManagementController extends Controller
             return back()->with('error', 'You already have a pending request. Please wait for admin to review it.');
         }
 
+        $eligible = $company->plansWithMoreUsers();
+
         $validated = $request->validate([
-            'requested_limit' => 'required|integer|min:' . ($company->getUserLimit() + 1) . '|max:100',
-            'reason' => 'required|string|max:1000',
+            'plan_id' => ['required', 'integer', \Illuminate\Validation\Rule::in($eligible->pluck('id')->all())],
+            'reason' => 'nullable|string|max:1000',
         ]);
+
+        $plan = $eligible->firstWhere('id', (int) $validated['plan_id']);
 
         UserLimitRequest::create([
             'company_id' => $company->id,
             'requested_by' => auth()->id(),
-            'current_limit' => $company->getUserLimit(),
-            'requested_limit' => $validated['requested_limit'],
-            'reason' => $validated['reason'],
+            'current_limit' => $company->effectiveUserLimit(),
+            'requested_limit' => min($plan->max_users ?? 100, 100),
+            'requested_plan_id' => $plan->id,
+            'reason' => $validated['reason'] ?? null,
             'status' => 'pending',
         ]);
 

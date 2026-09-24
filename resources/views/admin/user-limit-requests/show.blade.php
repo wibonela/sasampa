@@ -53,6 +53,16 @@
                             </div>
                         </div>
 
+                        @if($userLimitRequest->plan)
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">Requested Plan</label>
+                                <div style="font-weight: 600;">{{ $userLimitRequest->plan->name }}</div>
+                                <a href="{{ route('admin.companies.show', $userLimitRequest->company) }}" class="small">
+                                    Set the company's plan and record payment
+                                </a>
+                            </div>
+                        @endif
+
                         <div class="mb-3">
                             <label class="form-label text-secondary">Reason for Request</label>
                             <div class="p-3 rounded" style="background: #fff; border: 1px solid var(--apple-border);">
