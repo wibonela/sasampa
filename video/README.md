@@ -1,28 +1,48 @@
-# Sasampa launch video
+# Sasampa videos
 
-Remotion project. Captions, durations and the end card live in `data/launch.json`; clips go in `public/clips/`.
+Remotion project that turns real recordings of the mobile app into captioned, branded videos.
+The rules every video must meet are in [STYLE.md](STYLE.md) and are enforced by `npm run check`.
+
+| Project | What | Length |
+|---------|------|--------|
+| `launch` | Launch video (Kiswahili captions, English voiceover) | ~80s |
+| `tutorial-sale` | Tutorial: how to make a sale in 5 steps | ~56s |
+
+## Everyday commands
 
 ```bash
 npm install
-npm run studio        # live preview
-npm run render        # out/launch-9x16.mp4 (vertical)
-npm run render:wide   # out/launch-16x9.mp4
+npm run studio                       # live preview in the browser
+npm run check launch                 # the clean-standard gate
+npm run render:launch                # out/launch-9x16.mp4
+npm run render:launch:wide           # out/launch-16x9.mp4
+npm run render:tutorial-sale         # (and :wide)
 ```
 
-Needs `ffmpeg` (`brew install ffmpeg`). `remotion.config.ts` uses the installed Google Chrome because the bundled browser crashes on some Macs.
+Needs `ffmpeg` (`brew install ffmpeg`), Xcode with an iOS simulator, and Flutter.
+`remotion.config.ts` uses the installed Google Chrome because Remotion's bundled browser crashes on some Macs.
 
-## Recording the clips from the real app (iOS simulator)
+## Re-recording from the real app
 
-1. Start a local demo server on a throwaway database with fake data (never production data):
-   `DB_DATABASE=<scratch.sqlite> MAIL_MAILER=log php artisan serve --port=8099`
-2. Boot an iPhone simulator whose iOS runtime matches Xcode's SDK, and set a clean status bar:
-   `xcrun simctl status_bar booted override --time 9:41 --batteryState charged --batteryLevel 100`
-3. Record while the app drives itself:
-   ```bash
-   xcrun simctl io booted recordVideo --codec=h264 raw.mp4 &
-   cd ../mobile_app
-   flutter test integration_test/demo_recording_test.dart -d <sim id> \
-     --dart-define=API_BASE_URL=http://127.0.0.1:8099/api/v1
-   kill -INT %1
-   ```
-   The test prints `MARK <beat> start|end <epoch ms>`; cut each beat out of `raw.mp4` with `ffmpeg -ss <start> -t <length>`.
+```bash
+scripts/record.sh launch             # or: tutorial-sale
+```
+
+This starts a throwaway demo server (fake data from `demo/seed_demo.php`), erases and boots the "Sasampa Demo" simulator
+with a clean 9:41 status bar, drives the app with the matching test in `mobile_app/integration_test/` while recording,
+fails if the run shows overflows or missing screens, and cuts one clip per step into `public/clips/<project>/`
+(updating each step's `seconds` in `data/<project>.json`).
+
+## Audio
+
+```bash
+node scripts/make-voiceover.mjs launch        # English voiceover from the "vo" lines (macOS `say`)
+node scripts/make-music.mjs                   # original background track -> public/audio/music.m4a
+```
+
+Swap any generated file for your own recording or licensed track by putting a file with the same name in `public/audio/`.
+Recorded clips and generated audio are not committed; the scripts rebuild them.
+
+## Adding a video
+
+See the checklist at the bottom of [STYLE.md](STYLE.md).

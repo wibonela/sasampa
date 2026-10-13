@@ -1,59 +1,70 @@
 {
+  "project": "launch",
   "fps": 30,
-  "brand": {
-    "accent": "#FF3B30",
-    "blue": "#007AFF",
-    "dark": "#0A1020",
-    "text": "#FFFFFF",
-    "name": "Sasampa POS"
+  "voiceover": true,
+  "music": {
+    "file": "audio/music.m4a",
+    "volume": 0.2,
+    "volumeUnderVoice": 0.09
   },
-  "music": null,
   "intro": {
-    "seconds": 4,
+    "seconds": 5,
+    "emoji": "📒",
+    "strike": true,
     "line1": "Bado unaandika mauzo kwenye daftari?",
-    "line2": "Kuna njia rahisi zaidi."
-  },
-  "endCard": {
-    "seconds": 6,
-    "title": "Sasampa POS",
-    "subtitle": "Pakua sasa.",
-    "link": ""
+    "line2": "Kuna njia rahisi zaidi.",
+    "vo": "Still writing your sales in a notebook? There is an easier way."
   },
   "beats": [
     {
       "id": "01-hook",
       "seconds": 8.4,
-      "caption": "Ingia na uone mauzo na faida ya leo"
+      "caption": "Ingia na uone mauzo na faida ya leo",
+      "vo": "Log in and see today's sales and profit at a glance."
     },
     {
       "id": "02-sale",
-      "seconds": 8.4,
-      "caption": "Uza kwa sekunde chache"
+      "seconds": 8.2,
+      "caption": "Uza kwa sekunde chache",
+      "vo": "Add products to the cart and make a sale in seconds."
     },
     {
       "id": "03-scan",
       "seconds": 8.2,
-      "caption": "Tafuta bidhaa kwa jina au kundi"
+      "caption": "Tafuta bidhaa kwa jina au kundi",
+      "vo": "Find any product by its name or its category."
     },
     {
       "id": "04-pay",
-      "seconds": 11.7,
-      "caption": "Taslimu, Simu, Kadi au Benki. Chenji inahesabiwa yenyewe"
+      "seconds": 11.8,
+      "caption": "Taslimu, Simu, Kadi au Benki. Chenji inahesabiwa yenyewe",
+      "vo": "Take cash, mobile money, card or bank transfer. The change is worked out for you."
     },
     {
       "id": "05-receipt",
       "seconds": 6.6,
-      "caption": "Risiti tayari: tazama, chapisha au shiriki"
+      "caption": "Risiti tayari: tazama, chapisha au shiriki",
+      "vo": "The receipt is ready. View it, print it, or share it."
     },
     {
       "id": "06-reports",
       "seconds": 15.5,
-      "caption": "Fuatilia mauzo, hifadhi na faida"
+      "speed": 1.6,
+      "caption": "Fuatilia mauzo, hifadhi na faida",
+      "vo": "Keep track of your sales, your stock and your profit, all in one place."
     },
     {
       "id": "07-orders",
       "seconds": 10,
-      "caption": "Oda na ankara ya proforma kwa wateja"
+      "caption": "Oda na ankara ya proforma kwa wateja",
+      "vo": "Create orders and proforma invoices for your customers."
     }
-  ]
+  ],
+  "endCard": {
+    "seconds": 6,
+    "title": "Sasampa POS",
+    "subtitle": "Pakua sasa.",
+    "link": "",
+    "vo": "Sasampa POS. Download it today."
+  }
 }

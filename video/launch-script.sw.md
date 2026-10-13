@@ -1,15 +1,16 @@
-# Sasampa POS: Launch video (Kiswahili, ~79s)
+# Sasampa POS: Launch video (Kiswahili captions, English voiceover, ~80s)
 
 The video is built from a real screen recording of the app, so every screen you see is the real app.
 Captions use the app's own Swahili wording (`mobile_app/lib/l10n/app_sw.arb`). A Swahili speaker should review every line.
+Voiceover is English (generated); the English lines are in `data/launch.json` under `vo`.
 
 | # | Seconds | What is on screen (real app) | Caption |
 |---|---------|------------------------------|---------|
-| intro | 4 | Animated title card | "Bado unaandika mauzo kwenye daftari?" / "Kuna njia rahisi zaidi." |
+| intro | 5 | Animated title card | "Bado unaandika mauzo kwenye daftari?" / "Kuna njia rahisi zaidi." |
 | 01 | 8.4 | Login, then the dashboard with today's sales and profit | Ingia na uone mauzo na faida ya leo |
-| 02 | 8.4 | POS: adding products to the cart | Uza kwa sekunde chache |
+| 02 | 8.2 | POS: adding products to the cart | Uza kwa sekunde chache |
 | 03 | 8.2 | Product search and category chips | Tafuta bidhaa kwa jina au kundi |
-| 04 | 11.7 | Checkout: Taslimu, amount paid, "Mauzo Yamekamilika!", change | Taslimu, Simu, Kadi au Benki. Chenji inahesabiwa yenyewe |
+| 04 | 11.8 | Checkout: Taslimu, amount paid, "Mauzo Yamekamilika!", change | Taslimu, Simu, Kadi au Benki. Chenji inahesabiwa yenyewe |
 | 05 | 6.6 | The receipt with Chapisha and Shiriki | Risiti tayari: tazama, chapisha au shiriki |
 | 06 | 15.5 | Dashboard, stock levels, sales history (sped up) | Fuatilia mauzo, hifadhi na faida |
 | 07 | 10 | Orders list and an order with proforma options | Oda na ankara ya proforma kwa wateja |

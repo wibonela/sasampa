@@ -11,20 +11,31 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { Beat, clipFor, config } from "./data";
+import { brand } from "./brand";
+import { Beat, Project, clipFor, hasMusic, projects, totalFrames, voiceFor } from "./data";
 
-const { brand } = config;
-const FONT = "-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif";
+const FONT = brand.font;
 const PHONE_RATIO = 1206 / 2622;
 const FADE = 10;
+const VO_DELAY = 9; // frames: the voice starts just after the scene has faded in
 
-/** Fade a scene in and out so beats blend into each other. */
+/** Fade a scene in and out so scenes blend into each other. */
 const useSceneFade = (duration: number) => {
   const frame = useCurrentFrame();
   return interpolate(frame, [0, FADE, duration - FADE, duration], [0, 1, 1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+};
+
+const Voice: React.FC<{ project: string; id: string }> = ({ project, id }) => {
+  const file = voiceFor(project, id);
+  if (!file) return null;
+  return (
+    <Sequence from={VO_DELAY}>
+      <Audio src={staticFile(`audio/${project}/${file}`)} />
+    </Sequence>
+  );
 };
 
 const Background: React.FC = () => {
@@ -63,26 +74,21 @@ const Progress: React.FC<{ index: number; total: number }> = ({ index, total }) 
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          style={{
-            width: w,
-            height: 8,
-            borderRadius: 4,
-            background: i <= index ? brand.accent : "rgba(255,255,255,0.22)",
-          }}
+          style={{ width: w, height: 8, borderRadius: 4, background: i <= index ? brand.accent : "rgba(255,255,255,0.22)" }}
         />
       ))}
     </div>
   );
 };
 
-const Phone: React.FC<{ id: string; height: number; duration: number }> = ({ id, height, duration }) => {
+const Phone: React.FC<{ project: string; id: string; height: number; duration: number }> = ({ project, id, height, duration }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const enter = spring({ frame, fps, config: { damping: 18, stiffness: 90 } });
   const zoom = interpolate(frame, [0, duration], [1, 1.05]);
   const width = height * PHONE_RATIO;
   const bezel = 16;
-  const clip = clipFor(id);
+  const clip = clipFor(project, id);
   return (
     <div
       style={{
@@ -99,14 +105,14 @@ const Phone: React.FC<{ id: string; height: number; duration: number }> = ({ id,
       <div style={{ width, height, borderRadius: 80, overflow: "hidden", background: "#fff", position: "relative" }}>
         {clip ? (
           <OffthreadVideo
-            src={staticFile(`clips/${clip}`)}
+            src={staticFile(`clips/${project}/${clip}`)}
             style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom})` }}
           />
         ) : (
           <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", fontFamily: FONT, color: "#667", fontSize: 38, textAlign: "center", padding: 40 }}>
             Weka clip hapa
             <br />
-            public/clips/{id}.mp4
+            public/clips/{project}/{id}.mp4
           </AbsoluteFill>
         )}
       </div>
@@ -149,23 +155,24 @@ const Caption: React.FC<{ text: string; step: number; wide: boolean }> = ({ text
   );
 };
 
-const BeatScene: React.FC<{ beat: Beat; index: number; total: number; duration: number }> = ({ beat, index, total, duration }) => {
+const BeatScene: React.FC<{ project: string; beat: Beat; index: number; total: number; duration: number }> = ({ project, beat, index, total, duration }) => {
   const { width, height } = useVideoConfig();
   const opacity = useSceneFade(duration);
   const wide = width > height;
   return (
     <AbsoluteFill style={{ opacity }}>
+      <Voice project={project} id={beat.id} />
       {!wide && <Progress index={index} total={total} />}
       {wide ? (
         <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 110, padding: "0 120px" }}>
           <Caption text={beat.caption} step={index + 1} wide />
-          <Phone id={beat.id} height={height - 120} duration={duration} />
+          <Phone project={project} id={beat.id} height={height - 120} duration={duration} />
         </AbsoluteFill>
       ) : (
         <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
           <Caption text={beat.caption} step={index + 1} wide={false} />
           <div style={{ position: "absolute", bottom: 70 }}>
-            <Phone id={beat.id} height={1330} duration={duration} />
+            <Phone project={project} id={beat.id} height={1330} duration={duration} />
           </div>
         </AbsoluteFill>
       )}
@@ -173,28 +180,29 @@ const BeatScene: React.FC<{ beat: Beat; index: number; total: number; duration: 
   );
 };
 
-const Intro: React.FC<{ duration: number }> = ({ duration }) => {
+const Intro: React.FC<{ p: Project; duration: number }> = ({ p, duration }) => {
   const frame = useCurrentFrame();
   const { fps, width } = useVideoConfig();
   const opacity = useSceneFade(duration);
   const a = spring({ frame, fps, config: { damping: 200 } });
-  const strike = interpolate(frame, [fps * 1.3, fps * 1.9], [0, 100], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const b = spring({ frame: frame - fps * 2.2, fps, config: { damping: 14 } });
+  const strike = interpolate(frame, [fps * 1.6, fps * 2.3], [0, 100], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const b = spring({ frame: frame - fps * 2.6, fps, config: { damping: 14 } });
   return (
     <AbsoluteFill style={{ opacity, alignItems: "center", justifyContent: "center", fontFamily: FONT, color: brand.text, textAlign: "center", padding: 80 }}>
-      <div style={{ fontSize: 190, transform: `scale(${a}) rotate(${interpolate(a, [0, 1], [-20, -4])}deg)` }}>📒</div>
+      <Voice project={p.project} id="intro" />
+      <div style={{ fontSize: 190, transform: `scale(${a}) rotate(${interpolate(a, [0, 1], [-20, -4])}deg)` }}>{p.intro.emoji}</div>
       <div style={{ position: "relative", fontSize: width > 1500 ? 84 : 76, fontWeight: 800, lineHeight: 1.15, marginTop: 30, opacity: a, maxWidth: 1200 }}>
-        {config.intro.line1}
-        <div style={{ position: "absolute", left: 0, top: "52%", height: 10, width: `${strike}%`, background: brand.accent, borderRadius: 5 }} />
+        {p.intro.line1}
+        {p.intro.strike && <div style={{ position: "absolute", left: 0, top: "52%", height: 10, width: `${strike}%`, background: brand.accent, borderRadius: 5 }} />}
       </div>
       <div style={{ fontSize: 80, fontWeight: 800, marginTop: 50, color: brand.accent, opacity: Math.max(0, b), transform: `translateY(${interpolate(Math.max(0, b), [0, 1], [30, 0])}px)` }}>
-        {config.intro.line2}
+        {p.intro.line2}
       </div>
     </AbsoluteFill>
   );
 };
 
-const EndCard: React.FC<{ duration: number }> = ({ duration }) => {
+const EndCard: React.FC<{ p: Project }> = ({ p }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = spring({ frame, fps, config: { damping: 12 } });
@@ -202,37 +210,53 @@ const EndCard: React.FC<{ duration: number }> = ({ duration }) => {
   const opacity = interpolate(frame, [0, FADE], [0, 1], { extrapolateRight: "clamp" });
   return (
     <AbsoluteFill style={{ opacity, alignItems: "center", justifyContent: "center", fontFamily: FONT, color: brand.text, textAlign: "center" }}>
+      <Voice project={p.project} id="end" />
       <Img src={staticFile("logo.png")} style={{ width: 300, height: 300, borderRadius: 72, transform: `scale(${s})`, boxShadow: "0 30px 80px rgba(255,59,48,0.45)" }} />
-      <div style={{ fontSize: 108, fontWeight: 900, marginTop: 56, opacity: t, transform: `translateY(${interpolate(t, [0, 1], [30, 0])}px)` }}>{config.endCard.title}</div>
-      <div style={{ fontSize: 66, marginTop: 20, color: brand.accent, fontWeight: 800, opacity: t }}>{config.endCard.subtitle}</div>
-      {config.endCard.link ? <div style={{ fontSize: 46, marginTop: 44, opacity: 0.85 }}>{config.endCard.link}</div> : null}
+      <div style={{ fontSize: 108, fontWeight: 900, marginTop: 56, opacity: t, transform: `translateY(${interpolate(t, [0, 1], [30, 0])}px)` }}>{p.endCard.title}</div>
+      <div style={{ fontSize: 66, marginTop: 20, color: brand.accent, fontWeight: 800, opacity: t }}>{p.endCard.subtitle}</div>
+      {p.endCard.link ? <div style={{ fontSize: 46, marginTop: 44, opacity: 0.85 }}>{p.endCard.link}</div> : null}
     </AbsoluteFill>
   );
 };
 
-export const Launch: React.FC = () => {
+/** Music bed: fades in/out and sits lower while a voiceover is present. */
+const Music: React.FC<{ p: Project }> = ({ p }) => {
   const { fps } = useVideoConfig();
-  const introFrames = Math.round(config.intro.seconds * fps);
+  if (!p.music || !hasMusic(p.music.file)) return null;
+  const total = totalFrames(p);
+  const level = p.voiceover ? p.music.volumeUnderVoice : p.music.volume;
+  return (
+    <Audio
+      src={staticFile(p.music.file)}
+      volume={(f) => level * interpolate(f, [0, fps, total - fps * 2, total], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+    />
+  );
+};
+
+export const Video: React.FC<{ project: string }> = ({ project }) => {
+  const { fps } = useVideoConfig();
+  const p = projects[project];
+  const introFrames = Math.round(p.intro.seconds * fps);
   let cursor = introFrames;
   return (
     <AbsoluteFill>
       <Background />
-      {config.music ? <Audio src={staticFile(config.music)} volume={0.35} /> : null}
+      <Music p={p} />
       <Sequence from={0} durationInFrames={introFrames}>
-        <Intro duration={introFrames} />
+        <Intro p={p} duration={introFrames} />
       </Sequence>
-      {config.beats.map((beat, i) => {
+      {p.beats.map((beat, i) => {
         const from = cursor;
         const duration = Math.round(beat.seconds * fps);
         cursor += duration;
         return (
           <Sequence key={beat.id} from={from} durationInFrames={duration}>
-            <BeatScene beat={beat} index={i} total={config.beats.length} duration={duration} />
+            <BeatScene project={project} beat={beat} index={i} total={p.beats.length} duration={duration} />
           </Sequence>
         );
       })}
-      <Sequence from={cursor} durationInFrames={Math.round(config.endCard.seconds * fps)}>
-        <EndCard duration={Math.round(config.endCard.seconds * fps)} />
+      <Sequence from={cursor} durationInFrames={Math.round(p.endCard.seconds * fps)}>
+        <EndCard p={p} />
       </Sequence>
     </AbsoluteFill>
   );
