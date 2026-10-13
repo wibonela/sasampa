@@ -162,7 +162,11 @@ class AdminDashboardService
         return Company::select('companies.*')
             ->selectRaw('COALESCE(SUM(transactions.total), 0) as total_revenue')
             ->selectRaw('COUNT(transactions.id) as transaction_count')
-            ->leftJoin('transactions', 'companies.id', '=', 'transactions.company_id')
+            ->leftJoin('transactions', function ($join) {
+                $join->on('companies.id', '=', 'transactions.company_id')
+                    ->where('transactions.status', 'completed')
+                    ->where(fn ($q) => $q->where('transactions.type', 'sale')->orWhereNull('transactions.type'));
+            })
             ->where('companies.status', Company::STATUS_APPROVED)
             ->groupBy('companies.id')
             ->orderByDesc('total_revenue')
@@ -443,7 +447,7 @@ class AdminDashboardService
             ->selectRaw('COUNT(*) as total')
             ->first();
 
-        $total = $result->total ?: 1;
+        $total = (int) $result->total ?: 1;
         return [
             'registered' => (int) $result->registered,
             'walkin' => (int) $result->walkin,

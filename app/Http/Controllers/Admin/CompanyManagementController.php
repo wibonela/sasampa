@@ -7,6 +7,7 @@ use App\Mail\CompanyApproved;
 use App\Mail\CompanyRejected;
 use App\Models\Company;
 use App\Services\AdminNotificationService;
+use App\Services\CompanyActivityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,8 @@ use Illuminate\Validation\Rule;
 class CompanyManagementController extends Controller
 {
     public function __construct(
-        private AdminNotificationService $notificationService
+        private AdminNotificationService $notificationService,
+        private CompanyActivityService $activity
     ) {}
 
     public function index(Request $request)
@@ -31,25 +33,45 @@ class CompanyManagementController extends Controller
             }
         }
 
-        $companies = $query->latest()->paginate(20);
+        if ($request->filled('q')) {
+            $term = '%' . $request->q . '%';
+            $query->where(fn ($q) => $q->where('companies.name', 'like', $term)
+                ->orWhere('companies.email', 'like', $term)
+                ->orWhere('companies.phone', 'like', $term));
+        }
+
+        $this->activity->filterByActivity($query, (string) $request->input('activity'));
+        $this->activity->withActivity($query);
+
+        match ($request->input('sort')) {
+            'revenue' => $query->orderByDesc('revenue_30d'),
+            'sales' => $query->orderByDesc('sales_7d'),
+            'recent' => $query->orderByRaw('last_sale_at IS NULL')->orderByDesc('last_sale_at'),
+            'stale' => $query->orderByRaw('last_sale_at IS NULL')->orderBy('last_sale_at'),
+            default => $query->latest('companies.created_at'),
+        };
+
+        $companies = $query->paginate(20)->withQueryString();
 
         $stats = [
             'pending' => Company::pending()->count(),
             'pending_setup' => Company::where('status', Company::STATUS_APPROVED)
                                       ->where('onboarding_completed', false)->count(),
             'approved' => Company::approved()->where('onboarding_completed', true)->count(),
+            'selling' => $this->activity->sellingThisWeek(),
             'total' => Company::count(),
         ];
 
         return view('admin.companies.index', compact('companies', 'stats'));
     }
 
-    public function show(Company $company)
+    public function show(Request $request, Company $company)
     {
         $company->load(['users', 'owner', 'subscription.plan']);
         $plans = \App\Models\Plan::orderBy('sort_order')->get();
         $payments = $company->payments()->with('plan')->latest()->limit(20)->get();
-        return view('admin.companies.show', compact('company', 'plans', 'payments'));
+        $sales = $this->activity->companySales($company, (int) $request->input('days', 30));
+        return view('admin.companies.show', compact('company', 'plans', 'payments', 'sales'));
     }
 
     public function edit(Company $company)

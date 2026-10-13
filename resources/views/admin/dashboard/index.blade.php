@@ -379,8 +379,8 @@
                             <td class="text-secondary">{{ $company->created_at->format('M d, Y') }}</td>
                             <td class="text-end">
                                 @php
-                                    $lastTx = \App\Models\Transaction::withoutGlobalScope('company')->where('company_id', $company->id)->latest()->first();
-                                    $daysInactive = $lastTx ? $lastTx->created_at->diffInDays(now()) : $company->created_at->diffInDays(now());
+                                    $lastSale = $lastSaleTimes[$company->id] ?? null;
+                                    $daysInactive = (int) \Carbon\Carbon::parse($lastSale ?? $company->created_at)->diffInDays(now());
                                 @endphp
                                 <span class="badge {{ $daysInactive > 14 ? 'bg-danger' : 'bg-warning' }}">{{ $daysInactive }} days</span>
                             </td>
@@ -419,6 +419,63 @@
                     <div class="stat-value">{{ count($decliningCompanies) }}</div>
                     <div class="stat-label">Declining Companies</div>
                     <div class="stat-change text-danger"><small>Revenue dropped vs prior month</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-graph-up-arrow text-success me-2"></i>Trending This Week</span>
+                        <small class="text-secondary">vs previous 7 days</small>
+                    </div>
+                    @if(count($trendingCompanies) > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Company</th><th class="text-end">This week</th><th class="text-end">Last week</th><th class="text-end">Change</th></tr></thead>
+                            <tbody>
+                                @foreach($trendingCompanies as $tc)
+                                <tr>
+                                    <td><a href="{{ route('admin.companies.show', $tc->id) }}" class="text-decoration-none fw-medium" style="color: var(--apple-text);">{{ $tc->name }}</a></td>
+                                    <td class="text-end">{{ number_format($tc->this_week, 0) }}</td>
+                                    <td class="text-end text-secondary">{{ number_format($tc->last_week, 0) }}</td>
+                                    <td class="text-end"><span class="badge bg-success">{{ $tc->change_pct !== null ? '+' . $tc->change_pct . '%' : 'New' }}</span></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="card-body text-center py-5 text-secondary">No company has grown with enough sales yet</div>
+                    @endif
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-life-preserver text-warning me-2"></i>Needs Help: Slipping This Week</span>
+                        <small class="text-secondary">vs previous 7 days</small>
+                    </div>
+                    @if(count($slippingCompanies) > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Company</th><th class="text-end">This week</th><th class="text-end">Last week</th><th class="text-end">Change</th></tr></thead>
+                            <tbody>
+                                @foreach($slippingCompanies as $sc)
+                                <tr>
+                                    <td><a href="{{ route('admin.companies.show', $sc->id) }}" class="text-decoration-none fw-medium" style="color: var(--apple-text);">{{ $sc->name }}</a></td>
+                                    <td class="text-end">{{ number_format($sc->this_week, 0) }}</td>
+                                    <td class="text-end text-secondary">{{ number_format($sc->last_week, 0) }}</td>
+                                    <td class="text-end"><span class="badge bg-danger">{{ $sc->change_pct }}%</span></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="card-body text-center py-5 text-secondary"><i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>No company is slipping</div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -463,7 +520,7 @@
                                 @foreach($decliningCompanies as $dc)
                                 @php $declinePct = $dc->previous_revenue > 0 ? round((($dc->recent_revenue - $dc->previous_revenue) / $dc->previous_revenue) * 100, 1) : 0; @endphp
                                 <tr>
-                                    <td class="fw-medium">{{ $dc->name }}</td>
+                                    <td><a href="{{ route('admin.companies.show', $dc->id) }}" class="text-decoration-none fw-medium" style="color: var(--apple-text);">{{ $dc->name }}</a></td>
                                     <td class="text-end">{{ number_format($dc->recent_revenue, 0) }}</td>
                                     <td class="text-end text-secondary">{{ number_format($dc->previous_revenue, 0) }}</td>
                                     <td class="text-end"><span class="badge bg-danger">{{ $declinePct }}%</span></td>
