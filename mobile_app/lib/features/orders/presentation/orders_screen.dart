@@ -175,16 +175,19 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                _buildFilterChip('pending', l10n.pending),
-                const SizedBox(width: 8),
-                _buildFilterChip('all', l10n.all),
-                const SizedBox(width: 8),
-                _buildFilterChip('completed', l10n.completed),
-                const SizedBox(width: 8),
-                _buildFilterChip('cancelled', l10n.cancelled),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('pending', l10n.pending),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('all', l10n.all),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('completed', l10n.completed),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('cancelled', l10n.cancelled),
+                ],
+              ),
             ),
           ),
           // Orders list
