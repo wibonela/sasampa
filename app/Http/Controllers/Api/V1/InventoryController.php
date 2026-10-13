@@ -236,15 +236,15 @@ class InventoryController extends Controller
                 $q->where('quantity', '<=', 0);
             })->count();
 
-        $totalStockValue = Product::active()
-            ->with('inventory')
-            ->get()
+        $products = Product::active()->with('inventory')->get();
+
+        $totalStockValue = $products
             ->sum(fn ($p) => ($p->inventory?->quantity ?? 0) * $p->cost_price);
 
-        $totalRetailValue = Product::active()
-            ->with('inventory')
-            ->get()
+        $totalRetailValue = $products
             ->sum(fn ($p) => ($p->inventory?->quantity ?? 0) * $p->selling_price);
+
+        $totalUnits = $products->sum(fn ($p) => $p->inventory?->quantity ?? 0);
 
         return response()->json([
             'data' => [
@@ -254,6 +254,9 @@ class InventoryController extends Controller
                 'total_stock_value' => (float) $totalStockValue,
                 'total_retail_value' => (float) $totalRetailValue,
                 'potential_profit' => (float) ($totalRetailValue - $totalStockValue),
+                // The mobile inventory screen reads these two keys (total value and units in stock) for its summary cards.
+                'total_value' => (float) $totalStockValue,
+                'total_stock' => (int) $totalUnits,
             ],
         ]);
     }

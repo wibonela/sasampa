@@ -341,7 +341,12 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   ElevatedButton.icon(
-                                    onPressed: () => context.push('/expenses/add'),
+                                    onPressed: () async {
+                                      final result = await context.push('/expenses/add');
+                                      if (result == true) {
+                                        _loadData();
+                                      }
+                                    },
                                     icon: const Icon(Icons.add),
                                     label: Text(l10n.addExpense),
                                   ),
