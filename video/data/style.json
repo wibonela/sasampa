@@ -1,0 +1,21 @@
+{
+  "maxCaptionChars": 62,
+  "beatSeconds": [
+    5,
+    16
+  ],
+  "maxTotalSeconds": {
+    "launch": 90,
+    "tutorial-sale": 120
+  },
+  "phoneAspect": [
+    0.44,
+    0.48
+  ],
+  "bannedClaims": [
+    {
+      "word": "WhatsApp",
+      "why": "WhatsApp receipts are shown as 'coming soon' in the app; do not promote them."
+    }
+  ]
+}

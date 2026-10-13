@@ -5,9 +5,15 @@
   "scripts": {
     "sync": "node scripts/sync-clips.mjs",
     "studio": "npm run sync && remotion studio src/index.ts",
-    "render": "npm run sync && remotion render src/index.ts Launch out/launch-9x16.mp4",
-    "render:wide": "npm run sync && remotion render src/index.ts LaunchWide out/launch-16x9.mp4",
-    "still": "npm run sync && remotion still src/index.ts Launch out/frame.png --frame=150"
+    "check": "node scripts/check.mjs",
+    "record": "scripts/record.sh",
+    "voiceover": "node scripts/make-voiceover.mjs",
+    "music": "node scripts/make-music.mjs",
+    "render": "node scripts/render.mjs",
+    "render:launch": "node scripts/render.mjs launch",
+    "render:launch:wide": "node scripts/render.mjs launch wide",
+    "render:tutorial-sale": "node scripts/render.mjs tutorial-sale",
+    "render:tutorial-sale:wide": "node scripts/render.mjs tutorial-sale wide"
   },
   "dependencies": {
     "@remotion/cli": "4.0.535",

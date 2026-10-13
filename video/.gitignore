@@ -1,5 +1,9 @@
 node_modules
 out
+.demo
+data/available.json
+# Recorded footage and generated audio are rebuilt by the scripts (see README.md)
 public/clips/*
 !public/clips/.gitkeep
-data/available.json
+public/audio/*
+!public/audio/.gitkeep
