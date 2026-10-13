@@ -1,0 +1,51 @@
+{
+  "project": "tutorial-stock",
+  "fps": 30,
+  "voiceover": true,
+  "music": {
+    "file": "audio/music.m4a",
+    "volume": 0.2,
+    "volumeUnderVoice": 0.08
+  },
+  "intro": {
+    "seconds": 4.5,
+    "emoji": "📦",
+    "strike": false,
+    "line1": "Hifadhi ya bidhaa",
+    "line2": "Hatua 4 rahisi.",
+    "vo": "Managing your stock. Four simple steps."
+  },
+  "beats": [
+    {
+      "id": "01-open",
+      "seconds": 7.2,
+      "caption": "Hatua 1: Fungua Hifadhi kutoka Menyu",
+      "vo": "Step one. Open the menu and tap stock levels."
+    },
+    {
+      "id": "02-low",
+      "seconds": 5.1,
+      "caption": "Hatua 2: Angalia bidhaa zinazopungua",
+      "vo": "Step two. Open the low stock tab to see what is running out."
+    },
+    {
+      "id": "03-adjust",
+      "seconds": 9.9,
+      "caption": "Hatua 3: Chagua bidhaa na uongeze hifadhi",
+      "vo": "Step three. Tap a product, enter how many arrived, and save the adjustment."
+    },
+    {
+      "id": "04-result",
+      "seconds": 7.2,
+      "caption": "Hatua 4: Hakiki hifadhi mpya",
+      "vo": "Step four. Check the list. Your new stock is there."
+    }
+  ],
+  "endCard": {
+    "seconds": 5,
+    "title": "Sasampa POS",
+    "subtitle": "Tazama mafunzo mengine.",
+    "link": "",
+    "vo": "That is all. Watch our other tutorials to learn more."
+  }
+}

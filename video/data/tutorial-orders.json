@@ -1,0 +1,57 @@
+{
+  "project": "tutorial-orders",
+  "fps": 30,
+  "voiceover": true,
+  "music": {
+    "file": "audio/music.m4a",
+    "volume": 0.2,
+    "volumeUnderVoice": 0.08
+  },
+  "intro": {
+    "seconds": 5,
+    "emoji": "📋",
+    "strike": false,
+    "line1": "Jinsi ya kutengeneza oda na proforma",
+    "line2": "Hatua 5 rahisi.",
+    "vo": "How to make an order and a proforma invoice. Five simple steps."
+  },
+  "beats": [
+    {
+      "id": "01-products",
+      "seconds": 7.8,
+      "caption": "Hatua 1: Chagua bidhaa anazotaka mteja",
+      "vo": "Step one. Choose the products your customer wants."
+    },
+    {
+      "id": "02-customer",
+      "seconds": 8.8,
+      "caption": "Hatua 2: Fungua kikapu na uchague mteja",
+      "vo": "Step two. Open the cart and choose the customer."
+    },
+    {
+      "id": "03-save",
+      "seconds": 8.7,
+      "caption": "Hatua 3: Gusa Hifadhi Oda",
+      "vo": "Step three. Tap Save order, instead of completing the sale."
+    },
+    {
+      "id": "04-list",
+      "seconds": 6.9,
+      "caption": "Hatua 4: Ipate oda kwenye kichupo cha Oda",
+      "vo": "Step four. Find your order in the orders tab."
+    },
+    {
+      "id": "05-proforma",
+      "seconds": 8.2,
+      "caption": "Hatua 5: Fungua oda kushiriki proforma",
+      "vo": "Step five. Open the order to share the proforma invoice, and complete the sale when the customer pays."
+    }
+  ],
+  "endCard": {
+    "seconds": 5,
+    "title": "Sasampa POS",
+    "subtitle": "Tazama mafunzo mengine.",
+    "link": "",
+    "vo": "That is all. Watch our other tutorials to learn more."
+  }
+}

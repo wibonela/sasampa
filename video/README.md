@@ -7,6 +7,10 @@ The rules every video must meet are in [STYLE.md](STYLE.md) and are enforced by 
 |---------|------|--------|
 | `launch` | Launch video (Kiswahili captions, English voiceover) | ~80s |
 | `tutorial-sale` | Tutorial: how to make a sale in 5 steps | ~56s |
+| `tutorial-orders` | Tutorial: orders and proforma invoices | ~1 min |
+| `tutorial-customers` | Tutorial: customers and credit | ~1 min |
+| `tutorial-stock` | Tutorial: stock levels and adjustments | ~1 min |
+| `tutorial-expenses` | Tutorial: recording expenses | ~1 min |
 
 ## Everyday commands
 
@@ -14,9 +18,10 @@ The rules every video must meet are in [STYLE.md](STYLE.md) and are enforced by 
 npm install
 npm run studio                       # live preview in the browser
 npm run check launch                 # the clean-standard gate
-npm run render:launch                # out/launch-9x16.mp4
-npm run render:launch:wide           # out/launch-16x9.mp4
-npm run render:tutorial-sale         # (and :wide)
+npm run render -- launch             # out/launch-9x16.mp4
+npm run render -- launch wide        # out/launch-16x9.mp4
+npm run render -- tutorial-stock     # any project name from the table above
+npm run render:all                   # every project, vertical and wide
 ```
 
 Needs `ffmpeg` (`brew install ffmpeg`), Xcode with an iOS simulator, and Flutter.
@@ -25,7 +30,7 @@ Needs `ffmpeg` (`brew install ffmpeg`), Xcode with an iOS simulator, and Flutter
 ## Re-recording from the real app
 
 ```bash
-scripts/record.sh launch             # or: tutorial-sale
+scripts/record.sh launch             # or any tutorial-* project
 ```
 
 This starts a throwaway demo server (fake data from `demo/seed_demo.php`), erases and boots the "Sasampa Demo" simulator

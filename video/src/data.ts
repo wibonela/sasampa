@@ -1,5 +1,9 @@
 import launch from "../data/launch.json";
 import tutorialSale from "../data/tutorial-sale.json";
+import tutorialOrders from "../data/tutorial-orders.json";
+import tutorialCustomers from "../data/tutorial-customers.json";
+import tutorialStock from "../data/tutorial-stock.json";
+import tutorialExpenses from "../data/tutorial-expenses.json";
 import available from "../data/available.json";
 
 export type Beat = { id: string; seconds: number; caption: string; vo?: string; speed?: number };
@@ -16,6 +20,10 @@ export type Project = {
 export const projects: Record<string, Project> = {
   launch: launch as Project,
   "tutorial-sale": tutorialSale as Project,
+  "tutorial-orders": tutorialOrders as Project,
+  "tutorial-customers": tutorialCustomers as Project,
+  "tutorial-stock": tutorialStock as Project,
+  "tutorial-expenses": tutorialExpenses as Project,
 };
 
 type Available = { clips: Record<string, string[]>; audio: Record<string, string[]>; music: string[] };

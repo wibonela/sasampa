@@ -1,7 +1,7 @@
 // Cuts one clip per beat out of a raw simulator recording, using the MARK lines printed by the test.
 //   node scripts/cut-clips.mjs <project> <raw.mp4> <test.log> <recording start epoch ms>
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 
 const [project, raw, log, rec0Arg] = process.argv.slice(2);
 if (!rec0Arg) throw new Error("usage: cut-clips.mjs <project> <raw.mp4> <test.log> <rec0>");
@@ -29,6 +29,11 @@ for (const beat of data.beats) {
     "-an", "-vf", `setpts=PTS/${speed},fps=30`,
     "-c:v", "libx264", "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out,
   ]);
+  // Refuse empty or truncated clips (for example when the recording was not finalised).
+  const got = Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", out]).toString().trim());
+  if (!(got > 0.8 * (length / speed)) || statSync(out).size < 20000) {
+    throw new Error(`${beat.id}: clip is empty or truncated (${got || 0}s, expected about ${(length / speed).toFixed(1)}s)`);
+  }
   // Keep the edit timing equal to the real clip length.
   beat.seconds = Math.round((length / speed) * 10) / 10;
   console.log(`${beat.id}: ${beat.seconds}s${speed !== 1 ? ` (x${speed})` : ""}`);
