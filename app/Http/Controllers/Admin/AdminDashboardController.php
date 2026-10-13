@@ -7,13 +7,15 @@ use App\Models\Sanduku;
 use App\Models\UserLimitRequest;
 use App\Services\AdminDashboardService;
 use App\Services\AdminNotificationService;
+use App\Services\CompanyActivityService;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
     public function __construct(
         private AdminDashboardService $dashboardService,
-        private AdminNotificationService $notificationService
+        private AdminNotificationService $notificationService,
+        private CompanyActivityService $activity
     ) {}
 
     public function index()
@@ -52,6 +54,9 @@ class AdminDashboardController extends Controller
         $sandukuSummary = $this->dashboardService->getSandukuSummary();
         $companyAging = $this->dashboardService->getCompanyAgingDistribution();
         $onboardingFunnel = $this->dashboardService->getOnboardingFunnel();
+        $trendingCompanies = $this->activity->trendingCompanies(5);
+        $slippingCompanies = $this->activity->slippingCompanies(5);
+        $lastSaleTimes = $this->activity->lastSaleTimes($activeCompanyStats['churn_risk']->pluck('id'));
 
         return view('admin.dashboard.index', compact(
             'companyStats',
@@ -81,7 +86,10 @@ class AdminDashboardController extends Controller
             'mobileAppStats',
             'sandukuSummary',
             'companyAging',
-            'onboardingFunnel'
+            'onboardingFunnel',
+            'trendingCompanies',
+            'slippingCompanies',
+            'lastSaleTimes'
         ));
     }
 

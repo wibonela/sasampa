@@ -86,7 +86,7 @@
                     <div class="stat-icon green">
                         <i class="bi bi-receipt"></i>
                     </div>
-                    <div class="stat-value">{{ number_format($company->transactions()->count()) }}</div>
+                    <div class="stat-value">{{ number_format($sales['all_time']->sales) }}</div>
                     <div class="stat-label">Transactions</div>
                 </div>
             </div>
@@ -95,8 +95,154 @@
                     <div class="stat-icon green">
                         <i class="bi bi-cash-stack"></i>
                     </div>
-                    <div class="stat-value">{{ number_format($company->transactions()->sum('total') / 1000, 0) }}K</div>
+                    <div class="stat-value">{{ number_format($sales['all_time']->revenue / 1000, 0) }}K</div>
                     <div class="stat-label">Revenue (TZS)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Activity -->
+        @php
+            $cur = $sales['current'];
+            $health = $sales['health'];
+            $contactPhone = $company->owner?->phone ?: $company->phone;
+            $money = fn ($v) => number_format((float) $v, 0);
+        @endphp
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <h5 class="fw-semibold mb-0"><i class="bi bi-graph-up-arrow me-2" style="color: #34C759;"></i>Sales Activity</h5>
+            <div class="d-flex align-items-center gap-2">
+                @if($contactPhone)
+                    <a href="https://wa.me/{{ preg_replace('/\D+/', '', $contactPhone) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                    <a href="tel:{{ $contactPhone }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-telephone me-1"></i>Call</a>
+                @endif
+                <div class="btn-group btn-group-sm">
+                    @foreach([7, 30, 90] as $d)
+                        <a href="{{ route('admin.companies.show', [$company, 'days' => $d]) }}" class="btn {{ $sales['days'] === $d ? 'btn-primary' : 'btn-outline-primary' }}">{{ $d }}d</a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ $money($cur->revenue) }}</div>
+                    <div class="stat-label">Revenue, last {{ $sales['days'] }}d (TZS)</div>
+                    @if($sales['growth_pct'] !== null)
+                        <div class="stat-change {{ $sales['growth_pct'] >= 0 ? 'text-success' : 'text-danger' }}"><small><i class="bi bi-arrow-{{ $sales['growth_pct'] >= 0 ? 'up' : 'down' }}"></i> {{ abs($sales['growth_pct']) }}% vs previous {{ $sales['days'] }}d</small></div>
+                    @endif
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ number_format($cur->sales) }}</div>
+                    <div class="stat-label">Sales, last {{ $sales['days'] }}d</div>
+                    <div class="stat-change text-secondary"><small>{{ $cur->sales > 0 ? $money($cur->revenue / $cur->sales) : 0 }} avg sale</small></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value">{{ $money($sales['today']->revenue) }}</div>
+                    <div class="stat-label">Today ({{ $sales['today']->sales }} sales)</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-value" style="font-size: 20px;">{{ $sales['all_time']->last_sale_at ? \Carbon\Carbon::parse($sales['all_time']->last_sale_at)->diffForHumans() : 'Never' }}</div>
+                    <div class="stat-label">Last sale</div>
+                    <span class="badge {{ $health['class'] }}">{{ $health['label'] }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Daily Revenue</div>
+            <div class="card-body"><canvas id="companySalesChart" height="90"></canvas></div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-box-seam me-2"></i>What they sell most (last {{ $sales['days'] }}d)</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Revenue</th></tr></thead>
+                            <tbody>
+                                @forelse($sales['top_products'] as $p)
+                                    <tr><td>{{ $p->name }}</td><td class="text-end">{{ number_format($p->qty) }}</td><td class="text-end fw-medium">{{ $money($p->revenue) }}</td></tr>
+                                @empty
+                                    <tr><td colspan="3" class="text-center py-4 text-secondary">No sales in this period</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-people me-2"></i>By cashier, branch and payment</div>
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <tbody>
+                                @foreach(['Cashier' => $sales['cashiers'], 'Branch' => $sales['branches'], 'Payment' => $sales['payments']] as $group => $rows)
+                                    @if($rows->isNotEmpty())
+                                        <tr class="table-light"><td colspan="3" class="text-secondary" style="font-size: 12px; text-transform: uppercase;">{{ $group }}</td></tr>
+                                        @foreach($rows as $r)
+                                            <tr>
+                                                <td>{{ $r->name ?? ucfirst(str_replace('_', ' ', $r->method)) }}</td>
+                                                <td class="text-end text-secondary">{{ number_format($r->sales) }} sales</td>
+                                                <td class="text-end fw-medium">{{ $money($r->revenue) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+                                @endforeach
+                                @if($sales['cashiers']->isEmpty())
+                                    <tr><td class="text-center py-4 text-secondary">No sales in this period</td></tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-receipt me-2"></i>Latest sales</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Receipt</th><th>Cashier</th><th>When</th><th class="text-end">Total</th></tr></thead>
+                            <tbody>
+                                @forelse($sales['recent'] as $t)
+                                    <tr>
+                                        <td>{{ $t->transaction_number }}</td>
+                                        <td class="text-secondary">{{ $t->cashier ?? '—' }}</td>
+                                        <td class="text-secondary">{{ \Carbon\Carbon::parse($t->created_at)->diffForHumans() }}</td>
+                                        <td class="text-end fw-medium">{{ $money($t->total) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center py-4 text-secondary">No sales yet</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Low stock</div>
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <tbody>
+                                @forelse($sales['low_stock'] as $item)
+                                    <tr><td>{{ $item->name }}</td><td class="text-end"><span class="badge {{ $item->quantity <= 0 ? 'bg-danger' : 'bg-warning' }}">{{ $item->quantity }} left</span></td></tr>
+                                @empty
+                                    <tr><td class="text-center py-4 text-secondary">Nothing running low</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -419,4 +565,24 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const series = @json($sales['series']);
+            new Chart(document.getElementById('companySalesChart'), {
+                type: 'bar',
+                data: {
+                    labels: series.map(d => d.label),
+                    datasets: [{ label: 'Revenue (TZS)', data: series.map(d => d.revenue), backgroundColor: '#34C759', borderRadius: 4 }]
+                },
+                options: {
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: ctx => series[ctx.dataIndex].sales + ' sales' } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() } }, x: { ticks: { maxTicksLimit: 12 } } }
+                }
+            });
+        })();
+    </script>
+    @endpush
 </x-app-layout>

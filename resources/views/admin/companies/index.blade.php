@@ -10,7 +10,7 @@
 
         <!-- Stats -->
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-6 col-md">
                 <div class="stat-card">
                     <div class="stat-icon orange">
                         <i class="bi bi-hourglass-split"></i>
@@ -19,7 +19,7 @@
                     <div class="stat-label">Pending Approval</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md">
                 <div class="stat-card">
                     <div class="stat-icon" style="background: #fff; border: 1px solid var(--apple-border); color: #8b5cf6;">
                         <i class="bi bi-gear"></i>
@@ -28,16 +28,27 @@
                     <div class="stat-label">Pending Setup</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md">
                 <div class="stat-card">
                     <div class="stat-icon green">
                         <i class="bi bi-check-circle"></i>
                     </div>
                     <div class="stat-value">{{ $stats['approved'] }}</div>
-                    <div class="stat-label">Active</div>
+                    <div class="stat-label">Set Up</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md">
+                <a href="{{ route('admin.companies.index', ['activity' => 'active', 'sort' => 'revenue']) }}" class="text-decoration-none">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <div class="stat-value">{{ $stats['selling'] }}</div>
+                        <div class="stat-label">Selling (7 days)</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md">
                 <div class="stat-card">
                     <div class="stat-icon blue">
                         <i class="bi bi-building"></i>
@@ -51,16 +62,29 @@
         <!-- Filter -->
         <div class="card mb-4">
             <div class="card-body py-3">
-                <form method="GET" class="d-flex align-items-center gap-3">
-                    <span class="text-secondary" style="font-size: 13px;">Filter</span>
-                    <select name="status" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
-                        <option value="">All Companies</option>
+                <form method="GET" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-sm" style="width: 200px;" placeholder="Search name, email, phone">
+                    <select name="status" class="form-select form-select-sm" style="width: 160px;" onchange="this.form.submit()">
+                        <option value="">All statuses</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending Approval</option>
                         <option value="pending_setup" {{ request('status') == 'pending_setup' ? 'selected' : '' }}>Pending Setup</option>
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                     </select>
-                    @if(request('status'))
+                    <select name="activity" class="form-select form-select-sm" style="width: 170px;" onchange="this.form.submit()">
+                        <option value="">Any activity</option>
+                        <option value="active" {{ request('activity') == 'active' ? 'selected' : '' }}>Sold in last 7 days</option>
+                        <option value="inactive" {{ request('activity') == 'inactive' ? 'selected' : '' }}>No sales in 7 days</option>
+                    </select>
+                    <select name="sort" class="form-select form-select-sm" style="width: 190px;" onchange="this.form.submit()">
+                        <option value="">Newest registered</option>
+                        <option value="revenue" {{ request('sort') == 'revenue' ? 'selected' : '' }}>Most revenue (30d)</option>
+                        <option value="sales" {{ request('sort') == 'sales' ? 'selected' : '' }}>Most sales (7d)</option>
+                        <option value="recent" {{ request('sort') == 'recent' ? 'selected' : '' }}>Sold most recently</option>
+                        <option value="stale" {{ request('sort') == 'stale' ? 'selected' : '' }}>Longest without a sale</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
+                    @if(request()->hasAny(['q', 'status', 'activity', 'sort']))
                         <a href="{{ route('admin.companies.index') }}" class="btn btn-sm btn-outline-secondary">Clear</a>
                     @endif
                 </form>
@@ -76,7 +100,9 @@
                             <th>Company</th>
                             <th>Owner</th>
                             <th>Contact</th>
-                            <th>Registered</th>
+                            <th>Last Sale</th>
+                            <th class="text-end">Sales 7d</th>
+                            <th class="text-end">Revenue 30d</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -100,14 +126,27 @@
                                 </td>
                                 <td>
                                     <div>{{ $company->email }}</div>
-                                    @if($company->phone)
-                                        <div class="text-secondary" style="font-size: 12px;">{{ $company->phone }}</div>
+                                    @php $contactPhone = $company->owner?->phone ?: $company->phone; @endphp
+                                    @if($contactPhone)
+                                        <div style="font-size: 12px;">
+                                            <a href="tel:{{ $contactPhone }}" class="text-secondary text-decoration-none">{{ $contactPhone }}</a>
+                                            <a href="https://wa.me/{{ preg_replace('/\D+/', '', $contactPhone) }}" target="_blank" rel="noopener" class="text-success ms-1" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                                        </div>
                                     @endif
                                 </td>
                                 <td>
-                                    <div>{{ $company->created_at->format('M d, Y') }}</div>
-                                    <div class="text-secondary" style="font-size: 12px;">{{ $company->created_at->diffForHumans() }}</div>
+                                    @php $health = \App\Services\CompanyActivityService::health($company->last_sale_at); @endphp
+                                    @if($company->status === 'approved')
+                                        @if($company->last_sale_at)
+                                            <div>{{ \Carbon\Carbon::parse($company->last_sale_at)->diffForHumans() }}</div>
+                                        @endif
+                                        <span class="badge {{ $health['class'] }}">{{ $health['label'] }}</span>
+                                    @else
+                                        <span class="text-secondary">—</span>
+                                    @endif
                                 </td>
+                                <td class="text-end">{{ number_format($company->sales_7d) }}</td>
+                                <td class="text-end fw-medium">{{ number_format($company->revenue_30d, 0) }}</td>
                                 <td>
                                     @if($company->status === 'pending')
                                         <span class="badge bg-warning">Pending</span>
@@ -157,7 +196,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-secondary">
+                                <td colspan="8" class="text-center py-5 text-secondary">
                                     No companies found
                                 </td>
                             </tr>
