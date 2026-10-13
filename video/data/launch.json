@@ -1,0 +1,59 @@
+{
+  "fps": 30,
+  "brand": {
+    "accent": "#FF3B30",
+    "blue": "#007AFF",
+    "dark": "#0A1020",
+    "text": "#FFFFFF",
+    "name": "Sasampa POS"
+  },
+  "music": null,
+  "intro": {
+    "seconds": 4,
+    "line1": "Bado unaandika mauzo kwenye daftari?",
+    "line2": "Kuna njia rahisi zaidi."
+  },
+  "endCard": {
+    "seconds": 6,
+    "title": "Sasampa POS",
+    "subtitle": "Pakua sasa.",
+    "link": ""
+  },
+  "beats": [
+    {
+      "id": "01-hook",
+      "seconds": 8.4,
+      "caption": "Ingia na uone mauzo na faida ya leo"
+    },
+    {
+      "id": "02-sale",
+      "seconds": 8.4,
+      "caption": "Uza kwa sekunde chache"
+    },
+    {
+      "id": "03-scan",
+      "seconds": 8.2,
+      "caption": "Tafuta bidhaa kwa jina au kundi"
+    },
+    {
+      "id": "04-pay",
+      "seconds": 11.7,
+      "caption": "Taslimu, Simu, Kadi au Benki. Chenji inahesabiwa yenyewe"
+    },
+    {
+      "id": "05-receipt",
+      "seconds": 6.6,
+      "caption": "Risiti tayari: tazama, chapisha au shiriki"
+    },
+    {
+      "id": "06-reports",
+      "seconds": 15.5,
+      "caption": "Fuatilia mauzo, hifadhi na faida"
+    },
+    {
+      "id": "07-orders",
+      "seconds": 10,
+      "caption": "Oda na ankara ya proforma kwa wateja"
+    }
+  ]
+}

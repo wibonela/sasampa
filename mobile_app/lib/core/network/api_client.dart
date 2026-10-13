@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import '../storage/secure_storage.dart';
 
 class ApiClient {
-  // Production server
-  static const String baseUrl = 'https://sasampa.com/api/v1';
+  // Production server by default; override with --dart-define=API_BASE_URL=... (e.g. for local demos)
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://sasampa.com/api/v1',
+  );
 
   late final Dio _dio;
   final SecureStorage _storage;

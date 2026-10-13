@@ -127,21 +127,28 @@ class _ProfitBreakdownWidgetState extends ConsumerState<ProfitBreakdownWidget>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          l10n?.profitBreakdown ?? 'Profit Breakdown',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                    Flexible(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n?.profitBreakdown ?? 'Profit Breakdown',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.chevron_right_rounded,
-                            size: 20, color: AppColors.textSecondary),
-                      ],
+                          const SizedBox(width: 6),
+                          const Icon(Icons.chevron_right_rounded,
+                              size: 20, color: AppColors.textSecondary),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     _buildPeriodToggle(l10n),
                   ],
                 ),
