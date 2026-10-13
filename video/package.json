@@ -10,10 +10,7 @@
     "voiceover": "node scripts/make-voiceover.mjs",
     "music": "node scripts/make-music.mjs",
     "render": "node scripts/render.mjs",
-    "render:launch": "node scripts/render.mjs launch",
-    "render:launch:wide": "node scripts/render.mjs launch wide",
-    "render:tutorial-sale": "node scripts/render.mjs tutorial-sale",
-    "render:tutorial-sale:wide": "node scripts/render.mjs tutorial-sale wide"
+    "render:all": "node scripts/render-all.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.535",

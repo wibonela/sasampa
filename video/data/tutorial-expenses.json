@@ -1,0 +1,52 @@
+{
+  "project": "tutorial-expenses",
+  "fps": 30,
+  "voiceover": true,
+  "music": {
+    "file": "audio/music.m4a",
+    "volume": 0.2,
+    "volumeUnderVoice": 0.08
+  },
+  "intro": {
+    "seconds": 4.5,
+    "emoji": "🧮",
+    "strike": false,
+    "line1": "Kurekodi matumizi",
+    "line2": "Hatua 4 rahisi.",
+    "vo": "Recording your expenses. Four simple steps."
+  },
+  "beats": [
+    {
+      "id": "01-open",
+      "seconds": 11.2,
+      "caption": "Hatua 1: Fungua Matumizi kutoka Menyu",
+      "vo": "Step one. Open the menu and tap expenses."
+    },
+    {
+      "id": "02-add",
+      "seconds": 5.1,
+      "caption": "Hatua 2: Gusa Ongeza Matumizi",
+      "vo": "Step two. Tap add expense."
+    },
+    {
+      "id": "03-fill",
+      "seconds": 15.2,
+      "caption": "Hatua 3: Chagua aina, andika maelezo, bei na idadi",
+      "vo": "Step three. Choose a category, describe the expense, then enter the price and quantity.",
+      "speed": 1.5
+    },
+    {
+      "id": "04-save",
+      "seconds": 7.2,
+      "caption": "Hatua 4: Hifadhi na uone kwenye orodha",
+      "vo": "Step four. Save it, and it appears in your list."
+    }
+  ],
+  "endCard": {
+    "seconds": 5,
+    "title": "Sasampa POS",
+    "subtitle": "Tazama mafunzo mengine.",
+    "link": "",
+    "vo": "That is all. Watch our other tutorials to learn more."
+  }
+}

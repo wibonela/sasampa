@@ -22,10 +22,11 @@ Every video (launch, tutorials, anything later) follows this. `npm run render:<p
 - Slow, deliberate taps; pause about a second on every result screen.
 
 ## Footage (recorded by `scripts/record.sh`, never by hand)
-- iPhone 17 Pro simulator, freshly erased each run, status bar fixed at 9:41, full battery, full signal.
+- iPhone 17 Pro simulator "Sasampa Demo", app and login reset each run (never erase the simulator: a fresh iPhone shows an "Apple Intelligence" banner), status bar fixed at 9:41, full battery, full signal.
 - Fake data only: the demo duka "Duka la Mama Neema" from `demo/seed_demo.php`. Never production data, never real customers.
 - Local throwaway server and database; mail goes to the log; no real keys.
 - No debug artifacts: the run fails on any layout overflow (yellow/black stripes), missing screen or stuck screen. (checked, in `record.sh`)
+- No system banners or notifications in frame; look at every clip once before rendering.
 - Keyboard down before the result screen. Portrait phone ratio. (checked)
 
 ## Audio
@@ -34,8 +35,8 @@ Every video (launch, tutorials, anything later) follows this. `npm run render:<p
 
 ## New video checklist
 1. Add `data/<name>.json` (copy `tutorial-sale.json`) and register it in `src/data.ts`.
-2. Write a test in `mobile_app/integration_test/` using `support/recorder.dart`, and add it to the `case` in `scripts/record.sh`.
+2. Write `mobile_app/integration_test/tutorial_<name>_test.dart` (dashes become underscores) using `support/recorder.dart`; `scripts/record.sh tutorial-<name>` finds it by name.
 3. `scripts/record.sh <name>` (must finish with "Cleanliness check" passing).
 4. `node scripts/make-voiceover.mjs <name>`.
-5. `npm run render <name>` and `npm run render <name> wide` (the check runs for you).
+5. `npm run render -- <name>` and `npm run render -- <name> wide` (the check runs for you).
 6. Watch it once, have the captions reviewed, then publish.

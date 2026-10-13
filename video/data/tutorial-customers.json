@@ -1,0 +1,51 @@
+{
+  "project": "tutorial-customers",
+  "fps": 30,
+  "voiceover": true,
+  "music": {
+    "file": "audio/music.m4a",
+    "volume": 0.2,
+    "volumeUnderVoice": 0.08
+  },
+  "intro": {
+    "seconds": 4.5,
+    "emoji": "👥",
+    "strike": false,
+    "line1": "Wateja na mikopo",
+    "line2": "Hatua 4 rahisi.",
+    "vo": "Customers and credit. Four simple steps."
+  },
+  "beats": [
+    {
+      "id": "01-list",
+      "seconds": 7.2,
+      "caption": "Hatua 1: Fungua Menyu kisha Wateja",
+      "vo": "Step one. Open the menu and tap customers."
+    },
+    {
+      "id": "02-add",
+      "seconds": 13,
+      "caption": "Hatua 2: Ongeza mteja na kikomo cha mkopo",
+      "vo": "Step two. Add a new customer and set their credit limit."
+    },
+    {
+      "id": "03-detail",
+      "seconds": 6.1,
+      "caption": "Hatua 3: Fungua mteja kuona deni lake",
+      "vo": "Step three. Open a customer to see what they owe and what they bought."
+    },
+    {
+      "id": "04-payment",
+      "seconds": 14.9,
+      "caption": "Hatua 4: Rekodi malipo ya deni",
+      "vo": "Step four. When the customer pays back, record the payment and their balance goes down."
+    }
+  ],
+  "endCard": {
+    "seconds": 5,
+    "title": "Sasampa POS",
+    "subtitle": "Tazama mafunzo mengine.",
+    "link": "",
+    "vo": "That is all. Watch our other tutorials to learn more."
+  }
+}
