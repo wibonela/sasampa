@@ -130,7 +130,7 @@
                                     @if($contactPhone)
                                         <div style="font-size: 12px;">
                                             <a href="tel:{{ $contactPhone }}" class="text-secondary text-decoration-none">{{ $contactPhone }}</a>
-                                            <a href="https://wa.me/{{ preg_replace('/\D+/', '', $contactPhone) }}" target="_blank" rel="noopener" class="text-success ms-1" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                                            <a href="https://wa.me/{{ \App\Models\Company::whatsappNumber($contactPhone) }}" target="_blank" rel="noopener" class="text-success ms-1" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                                         </div>
                                     @endif
                                 </td>

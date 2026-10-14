@@ -246,4 +246,86 @@ class CompanyActivityService
             'low_stock' => $lowStock,
         ];
     }
+
+    /**
+     * Companies that did anything today, with a breakdown of what they did.
+     * "Active" matches the dashboard card: any transaction created today.
+     */
+    public function activeToday(): array
+    {
+        $start = today();
+
+        $tx = DB::table('transactions')
+            ->where('created_at', '>=', $start)
+            ->get(['id', 'company_id', 'user_id', 'type', 'status', 'total', 'created_at']);
+
+        $companyIds = $tx->pluck('company_id')->unique()->values();
+
+        $companies = Company::with('owner')->whereIn('id', $companyIds)->get()->keyBy('id');
+
+        $users = DB::table('users')
+            ->whereIn('id', $tx->pluck('user_id')->filter()->unique())
+            ->pluck('name', 'id');
+
+        $items = DB::table('transaction_items')
+            ->whereIn('transaction_id', $tx->pluck('id'))
+            ->select('transaction_id', 'product_name', 'quantity')
+            ->get()
+            ->groupBy('transaction_id');
+
+        $expenses = DB::table('expenses')
+            ->whereIn('company_id', $companyIds)
+            ->where('created_at', '>=', $start)
+            ->select('company_id', DB::raw('COUNT(*) as n'), DB::raw('SUM(amount) as total'))
+            ->groupBy('company_id')
+            ->get()
+            ->keyBy('company_id');
+
+        $rows = $tx->groupBy('company_id')->map(function ($group, $companyId) use ($companies, $users, $items, $expenses) {
+            $company = $companies->get($companyId);
+            if (! $company) {
+                return null;
+            }
+
+            $isSale = fn ($t) => $t->status === 'completed' && ($t->type === 'sale' || $t->type === null);
+            $sales = $group->filter($isSale);
+
+            $products = [];
+            foreach ($sales as $t) {
+                foreach ($items->get($t->id, []) as $it) {
+                    $products[$it->product_name] = ($products[$it->product_name] ?? 0) + (float) $it->quantity;
+                }
+            }
+            arsort($products);
+
+            $other = $group->reject($isSale)
+                ->map(fn ($t) => trim(($t->type ?? 'sale') . ' ' . $t->status))
+                ->countBy()
+                ->all();
+
+            $exp = $expenses->get($companyId);
+
+            return [
+                'company' => $company,
+                'sales_count' => $sales->count(),
+                'revenue' => (float) $sales->sum('total'),
+                'last_at' => Carbon::parse($group->max('created_at')),
+                'first_at' => Carbon::parse($group->min('created_at')),
+                'staff' => $group->pluck('user_id')->filter()->unique()->map(fn ($id) => $users[$id] ?? null)->filter()->values()->all(),
+                'top_products' => array_slice($products, 0, 5, true),
+                'other' => $other,
+                'expenses_count' => $exp->n ?? 0,
+                'expenses_total' => (float) ($exp->total ?? 0),
+            ];
+        })->filter()->sortByDesc('last_at')->values();
+
+        return [
+            'rows' => $rows,
+            'totals' => [
+                'companies' => $rows->count(),
+                'sales' => $rows->sum('sales_count'),
+                'revenue' => $rows->sum('revenue'),
+            ],
+        ];
+    }
 }

@@ -440,4 +440,30 @@ class Company extends Model
     {
         return $this->mobileDevices()->active()->count();
     }
+
+    /**
+     * Normalise a phone number to international digits for wa.me links.
+     * Defaults to Tanzania (255) when the number has no country code,
+     * e.g. 0712 345 678 and 712345678 both become 255712345678.
+     */
+    public static function whatsappNumber(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone);
+        if ($digits === '') {
+            return null;
+        }
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+        if (str_starts_with($digits, '255')) {
+            return $digits;
+        }
+        if (str_starts_with($digits, '0')) {
+            return '255' . substr($digits, 1);
+        }
+        if (strlen($digits) === 9) {
+            return '255' . $digits;
+        }
+        return $digits;
+    }
 }

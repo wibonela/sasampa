@@ -112,7 +112,7 @@
             <h5 class="fw-semibold mb-0"><i class="bi bi-graph-up-arrow me-2" style="color: #34C759;"></i>Sales Activity</h5>
             <div class="d-flex align-items-center gap-2">
                 @if($contactPhone)
-                    <a href="https://wa.me/{{ preg_replace('/\D+/', '', $contactPhone) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                    <a href="https://wa.me/{{ \App\Models\Company::whatsappNumber($contactPhone) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
                     <a href="tel:{{ $contactPhone }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-telephone me-1"></i>Call</a>
                 @endif
                 <div class="btn-group btn-group-sm">

@@ -74,12 +74,14 @@
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="display-6 fw-bold" style="color: #007AFF;">{{ $activeCompanyStats['active_today'] }}</div>
-                        <div class="text-secondary" style="font-size: 13px;">Active Today</div>
+                <a href="{{ route('admin.active-today') }}" class="text-decoration-none">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="display-6 fw-bold" style="color: #007AFF;">{{ $activeCompanyStats['active_today'] }}</div>
+                            <div class="text-secondary" style="font-size: 13px;">Active Today <i class="bi bi-chevron-right"></i></div>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card h-100">
@@ -293,12 +295,14 @@
 
         <div class="row g-2 g-md-3 mb-4">
             <div class="col-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="stat-icon green"><i class="bi bi-shop-window"></i></div>
-                    <div class="stat-value">{{ $activeCompanyStats['active_today'] }}</div>
-                    <div class="stat-label">Active Today</div>
-                    <div class="stat-change text-secondary"><small>of {{ $activeCompanyStats['approved_total'] }} approved</small></div>
-                </div>
+                <a href="{{ route('admin.active-today') }}" class="text-decoration-none d-block">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-shop-window"></i></div>
+                        <div class="stat-value">{{ $activeCompanyStats['active_today'] }}</div>
+                        <div class="stat-label">Active Today <i class="bi bi-chevron-right"></i></div>
+                        <div class="stat-change text-secondary"><small>of {{ $activeCompanyStats['approved_total'] }} approved</small></div>
+                    </div>
+                </a>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="stat-card">

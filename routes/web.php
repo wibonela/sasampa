@@ -167,6 +167,8 @@ Route::middleware('auth')->group(function () {
             // Dashboard
             Route::get('/dashboard', [AdminDashboardController::class, 'index'])
                 ->name('dashboard');
+            Route::get('/active-today', [AdminDashboardController::class, 'activeToday'])
+                ->name('active-today');
             Route::get('/dashboard/chart-data', [AdminDashboardController::class, 'chartData'])
                 ->name('dashboard.chart-data');
 
