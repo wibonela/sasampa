@@ -95,8 +95,8 @@
                     <div class="stat-icon green">
                         <i class="bi bi-cash-stack"></i>
                     </div>
-                    <div class="stat-value">{{ number_format($sales['all_time']->revenue / 1000, 0) }}K</div>
-                    <div class="stat-label">Revenue (TZS)</div>
+                    <div class="stat-value">{{ number_format($sales['all_time']->revenue, 0) }}</div>
+                    <div class="stat-label">All-time revenue (TZS)</div>
                 </div>
             </div>
         </div>
@@ -119,15 +119,17 @@
                     @foreach([7, 30, 90] as $d)
                         <a href="{{ route('admin.companies.show', [$company, 'days' => $d]) }}" class="btn {{ $sales['days'] === $d ? 'btn-primary' : 'btn-outline-primary' }}">{{ $d }}d</a>
                     @endforeach
+                    <a href="{{ route('admin.companies.show', [$company, 'days' => 'all']) }}" class="btn {{ $sales['is_all'] ? 'btn-primary' : 'btn-outline-primary' }}">All</a>
                 </div>
             </div>
         </div>
 
+        @php $span = $sales['is_all'] ? 'all time' : 'last ' . $sales['days'] . 'd'; @endphp
         <div class="row g-3 mb-3">
             <div class="col-6 col-md-3">
                 <div class="stat-card">
                     <div class="stat-value">{{ $money($cur->revenue) }}</div>
-                    <div class="stat-label">Revenue, last {{ $sales['days'] }}d (TZS)</div>
+                    <div class="stat-label">Revenue, {{ $span }} (TZS)</div>
                     @if($sales['growth_pct'] !== null)
                         <div class="stat-change {{ $sales['growth_pct'] >= 0 ? 'text-success' : 'text-danger' }}"><small><i class="bi bi-arrow-{{ $sales['growth_pct'] >= 0 ? 'up' : 'down' }}"></i> {{ abs($sales['growth_pct']) }}% vs previous {{ $sales['days'] }}d</small></div>
                     @endif
@@ -136,7 +138,7 @@
             <div class="col-6 col-md-3">
                 <div class="stat-card">
                     <div class="stat-value">{{ number_format($cur->sales) }}</div>
-                    <div class="stat-label">Sales, last {{ $sales['days'] }}d</div>
+                    <div class="stat-label">Sales, {{ $span }}</div>
                     <div class="stat-change text-secondary"><small>{{ $cur->sales > 0 ? $money($cur->revenue / $cur->sales) : 0 }} avg sale</small></div>
                 </div>
             </div>
@@ -156,14 +158,14 @@
         </div>
 
         <div class="card mb-3">
-            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Daily Revenue</div>
+            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>{{ $sales['monthly'] ? 'Monthly' : 'Daily' }} Revenue</div>
             <div class="card-body"><canvas id="companySalesChart" height="90"></canvas></div>
         </div>
 
         <div class="row g-3 mb-3">
             <div class="col-lg-6">
                 <div class="card h-100">
-                    <div class="card-header"><i class="bi bi-box-seam me-2"></i>What they sell most (last {{ $sales['days'] }}d)</div>
+                    <div class="card-header"><i class="bi bi-box-seam me-2"></i>What they sell most ({{ $span }})</div>
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Revenue</th></tr></thead>

@@ -99,8 +99,11 @@ class _ProfitBreakdownScreenState extends ConsumerState<ProfitBreakdownScreen> {
       ('today', 'Today'),
       ('week', 'Week'),
       ('month', 'Month'),
+      ('last_month', 'Last month'),
       ('quarter', 'Quarter'),
       ('year', 'Year'),
+      ('all', 'All time'),
+      ('custom', 'Custom'),
     ];
 
     return Container(
@@ -167,15 +170,40 @@ class _ProfitBreakdownScreenState extends ConsumerState<ProfitBreakdownScreen> {
     );
   }
 
+  Future<void> _pickCustomRange(ProfitFilters filters) async {
+    final now = DateTime.now();
+    final fmt = DateFormat('yyyy-MM-dd');
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: filters.dateFrom != null && filters.dateTo != null
+          ? DateTimeRange(
+              start: DateTime.parse(filters.dateFrom!),
+              end: DateTime.parse(filters.dateTo!))
+          : DateTimeRange(start: now.subtract(const Duration(days: 29)), end: now),
+    );
+    if (picked == null || !mounted) return;
+    ref.read(profitFiltersProvider.notifier).setPeriod(
+          'custom',
+          dateFrom: fmt.format(picked.start),
+          dateTo: fmt.format(picked.end),
+        );
+  }
+
   Widget _buildPeriodChip(String key, String label, ProfitFilters filters) {
     final selected = filters.period == key;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
-        label: Text(label),
+        label: Text(key == 'custom' && selected && filters.dateFrom != null ? '${filters.dateFrom} → ${filters.dateTo}' : label),
         selected: selected,
         onSelected: (_) {
-          ref.read(profitFiltersProvider.notifier).setPeriod(key);
+          if (key == 'custom') {
+            _pickCustomRange(filters);
+          } else {
+            ref.read(profitFiltersProvider.notifier).setPeriod(key);
+          }
         },
       ),
     );
