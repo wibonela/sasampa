@@ -8,6 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Same-timestamp migrations sort alphabetically; PostgreSQL needs referenced tables to exist first.
+        if (! Schema::hasTable('documentation_articles')) {
+            (require __DIR__ . '/2026_01_11_125840_create_documentation_articles_table.php')->up();
+        }
+        if (Schema::hasTable('documentation_article_translations')) {
+            return;
+        }
+
         Schema::create('documentation_article_translations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('article_id')->constrained('documentation_articles')->cascadeOnDelete();

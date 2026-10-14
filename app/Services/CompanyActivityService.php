@@ -184,7 +184,7 @@ class CompanyActivityService
 
         // Daily series, zero-filled
         $byDay = $scoped()->where('transactions.created_at', '>=', $since->toDateTimeString())
-            ->selectRaw(($monthly ? 'substr(date(transactions.created_at), 1, 7)' : 'date(transactions.created_at)') . ' as day, SUM(transactions.total) as revenue, COUNT(*) as sales')
+            ->selectRaw(($monthly ? \App\Support\SqlDates::month('transactions.created_at') : \App\Support\SqlDates::day('transactions.created_at')) . ' as day, SUM(transactions.total) as revenue, COUNT(*) as sales')
             ->groupBy('day')->get()->keyBy('day');
         $series = [];
         if ($monthly) {

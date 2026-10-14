@@ -357,7 +357,7 @@ class TransactionController extends Controller
         $peakHours = (clone $baseQuery)
             ->whereDate('created_at', today())
             ->select(
-                DB::raw("CAST(strftime('%H', created_at) AS INTEGER) as hour"),
+                DB::raw(\App\Support\SqlDates::hour('created_at') . ' as hour'),
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total) as total')
             )

@@ -98,16 +98,16 @@ class AdminDashboardService
         switch ($period) {
             case 'weekly':
                 // Use strftime for SQLite compatibility
-                $selectPeriod = DB::raw("strftime('%Y%W', created_at) as period");
+                $selectPeriod = DB::raw(\App\Support\SqlDates::week('created_at') . ' as period');
                 $query->where('created_at', '>=', now()->subWeeks($limit));
                 break;
             case 'monthly':
                 // Use strftime for SQLite compatibility
-                $selectPeriod = DB::raw("strftime('%Y-%m', created_at) as period");
+                $selectPeriod = DB::raw(\App\Support\SqlDates::month('created_at') . ' as period');
                 $query->where('created_at', '>=', now()->subMonths($limit));
                 break;
             default: // daily
-                $selectPeriod = DB::raw("strftime('%Y-%m-%d', created_at) as period");
+                $selectPeriod = DB::raw(\App\Support\SqlDates::day('created_at') . ' as period');
                 $query->where('created_at', '>=', now()->subDays($limit));
         }
 
