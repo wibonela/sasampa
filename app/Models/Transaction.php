@@ -39,6 +39,7 @@ class Transaction extends Model
         'branch_id',
         'customer_id',
         'transaction_number',
+        'offline_id',
         'type',
         'user_id',
         'customer_name',

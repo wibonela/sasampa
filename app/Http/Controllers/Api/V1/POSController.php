@@ -39,10 +39,31 @@ class POSController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:500',
             'offline_id' => 'nullable|string|max:100', // For offline sync
+            'created_at' => 'nullable|date', // When the sale actually happened (offline sales)
         ]);
 
+        $offlineId = $validated['offline_id'] ?? null;
+
+        // Idempotency: a sale queued offline may be re-sent after a lost response.
+        if ($offlineId) {
+            $existing = Transaction::where('company_id', $request->user()->company_id)
+                ->where('offline_id', $offlineId)
+                ->with('items.product')
+                ->first();
+
+            if ($existing) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sale already recorded.',
+                    'data' => $this->formatTransaction($existing),
+                    'offline_id' => $offlineId,
+                    'duplicate' => true,
+                ], 200);
+            }
+        }
+
         try {
-            $transaction = DB::transaction(function () use ($validated, $request) {
+            $transaction = DB::transaction(function () use ($validated, $request, $offlineId) {
                 $subtotal = 0;
                 $taxAmount = 0;
                 $items = [];
@@ -52,8 +73,9 @@ class POSController extends Controller
                     $product = Product::findOrFail($item['product_id']);
                     $quantity = $item['quantity'];
 
-                    // Check stock
-                    if ($product->stock_quantity < $quantity) {
+                    // Check stock. A sale that already happened offline must never
+                    // be rejected for stock, otherwise real revenue is lost.
+                    if (! $offlineId && $product->stock_quantity < $quantity) {
                         throw new \Exception("Insufficient stock for {$product->name}. Available: {$product->stock_quantity}");
                     }
 
@@ -128,6 +150,7 @@ class POSController extends Controller
                     'branch_id' => $user->currentBranch()?->id,
                     'customer_id' => $customerId,
                     'transaction_number' => Transaction::generateTransactionNumber(),
+                    'offline_id' => $offlineId,
                     'user_id' => $user->id,
                     'customer_name' => $customerName,
                     'customer_phone' => $customerPhone,
@@ -142,6 +165,15 @@ class POSController extends Controller
                     'status' => 'completed',
                     'notes' => $validated['notes'] ?? null,
                 ]);
+
+                // Keep the real sale time for offline sales (never in the future)
+                if ($offlineId && ! empty($validated['created_at'])) {
+                    $saleTime = \Carbon\Carbon::parse($validated['created_at']);
+                    if ($saleTime->isFuture()) {
+                        $saleTime = now();
+                    }
+                    $transaction->forceFill(['created_at' => $saleTime])->save();
+                }
 
                 // Create transaction items and update inventory
                 foreach ($items as $item) {
