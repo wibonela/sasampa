@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{ --navy:#0A1020; --ink:#F5F7FB; --muted:#9AA6C0; --red:#FF3B30; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:5244px;height:2950px;overflow:hidden;background:var(--navy)}
+  body{position:relative;font-family:-apple-system,"SF Pro Display","SF Pro",BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+  /* background: flat navy, one soft red light behind the phones, one cool light top-left */
+  .bg{position:absolute;inset:0;
+    background:
+      radial-gradient(1800px 1500px at 3600px 1500px, rgba(255,59,48,.46), rgba(255,59,48,.10) 55%, rgba(255,59,48,0) 78%),
+      radial-gradient(1700px 1200px at 700px 250px, rgba(0,122,255,.13), rgba(0,122,255,0) 70%),
+      linear-gradient(180deg,#0B1226 0%,#0A1020 100%);}
+  .grid{position:absolute;inset:0;opacity:.05;
+    background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
+    background-size:150px 150px;
+    -webkit-mask-image:radial-gradient(1900px 1400px at 3200px 1500px,#000,transparent 75%);}
+
+  /* text column */
+  .copy{position:absolute;left:700px;top:0;height:2950px;width:1900px;display:flex;flex-direction:column;justify-content:center}
+  .brand{display:flex;align-items:center;gap:44px;margin-bottom:150px}
+  .brand img{width:170px;height:170px;border-radius:38px;box-shadow:0 20px 60px rgba(255,59,48,.35)}
+  .brand span{font-size:92px;font-weight:600;letter-spacing:-1px;color:var(--ink)}
+  .brand span b{font-weight:600;color:var(--muted);margin-left:14px}
+  h1{font-size:268px;line-height:.98;font-weight:800;letter-spacing:-9px}
+  h1 em{font-style:normal;color:var(--red)}
+  p{margin-top:120px;font-size:86px;line-height:1.28;font-weight:400;color:var(--muted);max-width:1750px;letter-spacing:-.5px}
+
+  /* phones */
+  .phone{position:absolute;width:1070px;height:2326px;border-radius:182px;padding:17px;
+    background:linear-gradient(145deg,#6b6d74 0%,#2b2c31 18%,#17171a 50%,#2b2c31 82%,#5c5e65 100%);
+    box-shadow:0 0 0 3px rgba(255,255,255,.07) inset, 0 120px 220px rgba(0,0,0,.55), 0 40px 90px rgba(0,0,0,.45)}
+  .phone::before{content:"";position:absolute;inset:11px;border-radius:172px;background:#000}
+  .phone .screen{position:relative;width:100%;height:100%;border-radius:166px;overflow:hidden;background:#fff}
+  .phone .screen img{display:block;width:100%;height:100%;object-fit:cover}
+  .phone .btn{position:absolute;width:9px;background:#34353a;border-radius:5px}
+  .back{left:2560px;top:985px}
+  .front{left:3380px;top:300px}
+  .back .screen::after{content:"";position:absolute;inset:0;background:rgba(10,16,32,.10)}
+  .back .btn.l1{left:-7px;top:420px;height:130px}
+  .back .btn.l2{left:-7px;top:600px;height:230px}
+  .back .btn.r1{right:-7px;top:700px;height:310px}
+  .front .btn.l1{left:-7px;top:420px;height:130px}
+  .front .btn.l2{left:-7px;top:600px;height:230px}
+  .front .btn.r1{right:-7px;top:700px;height:310px}
+</style></head>
+<body>
+  <div class="bg"></div><div class="grid"></div>
+
+  <div class="copy">
+    <div class="brand"><img src="icon.png"><span>Sasampa<b>POS</b></span></div>
+    <h1>Sell anywhere.<br><em>Even offline.</em></h1>
+    <p>Sales are saved on your phone and sent automatically when you are back online.</p>
+  </div>
+
+  <div class="phone back"><i class="btn l1"></i><i class="btn l2"></i><i class="btn r1"></i>
+    <div class="screen"><img src="en_report.png"></div></div>
+  <div class="phone front"><i class="btn l1"></i><i class="btn l2"></i><i class="btn r1"></i>
+    <div class="screen"><img src="en_dash-offline.png"></div></div>
+</body></html>
