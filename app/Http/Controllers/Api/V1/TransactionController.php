@@ -64,6 +64,11 @@ class TransactionController extends Controller
 
         // Pagination
         $perPage = min($request->get('per_page', 20), 100);
+        // Totals for everything matching the filters (not just this page)
+        $totals = (clone $query)->where('status', 'completed')->toBase()
+            ->selectRaw('COUNT(*) as n, COALESCE(SUM(total), 0) as amount')
+            ->reorder()->first();
+
         $transactions = $query->orderByDesc('created_at')->paginate($perPage);
 
         return response()->json([
@@ -73,6 +78,10 @@ class TransactionController extends Controller
                 'last_page' => $transactions->lastPage(),
                 'per_page' => $transactions->perPage(),
                 'total' => $transactions->total(),
+            ],
+            'summary' => [
+                'completed_count' => (int) ($totals->n ?? 0),
+                'completed_total' => (float) ($totals->amount ?? 0),
             ],
         ]);
     }

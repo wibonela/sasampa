@@ -70,7 +70,7 @@ class CompanyManagementController extends Controller
         $company->load(['users', 'owner', 'subscription.plan']);
         $plans = \App\Models\Plan::orderBy('sort_order')->get();
         $payments = $company->payments()->with('plan')->latest()->limit(20)->get();
-        $sales = $this->activity->companySales($company, (int) $request->input('days', 30));
+        $sales = $this->activity->companySales($company, $request->input('days') === 'all' ? 'all' : (int) $request->input('days', 30));
         return view('admin.companies.show', compact('company', 'plans', 'payments', 'sales'));
     }
 

@@ -91,8 +91,21 @@ class ReportController extends Controller
             ->take(5)
             ->get();
 
+        // Everything since the first sale (aggregated in SQL, not loaded)
+        $allTime = Transaction::where('company_id', $user->company_id)
+            ->where('status', 'completed')
+            ->sales()
+            ->toBase()
+            ->selectRaw('COUNT(*) as n, COALESCE(SUM(total), 0) as amount, MIN(created_at) as since')
+            ->first();
+
         return response()->json([
             'data' => [
+                'all_time' => [
+                    'sales_total' => (float) ($allTime->amount ?? 0),
+                    'transactions_count' => (int) ($allTime->n ?? 0),
+                    'since' => $allTime->since ? \Carbon\Carbon::parse($allTime->since)->toDateString() : null,
+                ],
                 'today' => [
                     'sales_total' => (float) $todayTransactions->sum('total'),
                     'transactions_count' => $todayTransactions->count(),
@@ -274,7 +287,7 @@ class ReportController extends Controller
         }
 
         $validated = $request->validate([
-            'period' => 'nullable|in:today,week,month,quarter,year,custom',
+            'period' => 'nullable|in:today,week,month,last_month,quarter,year,all,custom',
             'date_from' => 'required_if:period,custom|date',
             'date_to' => 'required_if:period,custom|date|after_or_equal:date_from',
             'branch_id' => 'nullable|integer|exists:branches,id',

@@ -154,16 +154,27 @@ class CompanyActivityService
     /**
      * Everything the admin needs to see what one company is selling.
      */
-    public function companySales(Company $company, int $days = 30): array
+    public function companySales(Company $company, int|string $days = 30): array
     {
-        $days = in_array($days, [7, 30, 90], true) ? $days : 30;
-        $since = now()->subDays($days - 1)->startOfDay();
-        $prevSince = $since->copy()->subDays($days);
         $scoped = fn () => $this->sales()->where('transactions.company_id', $company->id);
+
+        // 'all' = since the first sale. $days becomes the span in days so the
+        // rest of the maths stays the same; there is no previous period to compare.
+        $isAll = $days === 'all';
+        if ($isAll) {
+            $first = $scoped()->min('transactions.created_at');
+            $since = $first ? Carbon::parse($first)->startOfDay() : now()->startOfDay();
+            $days = (int) $since->diffInDays(now()->startOfDay()) + 1;
+        } else {
+            $days = in_array((int) $days, [7, 30, 90], true) ? (int) $days : 30;
+            $since = now()->subDays($days - 1)->startOfDay();
+        }
+        $prevSince = $since->copy()->subDays($days);
+        $monthly = $days > 120;
 
         $current = $scoped()->where('transactions.created_at', '>=', $since->toDateTimeString())
             ->selectRaw('COUNT(*) as sales, COALESCE(SUM(transactions.total), 0) as revenue')->first();
-        $previous = $scoped()
+        $previous = $isAll ? (object) ['sales' => 0, 'revenue' => 0] : $scoped()
             ->where('transactions.created_at', '>=', $prevSince->toDateTimeString())
             ->where('transactions.created_at', '<', $since->toDateTimeString())
             ->selectRaw('COUNT(*) as sales, COALESCE(SUM(transactions.total), 0) as revenue')->first();
@@ -173,17 +184,28 @@ class CompanyActivityService
 
         // Daily series, zero-filled
         $byDay = $scoped()->where('transactions.created_at', '>=', $since->toDateTimeString())
-            ->selectRaw('date(transactions.created_at) as day, SUM(transactions.total) as revenue, COUNT(*) as sales')
+            ->selectRaw(($monthly ? 'substr(date(transactions.created_at), 1, 7)' : 'date(transactions.created_at)') . ' as day, SUM(transactions.total) as revenue, COUNT(*) as sales')
             ->groupBy('day')->get()->keyBy('day');
         $series = [];
-        for ($i = 0; $i < $days; $i++) {
-            $d = $since->copy()->addDays($i);
-            $row = $byDay->get($d->toDateString());
-            $series[] = [
-                'label' => $d->format('M j'),
-                'revenue' => (float) ($row->revenue ?? 0),
-                'sales' => (int) ($row->sales ?? 0),
-            ];
+        if ($monthly) {
+            for ($d = $since->copy()->startOfMonth(); $d->lte(now()); $d->addMonthNoOverflow()) {
+                $row = $byDay->get($d->format('Y-m'));
+                $series[] = [
+                    'label' => $d->format('M Y'),
+                    'revenue' => (float) ($row->revenue ?? 0),
+                    'sales' => (int) ($row->sales ?? 0),
+                ];
+            }
+        } else {
+            for ($i = 0; $i < $days; $i++) {
+                $d = $since->copy()->addDays($i);
+                $row = $byDay->get($d->toDateString());
+                $series[] = [
+                    'label' => $d->format('M j'),
+                    'revenue' => (float) ($row->revenue ?? 0),
+                    'sales' => (int) ($row->sales ?? 0),
+                ];
+            }
         }
 
         $topProducts = DB::table('transaction_items')
@@ -231,6 +253,8 @@ class CompanyActivityService
 
         return [
             'days' => $days,
+            'is_all' => $isAll,
+            'monthly' => $monthly,
             'current' => $current,
             'previous' => $previous,
             'growth_pct' => $growth,

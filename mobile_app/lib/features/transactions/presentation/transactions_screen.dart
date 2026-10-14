@@ -22,6 +22,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   bool _isLoadingMore = false;
   String? _error;
   String? _paymentFilter;
+  DateTimeRange? _dateRange;
+  Map<String, dynamic>? _rangeSummary;
   String _searchQuery = '';
   int _currentPage = 1;
   bool _hasMore = true;
@@ -63,6 +65,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       final response = await api.getTransactions(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
         paymentMethod: _paymentFilter,
+        dateFrom: _fmtDate(_dateRange?.start),
+        dateTo: _fmtDate(_dateRange?.end),
         page: _currentPage + 1,
       );
       final data = response.data;
@@ -96,7 +100,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       final txResponse = await api.getTransactions(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
         paymentMethod: _paymentFilter,
+        dateFrom: _fmtDate(_dateRange?.start),
+        dateTo: _fmtDate(_dateRange?.end),
       );
+      _rangeSummary = txResponse.data['summary'] as Map<String, dynamic>?;
 
       setState(() {
         _transactions = (txResponse.data['data'] as List)
@@ -123,6 +130,60 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  String? _fmtDate(DateTime? d) => d == null ? null : DateFormat('yyyy-MM-dd').format(d);
+
+  Future<void> _pickDateRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: _dateRange,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _dateRange = picked);
+    _loadData();
+  }
+
+  Widget _buildDateRangeBar() {
+    final fmt = DateFormat('d MMM yyyy');
+    final money = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
+    final count = (_rangeSummary?['completed_count'] ?? 0) as int;
+    final total = ((_rangeSummary?['completed_total'] ?? 0) as num).toDouble();
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.date_range, size: 20, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${fmt.format(_dateRange!.start)} – ${fmt.format(_dateRange!.end)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('$count sales · ${money.format(total)}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 18),
+            onPressed: () {
+              setState(() => _dateRange = null);
+              _loadData();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   String _getDateLabel(DateTime date) {
@@ -183,6 +244,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               icon: Icon(_showInsights ? Icons.list : Icons.insights),
               onPressed: () => setState(() => _showInsights = !_showInsights),
               tooltip: _showInsights ? l10n.allTransactions : l10n.insights,
+            ),
+            IconButton(
+              icon: Icon(Icons.date_range, color: _dateRange != null ? AppColors.primary : null),
+              onPressed: _pickDateRange,
             ),
             IconButton(
               icon: const Icon(Icons.search),
@@ -259,6 +324,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                           ),
                         ),
                       ),
+
+                      if (_dateRange != null)
+                        SliverToBoxAdapter(child: _buildDateRangeBar()),
 
                       // Quick filters
                       SliverToBoxAdapter(

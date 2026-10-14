@@ -12,9 +12,13 @@ class TodayStatsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allTime = dashboardData?['all_time'] as Map<String, dynamic>?;
+    final since = allTime?['since'] as String?;
+    final allTimeCount = allTime?['transactions_count'] ?? 0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
+      child: Column(children: [Row(
         children: [
           Expanded(
             child: _buildStatCard(
@@ -35,6 +39,18 @@ class TodayStatsWidget extends StatelessWidget {
           ),
         ],
       ),
+      if (allTime != null && allTimeCount > 0) ...[
+        const SizedBox(height: 12),
+        _buildStatCard(
+          title: since != null
+              ? 'All-time sales · since ${DateFormat('d MMM yyyy').format(DateTime.parse(since))} · $allTimeCount sales'
+              : 'All-time sales',
+          value: _currencyFormat.format(allTime['sales_total'] ?? 0),
+          icon: Icons.savings_outlined,
+          color: AppColors.warning,
+        ),
+      ],
+      ]),
     );
   }
 

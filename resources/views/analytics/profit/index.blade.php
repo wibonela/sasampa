@@ -26,8 +26,10 @@
                             <option value="today" {{ $period == 'today' ? 'selected' : '' }}>Today</option>
                             <option value="week" {{ $period == 'week' ? 'selected' : '' }}>This Week</option>
                             <option value="month" {{ $period == 'month' ? 'selected' : '' }}>This Month</option>
+                            <option value="last_month" {{ $period == 'last_month' ? 'selected' : '' }}>Last Month</option>
                             <option value="quarter" {{ $period == 'quarter' ? 'selected' : '' }}>This Quarter</option>
                             <option value="year" {{ $period == 'year' ? 'selected' : '' }}>This Year</option>
+                            <option value="all" {{ $period == 'all' ? 'selected' : '' }}>All Time</option>
                             <option value="custom" {{ request('date_from') ? 'selected' : '' }}>Custom</option>
                         </select>
                     </div>

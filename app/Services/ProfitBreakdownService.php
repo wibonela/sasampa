@@ -55,6 +55,14 @@ class ProfitBreakdownService
                 'previous_to' => now()->subWeek()->endOfWeek(),
                 'label' => 'This Week',
             ],
+            'last_month' => [
+                'from' => now()->subMonthNoOverflow()->startOfMonth(),
+                'to' => now()->subMonthNoOverflow()->endOfMonth(),
+                'previous_from' => now()->subMonthsNoOverflow(2)->startOfMonth(),
+                'previous_to' => now()->subMonthsNoOverflow(2)->endOfMonth(),
+                'label' => 'Last Month',
+            ],
+            'all' => $this->allTimeWindow(),
             'quarter' => [
                 'from' => now()->startOfQuarter(),
                 'to' => now()->endOfDay(),
@@ -77,6 +85,24 @@ class ProfitBreakdownService
                 'label' => 'This Month',
             ],
         };
+    }
+
+    /**
+     * From the first completed sale to now. Falls back to this month when
+     * there are no sales yet.
+     */
+    private function allTimeWindow(): array
+    {
+        $first = Transaction::completed()->sales()->min('created_at');
+        $from = $first ? Carbon::parse($first)->startOfDay() : now()->startOfMonth();
+
+        return [
+            'from' => $from,
+            'to' => now()->endOfDay(),
+            'previous_from' => $from,
+            'previous_to' => $from,
+            'label' => 'All Time',
+        ];
     }
 
     /**
@@ -133,10 +159,16 @@ class ProfitBreakdownService
         array $expenseCategoryIds = [],
         bool $hourly = false,
     ): array {
+        // Windows longer than ~3 months are grouped by month (YYYY-MM) so a
+        // multi-year history stays readable.
+        $monthly = ! $hourly && $from->diffInDays($to) > 92;
         $bucket = $hourly ? 'HOUR' : 'DATE';
+        $bucketSql = fn (string $col) => $monthly
+            ? "SUBSTR(DATE({$col}), 1, 7)"
+            : "{$bucket}({$col})";
 
         $sales = (clone $this->salesQuery($from, $to, $branchId))
-            ->selectRaw("{$bucket}(created_at) as bucket, SUM(total) as amount")
+            ->selectRaw($bucketSql('created_at') . " as bucket, SUM(total) as amount")
             ->groupBy('bucket')
             ->pluck('amount', 'bucket')
             ->toArray();
@@ -146,7 +178,7 @@ class ProfitBreakdownService
             ->where(fn ($q) => $q->where('transactions.type', 'sale')->orWhereNull('transactions.type'))
             ->whereBetween('transactions.created_at', [$from, $to])
             ->when($branchId, fn ($q) => $q->where('transactions.branch_id', $branchId))
-            ->selectRaw("{$bucket}(transactions.created_at) as bucket, SUM(transaction_items.cost_price * transaction_items.quantity) as amount")
+            ->selectRaw($bucketSql('transactions.created_at') . " as bucket, SUM(transaction_items.cost_price * transaction_items.quantity) as amount")
             ->groupBy('bucket')
             ->pluck('amount', 'bucket')
             ->toArray();
