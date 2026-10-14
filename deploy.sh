@@ -15,8 +15,8 @@ set -e
 # ===========================================
 
 # Configuration
-APP_DIR="/var/www/sasampa"
-BACKUP_DIR="/var/backups/sasampa"
+APP_DIR="${APP_DIR:-/var/www/sasampa}"
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/sasampa}"
 DATE=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="$BACKUP_DIR/deploy_$DATE.log"
 KEEP_BACKUPS=10
@@ -27,6 +27,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Shared database helpers (SQLite today, PostgreSQL after cutover)
+source "$APP_DIR/db-lib.sh"
 
 # Function to print colored output
 print_step() {
@@ -50,12 +53,15 @@ handle_error() {
     print_error "Deployment failed at step: $1"
     print_warning "Attempting automatic rollback..."
 
-    # Restore database if backup exists
-    if [ -f "$BACKUP_DIR/database_$DATE.sqlite" ]; then
-        cp "$BACKUP_DIR/database_$DATE.sqlite" "$APP_DIR/database/database.sqlite"
-        chown www-data:www-data "$APP_DIR/database/database.sqlite" 2>/dev/null || true
-        chmod 644 "$APP_DIR/database/database.sqlite" 2>/dev/null || true
-        print_success "Database restored from backup"
+    # Restore database if backup exists (.env is restored below, so restore the DB first
+    # using the connection settings the failed deploy was running with)
+    DB_BACKUP_FILE=$(db_backup_file "$DATE")
+    if [ -n "$DB_BACKUP_FILE" ]; then
+        if db_restore "$DB_BACKUP_FILE"; then
+            print_success "Database restored from backup"
+        else
+            print_error "Database restore FAILED - restore manually from $DB_BACKUP_FILE"
+        fi
     fi
 
     # Restore .env if backup exists
@@ -140,13 +146,17 @@ echo ""
 CURRENT_STEP="Backup creation"
 print_step "2/8" "Creating full backup..."
 
-# Backup database
-if [ -f "$APP_DIR/database/database.sqlite" ]; then
-    cp "$APP_DIR/database/database.sqlite" "$BACKUP_DIR/database_$DATE.sqlite"
-    DB_SIZE=$(ls -lh "$BACKUP_DIR/database_$DATE.sqlite" | awk '{print $5}')
-    print_success "Database backed up ($DB_SIZE)"
-else
+# Backup database ($(db_driver) decides between a SQLite copy and a pg_dump)
+DB_BACKUP_RC=0
+DB_BACKUP_FILE=$(db_backup "$BACKUP_DIR/database_$DATE") || DB_BACKUP_RC=$?
+if [ "$DB_BACKUP_RC" -eq 0 ]; then
+    DB_SIZE=$(ls -lh "$DB_BACKUP_FILE" | awk '{print $5}')
+    print_success "Database backed up ($(db_driver), $DB_SIZE)"
+elif [ "$DB_BACKUP_RC" -eq 2 ]; then
     print_warning "No database found to backup"
+else
+    print_error "Database backup FAILED - not deploying without a backup"
+    exit 1
 fi
 
 # Backup .env
@@ -229,7 +239,7 @@ print_step "8/8" "Finalizing deployment..."
 chown -R www-data:www-data $APP_DIR
 chmod -R 755 $APP_DIR/storage
 chmod -R 755 $APP_DIR/bootstrap/cache
-chmod 644 $APP_DIR/database/database.sqlite 2>/dev/null || true
+[ "$(db_driver)" = "sqlite" ] && chmod 644 "$(sqlite_path)" 2>/dev/null || true
 
 # Disable maintenance mode
 php artisan up
@@ -262,8 +272,8 @@ php artisan tinker --execute="DB::connection()->getPdo(); echo 'OK';" 2>/dev/nul
 echo ""
 print_step "~" "Cleaning up old backups (keeping last $KEEP_BACKUPS)..."
 
-# Remove old database backups
-ls -1t $BACKUP_DIR/database_*.sqlite 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -f
+# Remove old database backups (SQLite copies and PostgreSQL dumps)
+db_prune_backups "$KEEP_BACKUPS"
 # Remove old env backups
 ls -1t $BACKUP_DIR/env_*.backup 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -f
 # Remove old upload backups
@@ -271,7 +281,7 @@ ls -1t $BACKUP_DIR/uploads_*.tar.gz 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1))
 # Remove old logs
 ls -1t $BACKUP_DIR/deploy_*.log 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm -f
 
-BACKUP_COUNT=$(ls -1 $BACKUP_DIR/database_*.sqlite 2>/dev/null | wc -l)
+BACKUP_COUNT=$(ls -1 $BACKUP_DIR/database_*.sqlite $BACKUP_DIR/database_*.pgdump 2>/dev/null | wc -l)
 print_success "Cleanup complete ($BACKUP_COUNT backups retained)"
 
 # ===========================================
@@ -287,7 +297,7 @@ echo "Backup ID:   $DATE"
 echo "Log file:    $LOG_FILE"
 echo ""
 echo "Backups created:"
-echo "  - $BACKUP_DIR/database_$DATE.sqlite"
+echo "  - $DB_BACKUP_FILE"
 echo "  - $BACKUP_DIR/env_$DATE.backup"
 [ -f "$BACKUP_DIR/uploads_$DATE.tar.gz" ] && echo "  - $BACKUP_DIR/uploads_$DATE.tar.gz"
 echo ""

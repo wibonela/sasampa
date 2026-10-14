@@ -12,8 +12,11 @@
 # - Uploaded files
 # ===========================================
 
-BACKUP_DIR="/var/backups/sasampa"
-APP_DIR="/var/www/sasampa"
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/sasampa}"
+APP_DIR="${APP_DIR:-/var/www/sasampa}"
+
+# Shared database helpers (SQLite today, PostgreSQL after cutover)
+source "$APP_DIR/db-lib.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -39,7 +42,7 @@ echo "Available backups (newest first):"
 echo "-------------------------------------------"
 
 # Get unique backup dates
-BACKUP_DATES=$(ls -1 $BACKUP_DIR/database_*.sqlite 2>/dev/null | sed 's/.*database_\(.*\)\.sqlite/\1/' | sort -r | head -20)
+BACKUP_DATES=$(db_backup_ids 20)
 
 if [ -z "$BACKUP_DATES" ]; then
     echo -e "${RED}No backups found!${NC}"
@@ -47,12 +50,12 @@ if [ -z "$BACKUP_DATES" ]; then
 fi
 
 for DATE in $BACKUP_DATES; do
-    DB_FILE="$BACKUP_DIR/database_$DATE.sqlite"
+    DB_FILE=$(db_backup_file "$DATE")
     ENV_FILE="$BACKUP_DIR/env_$DATE.backup"
     UPLOAD_FILE="$BACKUP_DIR/uploads_$DATE.tar.gz"
 
     # Get file info
-    if [ -f "$DB_FILE" ]; then
+    if [ -n "$DB_FILE" ]; then
         DB_SIZE=$(ls -lh "$DB_FILE" | awk '{print $5}')
         # Format the date nicely
         YEAR=${DATE:0:4}
@@ -63,7 +66,7 @@ for DATE in $BACKUP_DATES; do
         SEC=${DATE:13:2}
 
         echo -n "  $DATE"
-        echo -n " | DB: ${DB_SIZE}"
+        echo -n " | DB: ${DB_SIZE} (${DB_FILE##*.})"
 
         [ -f "$ENV_FILE" ] && echo -n " | .env: yes" || echo -n " | .env: no"
         [ -f "$UPLOAD_FILE" ] && echo -n " | uploads: yes" || echo -n " | uploads: no"
@@ -100,13 +103,25 @@ if [ -z "$BACKUP_ID" ]; then
 fi
 
 # Check if files exist
-DB_FILE="$BACKUP_DIR/database_$BACKUP_ID.sqlite"
+DB_FILE=$(db_backup_file "$BACKUP_ID")
 ENV_FILE="$BACKUP_DIR/env_$BACKUP_ID.backup"
 UPLOAD_FILE="$BACKUP_DIR/uploads_$BACKUP_ID.tar.gz"
 
-if [ ! -f "$DB_FILE" ]; then
-    echo -e "${RED}Error: Database backup not found: $DB_FILE${NC}"
+if [ -z "$DB_FILE" ]; then
+    echo -e "${RED}Error: Database backup not found for ID: $BACKUP_ID${NC}"
     exit 1
+fi
+
+# A SQLite backup cannot be restored into a PostgreSQL setup (or the other way round)
+# without also restoring the matching .env, so make that explicit.
+BACKUP_KIND="${DB_FILE##*.}"
+CURRENT_KIND="$(db_backup_ext)"
+if [ "$BACKUP_KIND" != "$CURRENT_KIND" ]; then
+    echo -e "${YELLOW}This backup is a .$BACKUP_KIND but the app currently uses .$CURRENT_KIND.${NC}"
+    if [ "$RESTORE_CHOICE" -lt 2 ] || [ ! -f "$ENV_FILE" ]; then
+        echo -e "${RED}Choose option 2 or 3 (restores the matching .env too) and make sure env_$BACKUP_ID.backup exists.${NC}"
+        exit 1
+    fi
 fi
 
 # Confirm restoration
@@ -134,9 +149,12 @@ echo ""
 CURRENT_DATE=$(date +%Y%m%d_%H%M%S)
 echo -e "${BLUE}[1/4]${NC} Backing up current state..."
 
-if [ -f "$APP_DIR/database/database.sqlite" ]; then
-    cp "$APP_DIR/database/database.sqlite" "$BACKUP_DIR/database_${CURRENT_DATE}_pre_rollback.sqlite"
-    echo -e "${GREEN}✓${NC} Current database backed up"
+PRE_FILE=$(db_backup "$BACKUP_DIR/database_${CURRENT_DATE}_pre_rollback") || PRE_FILE=""
+if [ -n "$PRE_FILE" ]; then
+    echo -e "${GREEN}✓${NC} Current database backed up ($(basename "$PRE_FILE"))"
+else
+    echo -e "${RED}Could not back up the current database - aborting before changing anything.${NC}"
+    exit 1
 fi
 
 if [ -f "$APP_DIR/.env" ]; then
@@ -154,10 +172,18 @@ echo -e "${GREEN}✓${NC} Maintenance mode enabled"
 # Restore database
 echo ""
 echo -e "${BLUE}[3/4]${NC} Restoring database..."
-cp "$DB_FILE" "$APP_DIR/database/database.sqlite"
-chown www-data:www-data "$APP_DIR/database/database.sqlite"
-chmod 644 "$APP_DIR/database/database.sqlite"
-echo -e "${GREEN}✓${NC} Database restored"
+# Restore .env first when switching database type, so the restore targets the right database
+if [ "$BACKUP_KIND" != "$CURRENT_KIND" ] && [ -f "$ENV_FILE" ]; then
+    cp "$ENV_FILE" "$APP_DIR/.env"
+    php artisan config:clear 2>/dev/null || true
+fi
+if db_restore "$DB_FILE"; then
+    echo -e "${GREEN}✓${NC} Database restored"
+else
+    echo -e "${RED}Database restore FAILED. Your pre-rollback copy is $PRE_FILE${NC}"
+    php artisan up 2>/dev/null || true
+    exit 1
+fi
 
 # Restore .env if requested
 if [ "$RESTORE_CHOICE" -ge 2 ] && [ -f "$ENV_FILE" ]; then
@@ -198,7 +224,7 @@ echo ""
 echo "Restored from backup: $BACKUP_ID"
 echo ""
 echo "Pre-rollback backups saved:"
-echo "  - $BACKUP_DIR/database_${CURRENT_DATE}_pre_rollback.sqlite"
+echo "  - $PRE_FILE"
 [ "$RESTORE_CHOICE" -ge 2 ] && echo "  - $BACKUP_DIR/env_${CURRENT_DATE}_pre_rollback.backup"
 echo ""
 echo "If you need to undo this rollback, use backup ID:"
