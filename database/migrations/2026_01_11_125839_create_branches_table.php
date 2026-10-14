@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // add_branch_id_to_tenant_tables shares this timestamp and sorts first; it creates
+        // this table on demand (PostgreSQL needs the table to exist before a foreign key).
+        if (Schema::hasTable('branches')) {
+            return;
+        }
+
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();

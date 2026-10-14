@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Same-timestamp migrations sort alphabetically; PostgreSQL needs referenced tables to exist first.
+        if (Schema::hasTable('documentation_categories')) {
+            return;
+        }
+
         Schema::create('documentation_categories', function (Blueprint $table) {
             $table->id();
             $table->string('slug')->unique();

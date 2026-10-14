@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use App\Support\SqlDates;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -162,13 +163,10 @@ class ProfitBreakdownService
         // Windows longer than ~3 months are grouped by month (YYYY-MM) so a
         // multi-year history stays readable.
         $monthly = ! $hourly && $from->diffInDays($to) > 92;
-        $bucket = $hourly ? 'HOUR' : 'DATE';
-        $sqlite = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite';
         $bucketSql = fn (string $col) => match (true) {
-            $monthly => "SUBSTR(DATE({$col}), 1, 7)",
-            // SQLite has no HOUR(); the hourly "Today" view crashed there
-            $hourly && $sqlite => "CAST(strftime('%H', {$col}) AS INTEGER)",
-            default => "{$bucket}({$col})",
+            $monthly => SqlDates::month($col),
+            $hourly => SqlDates::hour($col),
+            default => SqlDates::day($col),
         };
 
         $sales = (clone $this->salesQuery($from, $to, $branchId))
