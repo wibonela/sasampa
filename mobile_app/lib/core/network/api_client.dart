@@ -269,6 +269,11 @@ class ApiClient {
     });
   }
 
+  /// Checkout with an already-built body (used to replay queued offline sales).
+  Future<Response> checkoutRaw(Map<String, dynamic> body) {
+    return _dio.post('/pos/checkout', data: body);
+  }
+
   Future<Response> voidTransaction(int transactionId, String reason) {
     return _dio.post('/pos/transactions/$transactionId/void', data: {
       'reason': reason,

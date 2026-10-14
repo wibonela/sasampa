@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/offline/offline_db.dart';
+import '../../../core/offline/sync_service.dart';
 import '../data/dashboard_preferences.dart';
 import 'widgets/today_stats_widget.dart';
 import 'widgets/quick_actions_widget.dart';
@@ -25,6 +27,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Map<String, dynamic>? _dashboardData;
   bool _isLoading = true;
   String? _error;
+  DateTime? _cachedAt;
 
   final _currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
 
@@ -47,9 +50,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       final response = await api.getDashboard();
       setState(() {
         _dashboardData = response.data['data'];
+        _cachedAt = null;
         _isLoading = false;
       });
+      OfflineDb.instance.putJson('dashboard', response.data['data']).catchError((_) {});
     } catch (e) {
+      // Offline: show the last numbers we had instead of an empty error screen.
+      if (isOfflineError(e)) {
+        try {
+          final cached = await OfflineDb.instance.getJson('dashboard');
+          if (cached != null && mounted) {
+            setState(() {
+              _dashboardData = Map<String, dynamic>.from(cached.value as Map);
+              _cachedAt = cached.savedAt;
+              _isLoading = false;
+            });
+            return;
+          }
+        } catch (_) {}
+      }
       String errorMsg = AppLocalizations.of(context)?.failedToLoadDashboard ?? 'Failed to load dashboard';
       if (e is DioException) {
         final response = e.response;
@@ -135,6 +154,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                 ),
               ),
+
+              if (_cachedAt != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Text(
+                      'Offline - showing numbers from ${DateFormat('d MMM, HH:mm').format(_cachedAt!)}. Pull down to refresh.',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
 
               // Loading / Error / Content
               if (_isLoading)

@@ -10,6 +10,8 @@ import 'storage/secure_storage.dart';
 import '../shared/models/user.dart';
 import '../shared/models/product.dart';
 import '../shared/models/cart.dart';
+import 'offline/offline_db.dart';
+import 'offline/sync_service.dart';
 import '../main.dart' show globalStorage;
 import '../features/dashboard/data/dashboard_preferences.dart';
 
@@ -468,18 +470,50 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
 
   ProductsNotifier(this._api) : super(ProductsState());
 
+  static const _productsKey = 'catalog_products';
+  static const _categoriesKey = 'catalog_categories';
+
+  /// When the products on screen came from the offline copy, not the server.
+  DateTime? cachedAt;
+
   Future<void> loadProducts() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final response = await _api.getProducts(perPage: 100);
-      final data = response.data;
-      final products = (data['data'] as List)
-          .map((e) => Product.fromJson(e))
-          .toList();
-
+      // Fetch every page so the whole catalogue is available (and cached).
+      final raw = <dynamic>[];
+      var page = 1;
+      while (true) {
+        final response = await _api.getProducts(perPage: 100, page: page);
+        final data = response.data;
+        raw.addAll(data['data'] as List);
+        final last = (data['meta']?['last_page'] ?? 1) as int;
+        if (page >= last || page >= 50) break;
+        page++;
+      }
+      final products = raw.map((e) => Product.fromJson(e)).toList();
+      cachedAt = null;
       state = state.copyWith(products: products, isLoading: false);
+      OfflineDb.instance.putJson(_productsKey, raw).catchError((_) {});
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      // No connection: fall back to the last copy of the catalogue.
+      final cached = isOfflineError(e) ? await _readCache(_productsKey) : null;
+      if (cached != null) {
+        cachedAt = cached.savedAt;
+        state = state.copyWith(
+          products: (cached.value as List).map((j) => Product.fromJson(Map<String, dynamic>.from(j))).toList(),
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
+    }
+  }
+
+  Future<({dynamic value, DateTime savedAt})?> _readCache(String key) async {
+    try {
+      return await OfflineDb.instance.getJson(key);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -492,9 +526,32 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
           .toList();
 
       state = state.copyWith(categories: categories);
+      OfflineDb.instance.putJson(_categoriesKey, data['data']).catchError((_) {});
     } catch (e) {
-      // Silently fail for categories
+      final cached = await _readCache(_categoriesKey);
+      if (cached != null) {
+        state = state.copyWith(
+          categories: (cached.value as List).map((j) => Category.fromJson(Map<String, dynamic>.from(j))).toList(),
+        );
+      }
     }
+  }
+
+  /// After an offline sale, reduce the local stock so the cashier can't oversell
+  /// while still offline. The server stock is corrected on the next refresh.
+  Future<void> applyOfflineSale(List<Map<String, dynamic>> items) async {
+    final qtyById = {for (final i in items) i['product_id'] as int: i['quantity'] as int};
+    final updated = state.products.map((p) {
+      final q = qtyById[p.id];
+      if (q == null) return p;
+      final j = p.toJson();
+      j['stock'] = (p.stock - q) < 0 ? 0 : p.stock - q;
+      return Product.fromJson(j);
+    }).toList();
+    state = state.copyWith(products: updated);
+    try {
+      await OfflineDb.instance.putJson(_productsKey, updated.map((p) => p.toJson()).toList());
+    } catch (_) {}
   }
 
   void setCategory(int? categoryId) {
@@ -522,6 +579,12 @@ class ProductsNotifier extends StateNotifier<ProductsState> {
     }
   }
 }
+
+final syncProvider = StateNotifierProvider<SyncNotifier, SyncState>((ref) {
+  final api = ref.watch(apiClientProvider);
+  // read (not watch): the queue must survive logout/login without being rebuilt
+  return SyncNotifier(api, () => ref.read(authProvider).user?.id);
+});
 
 final productsProvider = StateNotifierProvider<ProductsNotifier, ProductsState>((ref) {
   final api = ref.watch(apiClientProvider);

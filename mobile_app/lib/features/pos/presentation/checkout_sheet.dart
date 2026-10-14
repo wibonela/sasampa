@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import 'package:sasampa_pos/l10n/app_localizations.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
@@ -10,6 +11,8 @@ import '../../../core/services/printer_providers.dart';
 import '../../../core/services/receipt_service.dart';
 import '../../../core/utils/error_utils.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/offline/sync_service.dart';
+import '../../../shared/models/cart.dart';
 import '../../../shared/models/customer.dart';
 
 class CheckoutSheet extends ConsumerStatefulWidget {
@@ -169,9 +172,14 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
       _error = null;
     });
 
+    // One id per sale attempt. If the reply gets lost and the sale is queued
+    // offline, the server recognises this id and will not record it twice.
+    final offlineId = const Uuid().v4();
+
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.checkout(
+        offlineId: offlineId,
         items: cart.toCheckoutItems(),
         paymentMethod: _selectedPaymentMethod,
         amountPaid: _selectedPaymentMethod == 'credit' ? 0 : amountPaid,
@@ -240,10 +248,124 @@ class _CheckoutSheetState extends ConsumerState<CheckoutSheet> {
         }
       }
     } catch (e) {
+      if (isOfflineError(e)) {
+        if (_selectedPaymentMethod == 'credit') {
+          setState(() {
+            _error = 'Credit sales need an internet connection. Choose another payment method or reconnect.';
+            _isProcessing = false;
+          });
+          return;
+        }
+        await _saveSaleOffline(cart, amountPaid, offlineId);
+        return;
+      }
       setState(() {
         _error = extractErrorMessage(e, 'Failed to process sale. Please try again.');
         _isProcessing = false;
       });
+    }
+  }
+
+  /// No internet: keep the sale on the phone and send it automatically later.
+  Future<void> _saveSaleOffline(Cart cart, double amountPaid, String offlineId) async {
+    final name = _customerNameController.text.trim();
+    final phone = _customerPhoneController.text.trim();
+    final tin = _tinController.text.trim();
+    final items = cart.toCheckoutItems();
+    final payload = <String, dynamic>{
+      'items': items,
+      'payment_method': _selectedPaymentMethod,
+      'amount_paid': amountPaid,
+      if (_selectedCustomer?.id != null) 'customer_id': _selectedCustomer!.id,
+      if (name.isNotEmpty) 'customer_name': name,
+      if (phone.isNotEmpty) 'customer_phone': phone,
+      if (tin.isNotEmpty) 'customer_tin': tin,
+      if (cart.discountAmount > 0) 'discount_amount': cart.discountAmount,
+    };
+
+    final sync = ref.read(syncProvider.notifier);
+    await sync.enqueue(payload, total: cart.total, offlineId: offlineId);
+
+    final user = ref.read(authProvider).user;
+    final receipt = <String, dynamic>{
+      'id': null,
+      'transaction_number': 'OFFLINE-${offlineId.substring(0, 6).toUpperCase()}',
+      'created_at': DateTime.now().toIso8601String(),
+      'cashier': user?.name,
+      'customer_name': name.isNotEmpty ? name : _selectedCustomer?.name,
+      'subtotal': cart.subtotal,
+      'tax_amount': cart.taxAmount,
+      'discount_amount': cart.discountAmount,
+      'total': cart.total,
+      'payment_method': _selectedPaymentMethod,
+      'amount_paid': amountPaid,
+      'change_given': amountPaid > cart.total ? amountPaid - cart.total : 0,
+      'items': cart.items
+          .map((i) => {
+                'product_name': i.product.name,
+                'quantity': i.quantity,
+                'unit_price': i.product.sellingPrice,
+                'subtotal': i.total,
+              })
+          .toList(),
+    };
+
+    await ref.read(productsProvider.notifier).applyOfflineSale(items);
+    ref.read(cartProvider.notifier).clearCart();
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(children: [
+          Icon(Icons.cloud_off, color: AppColors.warning),
+          SizedBox(width: 8),
+          Expanded(child: Text('Sale saved offline')),
+        ]),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_currencyFormat.format(receipt['total']),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('${receipt['transaction_number']} · ${_paymentMethodLabel(_selectedPaymentMethod, AppLocalizations.of(ctx)!)}'),
+            const SizedBox(height: 12),
+            const Text(
+              'There is no internet right now. This sale is stored safely on your phone and will be sent automatically when you are back online.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => _printOfflineReceipt(receipt),
+            child: Text(AppLocalizations.of(ctx)!.print),
+          ),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(ctx)!.ok)),
+        ],
+      ),
+    );
+
+    if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _printOfflineReceipt(Map<String, dynamic> receipt) async {
+    final prefs = ref.read(printerPrefsProvider).prefs;
+    final btService = ref.read(bluetoothPrinterServiceProvider);
+    if (prefs.printerType == PrinterType.bluetooth && btService.isConnected) {
+      await ReceiptService.bluetoothPrintSimpleReceipt(
+        transaction: receipt,
+        btService: btService,
+        paperSize: prefs.paperSize == 'mm58' ? PaperSize.mm58 : PaperSize.mm80,
+        companyName: ref.read(authProvider).user?.company?.name,
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Connect a Bluetooth printer to print offline receipts.')),
+      );
     }
   }
 
