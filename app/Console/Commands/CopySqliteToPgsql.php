@@ -64,6 +64,10 @@ class CopySqliteToPgsql extends Command
             }
         }
 
+        if (! $this->preflight($src, $tables)) {
+            return self::FAILURE;
+        }
+
         $order = $this->dependencyOrder($tables);
         $bools = $this->booleanColumns();
         $chunk = (int) $this->option('chunk');
@@ -78,11 +82,44 @@ class CopySqliteToPgsql extends Command
             $dst->commit();
         } catch (\Throwable $e) {
             $dst->rollBack();
-            $this->error('Copy failed and was rolled back: ' . $e->getMessage());
+            $this->error('Copy failed and was rolled back: ' . mb_substr(strtok($e->getMessage(), "\n"), 0, 160));
             return self::FAILURE;
         }
 
         return $this->verify($src, $dst, $order) ? self::SUCCESS : self::FAILURE;
+    }
+
+    /**
+     * SQLite ignores column lengths, PostgreSQL enforces them. Find every value that would not
+     * fit before anything is copied, and report them all at once (lengths only, never the data).
+     */
+    private function preflight($src, array $tables): bool
+    {
+        $bad = [];
+        $cols = DB::select("select table_name, column_name, character_maximum_length as len
+                            from information_schema.columns
+                            where table_schema = 'public' and character_maximum_length is not null");
+        foreach ($cols as $c) {
+            if (! in_array($c->table_name, $tables, true)) {
+                continue;
+            }
+            $max = (int) ($src->selectOne(
+                'select max(length("' . $c->column_name . '")) as m from "' . $c->table_name . '"'
+            )->m ?? 0);
+            if ($max > (int) $c->len) {
+                $bad[] = "{$c->table_name}.{$c->column_name}: longest value is $max characters, column allows {$c->len}";
+            }
+        }
+        if ($bad) {
+            $this->error('Some values do not fit their PostgreSQL column:');
+            foreach ($bad as $b) {
+                $this->line('  ' . $b);
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private function copyTable($src, $dst, string $table, array $boolCols, int $chunk): int
