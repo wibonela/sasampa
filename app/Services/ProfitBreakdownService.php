@@ -7,7 +7,7 @@ use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
