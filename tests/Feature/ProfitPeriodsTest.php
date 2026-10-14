@@ -55,6 +55,16 @@ class ProfitPeriodsTest extends TestCase
         $this->assertEquals(3000, $sales['current']->revenue);
         $this->assertEquals(3000, array_sum(array_column($sales['series'], 'revenue')));
 
+        // "Today" uses hourly buckets, which used to crash on SQLite (no HOUR())
+        Transaction::create([
+            'company_id' => $company->id, 'transaction_number' => 'TODAY1', 'user_id' => $user->id,
+            'type' => 'sale', 'status' => 'completed', 'subtotal' => 500, 'total' => 500,
+            'payment_method' => 'cash', 'amount_paid' => 500,
+        ]);
+        $today = $svc->fullReport('today', [], null, true);
+        $this->assertCount(1, $today['trend']);
+        $this->assertMatchesRegularExpression('/^\d{2}:00$/', $today['trend'][0]['bucket']);
+
         $last = $svc->fullReport('last_month', [], null, true);
         $this->assertSame('Last Month', $last['period']['label']);
     }
