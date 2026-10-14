@@ -615,18 +615,25 @@ class AdminDashboardService
 
     public function getDecliningCompanies(int $limit = 5): array
     {
+        $d30 = now()->subDays(30)->toDateString();
+        $d60 = now()->subDays(60)->toDateString();
+
+        // Dates are bound parameters (no SQLite-only date('now', ...)), and the filter on the
+        // computed columns sits in an outer query because PostgreSQL does not allow aliases in HAVING.
         return DB::select("
-            SELECT c.id, c.name,
-                COALESCE(SUM(CASE WHEN t.created_at >= date('now', '-30 days') THEN t.total END), 0) as recent_revenue,
-                COALESCE(SUM(CASE WHEN t.created_at >= date('now', '-60 days') AND t.created_at < date('now', '-30 days') THEN t.total END), 0) as previous_revenue
-            FROM companies c
-            LEFT JOIN transactions t ON c.id = t.company_id AND t.status = 'completed'
-            WHERE c.status = 'approved'
-            GROUP BY c.id, c.name
-            HAVING previous_revenue > 0 AND recent_revenue < previous_revenue
+            SELECT * FROM (
+                SELECT c.id, c.name,
+                    COALESCE(SUM(CASE WHEN t.created_at >= ? THEN t.total END), 0) as recent_revenue,
+                    COALESCE(SUM(CASE WHEN t.created_at >= ? AND t.created_at < ? THEN t.total END), 0) as previous_revenue
+                FROM companies c
+                LEFT JOIN transactions t ON c.id = t.company_id AND t.status = 'completed'
+                WHERE c.status = 'approved'
+                GROUP BY c.id, c.name
+            ) x
+            WHERE previous_revenue > 0 AND recent_revenue < previous_revenue
             ORDER BY (previous_revenue - recent_revenue) DESC
             LIMIT ?
-        ", [$limit]);
+        ", [$d30, $d60, $d30, $limit]);
     }
 
     // ─── Mobile App Analytics ────────────────────────────────────────
@@ -673,7 +680,7 @@ class AdminDashboardService
     {
         $byType = Sanduku::selectRaw('type, COUNT(*) as count')->groupBy('type')->pluck('count', 'type');
         $byStatus = Sanduku::selectRaw('status, COUNT(*) as count')->groupBy('status')->pluck('count', 'status');
-        $recent = Sanduku::latest()->limit(5)->get(['id', 'type', 'status', 'message', 'created_at']);
+        $recent = Sanduku::latest()->limit(5)->get(['id', 'type', 'status', 'title', 'created_at']);
 
         return [
             'total' => Sanduku::count(),
