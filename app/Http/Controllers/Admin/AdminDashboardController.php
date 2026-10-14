@@ -93,6 +93,13 @@ class AdminDashboardController extends Controller
         ));
     }
 
+    public function activeToday()
+    {
+        $data = $this->activity->activeToday();
+
+        return view('admin.dashboard.active-today', $data);
+    }
+
     public function chartData(Request $request)
     {
         $period = $request->get('period', 'daily');
