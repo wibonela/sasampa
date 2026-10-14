@@ -163,9 +163,13 @@ class ProfitBreakdownService
         // multi-year history stays readable.
         $monthly = ! $hourly && $from->diffInDays($to) > 92;
         $bucket = $hourly ? 'HOUR' : 'DATE';
-        $bucketSql = fn (string $col) => $monthly
-            ? "SUBSTR(DATE({$col}), 1, 7)"
-            : "{$bucket}({$col})";
+        $sqlite = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite';
+        $bucketSql = fn (string $col) => match (true) {
+            $monthly => "SUBSTR(DATE({$col}), 1, 7)",
+            // SQLite has no HOUR(); the hourly "Today" view crashed there
+            $hourly && $sqlite => "CAST(strftime('%H', {$col}) AS INTEGER)",
+            default => "{$bucket}({$col})",
+        };
 
         $sales = (clone $this->salesQuery($from, $to, $branchId))
             ->selectRaw($bucketSql('created_at') . " as bucket, SUM(total) as amount")
