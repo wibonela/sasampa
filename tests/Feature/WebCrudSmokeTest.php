@@ -49,4 +49,33 @@ class WebCrudSmokeTest extends TestCase
         $product = Product::where('sku', 'SODA-1')->firstOrFail();
         $this->assertSame(24, (int) $product->inventory->quantity);
     }
+
+    public function test_owner_can_import_products_from_csv(): void
+    {
+        $csv = "name,category,selling_price,cost_price,opening_stock,barcode\n"
+            . "Soda,Vinywaji,\"1,500\",800,12,111\n"
+            . "Water,Vinywaji,500,300,5,111\n"
+            . ",Vinywaji,abc,,,\n";
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('p.csv', $csv);
+
+        $template = $this->actingAs($this->owner)->get(route('products.import.template'));
+        $template->assertOk();
+        $this->assertStringContainsString('Selling Price (required)', $template->streamedContent());
+
+        $friendly = "Product Name (required),Category,Selling Price (required),Cost Price,Opening Stock,Active (yes/no)\nTea,Drinks,700,400,9,yes\n";
+        $this->actingAs($this->owner)->post(route('products.import.store'), [
+            'file' => \Illuminate\Http\UploadedFile::fake()->createWithContent('t.csv', $friendly),
+        ]);
+        $this->assertSame(9, (int) Product::where('name', 'Tea')->firstOrFail()->inventory->quantity);
+        $this->actingAs($this->owner)
+            ->post(route('products.import.store'), ['file' => $file])
+            ->assertSessionHas('import_errors');
+
+        $soda = Product::where('name', 'Soda')->firstOrFail();
+        $this->assertSame(12, (int) $soda->inventory->quantity);
+        $this->assertSame('1500.00', (string) $soda->selling_price);
+        $this->assertSame(1, Category::where('name', 'Vinywaji')->count());
+        $this->assertNull(Product::where('name', 'Water')->first());
+        $this->assertSame(2, Product::count());
+    }
 }
