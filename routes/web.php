@@ -28,6 +28,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
@@ -331,6 +332,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
 
         // Products
+        Route::get('products/import', [ProductImportController::class, 'create'])->name('products.import');
+        Route::get('products/import/template', [ProductImportController::class, 'template'])->name('products.import.template');
+        Route::post('products/import', [ProductImportController::class, 'store'])->name('products.import.store');
         Route::resource('products', ProductController::class);
 
         // Inventory

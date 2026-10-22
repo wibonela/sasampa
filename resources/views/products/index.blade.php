@@ -6,9 +6,14 @@
                 <h1 class="page-title">Products</h1>
                 <p class="page-subtitle">Manage your product catalog</p>
             </div>
-            <a href="{{ route('products.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i>Add Product
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('products.import') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-upload me-1"></i>Import CSV
+                </a>
+                <a href="{{ route('products.create') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add Product
+                </a>
+            </div>
         </div>
 
         <!-- Filters -->
