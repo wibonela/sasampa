@@ -29,11 +29,9 @@ class _POSScreenState extends ConsumerState<POSScreen> {
   }
 
   Future<void> _loadDataIfNeeded() async {
-    final productsState = ref.read(productsProvider);
-    // Only load if products are empty (not already loaded)
-    if (productsState.products.isEmpty) {
-      await _loadData();
-    }
+    // Always refresh on entry: stock changes made elsewhere (inventory
+    // adjustments, other devices, web) would otherwise show as out of stock.
+    await _loadData();
   }
 
   Future<void> _loadData() async {
@@ -187,7 +185,7 @@ class _POSScreenState extends ConsumerState<POSScreen> {
 
           // Products Grid
           Expanded(
-            child: productsState.isLoading
+            child: productsState.isLoading && productsState.products.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : productsState.filteredProducts.isEmpty
                     ? Center(

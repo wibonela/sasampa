@@ -71,6 +71,30 @@ class ApiClient {
         handler.next(error);
       },
     ));
+
+    // Weak mobile signal often drops a connection mid-request. Retry reads a
+    // couple of times before surfacing an error. Writes (sales, adjustments)
+    // are never retried here, so nothing can be submitted twice.
+    _dio.interceptors.add(InterceptorsWrapper(
+      onError: (error, handler) async {
+        final attempt = (error.requestOptions.extra['retry_attempt'] ?? 0) as int;
+        final dropped = error.response == null &&
+            (error.type == DioExceptionType.connectionError ||
+                error.type == DioExceptionType.connectionTimeout ||
+                error.type == DioExceptionType.receiveTimeout ||
+                error.type == DioExceptionType.unknown);
+        if (error.requestOptions.method != 'GET' || !dropped || attempt >= 2) {
+          return handler.next(error);
+        }
+        await Future.delayed(Duration(milliseconds: 600 * (attempt + 1)));
+        try {
+          final options = error.requestOptions..extra['retry_attempt'] = attempt + 1;
+          handler.resolve(await _dio.fetch(options));
+        } on DioException catch (e) {
+          handler.next(e);
+        }
+      },
+    ));
   }
 
   // Registration & Onboarding

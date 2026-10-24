@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/providers.dart';
+import '../../../core/utils/error_utils.dart';
 
 class StoreSettingsScreen extends ConsumerStatefulWidget {
   const StoreSettingsScreen({super.key});
@@ -73,7 +74,7 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load settings: $e'),
+            content: Text(extractErrorMessage(e, 'Failed to load settings')),
             backgroundColor: AppColors.error,
           ),
         );
@@ -113,7 +114,7 @@ class _StoreSettingsScreenState extends ConsumerState<StoreSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save: $e'),
+            content: Text(extractErrorMessage(e, 'Failed to save settings')),
             backgroundColor: AppColors.error,
           ),
         );
