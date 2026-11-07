@@ -894,7 +894,7 @@ curl -X POST https://api.pindo.io/v1/sms/ \
         <div class="step-body">
             <div class="code-block">
                 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-ssh wibo@SERVER_IP_REDACTED
+ssh root@SERVER_IP_REDACTED
             </div>
             <p>Enter the server password when prompted.</p>
 

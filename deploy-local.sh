@@ -9,9 +9,10 @@
 # ===========================================
 
 # Server Configuration
-SERVER_HOST="SERVER_IP_REDACTED"
-SERVER_USER="wibo"
-SERVER_PASS="Muhas@2020"
+# Production: Contabo VPS SERVER_IP_REDACTED (moved from Hostinger KVM 8, SERVER_IP_REDACTED, on 2026-11-03).
+# Auth is by SSH key (the new server disables password logins). No password lives in this file.
+SERVER_HOST="${DEPLOY_HOST_IP:-SERVER_IP_REDACTED}"
+SERVER_USER="root"
 APP_DIR="/var/www/sasampa"
 
 # Colors
@@ -26,22 +27,6 @@ echo "==========================================="
 echo -e "   ${BLUE}SASAMPA LOCAL DEPLOYMENT${NC}"
 echo "==========================================="
 echo ""
-
-# Check if sshpass is installed
-if ! command -v sshpass &> /dev/null; then
-    echo -e "${YELLOW}Installing sshpass...${NC}"
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install hudochenkov/sshpass/sshpass 2>/dev/null || brew install sshpass 2>/dev/null || {
-            echo -e "${RED}Please install sshpass: brew install hudochenkov/sshpass/sshpass${NC}"
-            exit 1
-        }
-    else
-        sudo apt-get install -y sshpass 2>/dev/null || {
-            echo -e "${RED}Please install sshpass${NC}"
-            exit 1
-        }
-    fi
-fi
 
 # Navigate to project directory
 cd "$(dirname "$0")"
@@ -106,8 +91,8 @@ echo "==========================================="
 echo ""
 
 # Run the deployment script on the server
-sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$SERVER_USER@$SERVER_HOST" \
-    "cd $APP_DIR && sudo bash deploy.sh"
+ssh -o BatchMode=yes -o ConnectTimeout=30 "$SERVER_USER@$SERVER_HOST" \
+    "cd $APP_DIR && git config --global --add safe.directory $APP_DIR && bash deploy.sh"
 
 DEPLOY_STATUS=$?
 
@@ -118,7 +103,7 @@ if [ $DEPLOY_STATUS -eq 0 ]; then
     echo "==========================================="
     echo ""
     echo "Your changes are now live at:"
-    echo "  http://$SERVER_HOST"
+    echo "  https://sasampa.com"
     echo ""
 else
     echo "==========================================="

@@ -750,7 +750,7 @@ version: 1.0.2+8</div>
     <div class="step">
         <div class="step-header"><div class="step-number env">1</div><div><div class="step-title">SSH into the Server</div><div class="step-subtitle">Connect to production</div></div></div>
         <div class="step-body">
-            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>ssh wibo@SERVER_IP_REDACTED</div>
+            <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>ssh root@SERVER_IP_REDACTED</div>
             <p>Enter server password when prompted, then:</p>
             <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /var/www/sasampa</div>
         </div>
